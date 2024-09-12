@@ -22,6 +22,8 @@
 
 #ifdef __NDS__
 #define assert SDL_assert
+#define uint32 u32vorbis
+#define int32 i32vorbis
 #else
 #define malloc SDL_malloc
 #define realloc SDL_realloc
