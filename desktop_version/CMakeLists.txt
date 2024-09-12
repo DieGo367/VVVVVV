@@ -115,6 +115,7 @@ set(VVV_C_SRC
     src/GlitchrunnerMode.c
     src/Network.c
     src/Textbook.c
+    src/TileDecode.c
     src/ThirdPartyDeps.c
     src/UTF8.c
     src/VFormat.c
@@ -201,6 +202,7 @@ set(PFS_SRC
     ../third_party/physfs/src/physfs_platform_windows.c
     ../third_party/physfs/src/physfs_platform_haiku.cpp
     ../third_party/physfs/src/physfs_platform_android.c
+    ../third_party/physfs/src/physfs_platform_nds.c
 )
 if(APPLE)
     # Are you noticing a pattern with this Apple crap yet?
@@ -409,6 +411,119 @@ foreach(static_library IN LISTS STATIC_LIBRARIES)
     target_compile_options(${static_library} PRIVATE ${GLOBAL_COMPILE_FLAGS})
 endforeach(static_library)
 
+if(NDS)
+    target_compile_definitions(VVVVVV PRIVATE -Dasm=__asm__) # needed for c99
+
+    # minimize lodepng to just the encoding part
+    target_compile_definitions(lodepng-static PRIVATE
+        -DLODEPNG_NO_COMPILE_ANCILLARY_CHUNKS
+        -DLODEPNG_NO_COMPILE_DECODER
+    )
+
+    # force remove zip support from physfs
+    get_target_property(defs physfs-static COMPILE_DEFINITIONS)
+    list(FILTER defs EXCLUDE REGEX [[^PHYSFS_SUPPORTS_ZIP=1$]])
+    set_property(TARGET physfs-static PROPERTY COMPILE_DEFINITIONS ${defs} PHYSFS_SUPPORTS_ZIP=0)
+
+    # custom SDL replacement
+    add_library(sndsl-static STATIC
+        ../third_party/SnDsL/src/main.c
+        ../third_party/SnDsL/src/audio.c
+        ../third_party/SnDsL/src/video.c
+        ../third_party/SnDsL/src/messagebox.c
+        ../third_party/SnDsL/src/surface.c
+    )
+    target_include_directories(sndsl-static PRIVATE ../third_party/SnDsL/include)
+    if(ENABLE_WARNINGS)
+        target_compile_options(sndsl-static PRIVATE -Wall)
+    endif()
+    set(SDL2_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/SnDsL/include)
+    set(SDL2_LIBRARIES sndsl-static)
+
+    # prepare nitro files and output nds rom
+
+    find_program(MAGICK magick REQUIRED)
+    set(DATA_ZIP ${CMAKE_CURRENT_SOURCE_DIR}/data.zip)
+
+    set(IMG_1BIT
+        elephant
+        gamecomplete
+        levelcomplete
+        site
+        site2
+        site3
+        site4
+        sprites
+        teleporter
+    )
+    set(IMG_2BIT covered)
+    set(IMG_4BIT ending)
+    set(IMG_8BIT
+        entcolours
+        minimap
+        tiles
+        tiles2
+        tiles3
+    )
+    set(FONTS_WHITE font)
+    set(FONTS_COLOR buttons_8x8)
+    foreach(IMAGE_TYPE IMG_1BIT IMG_2BIT IMG_4BIT IMG_8BIT FONTS_WHITE FONTS_COLOR)
+        foreach(IMAGE ${${IMAGE_TYPE}})
+            list(APPEND ${IMAGE_TYPE}_SRCS graphics/${IMAGE}.png)
+            list(APPEND NITRO_DEPS nitro/graphics/${IMAGE}.grf)
+        endforeach()
+    endforeach()
+
+    foreach(IMAGE ${IMG_1BIT})
+        add_custom_command(
+            OUTPUT graphics/${IMAGE}.png
+            DEPENDS ${DATA_ZIP} nitro/graphics
+            COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} graphics/${IMAGE}.png
+            COMMAND ${MAGICK} graphics/${IMAGE}.png -colors 2 -background "#FF00FF" -alpha remove graphics/${IMAGE}.png VERBATIM
+        )
+    endforeach()
+    foreach(IMAGE ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT})
+        add_custom_command(
+            OUTPUT graphics/${IMAGE}.png
+            DEPENDS ${DATA_ZIP} nitro/graphics
+            COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} graphics/${IMAGE}.png
+            COMMAND ${MAGICK} graphics/${IMAGE}.png -background "#FF00FF" -alpha remove graphics/${IMAGE}.png VERBATIM
+        )
+    endforeach()
+    foreach(FONT ${FONTS_WHITE} ${FONTS_COLOR})
+        add_custom_command(
+            OUTPUT graphics/${FONT}.png
+            DEPENDS ${CMAKE_SOURCE_DIR}/fonts/${FONT}.png ${CMAKE_SOURCE_DIR}/fonts/${FONT}.fontmeta nitro/graphics
+            COMMAND ${CMAKE_COMMAND} -E make_directory graphics
+            COMMAND ${MAGICK} ${CMAKE_CURRENT_SOURCE_DIR}/fonts/${FONT}.png -background "#FF00FF" -alpha remove graphics/${FONT}.png VERBATIM
+            # while we're here, copy over the metadata file
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/fonts/${FONT}.fontmeta nitro/graphics/${FONT}.fontmeta
+        )
+    endforeach()
+
+    set(GRIT_COMMON -ftr -fh! -gb -gT FF00FF)
+    add_grit_rule(FLAGS ${GRIT_COMMON} -gB1 -pn2   OUTDIR nitro/graphics SOURCES ${IMG_1BIT_SRCS} ${FONTS_WHITE_SRCS})
+    add_grit_rule(FLAGS ${GRIT_COMMON} -gB2 -pn4   OUTDIR nitro/graphics SOURCES ${IMG_2BIT_SRCS})
+    add_grit_rule(FLAGS ${GRIT_COMMON} -gB4 -pn16  OUTDIR nitro/graphics SOURCES ${IMG_4BIT_SRCS})
+    add_grit_rule(FLAGS ${GRIT_COMMON} -gB8 -pn206 OUTDIR nitro/graphics SOURCES ${IMG_8BIT_SRCS})
+    add_grit_rule(FLAGS ${GRIT_COMMON} -gB8 -pn25  OUTDIR nitro/graphics SOURCES ${FONTS_COLOR_SRCS})
+
+    add_custom_command(OUTPUT nitro nitro/graphics
+        COMMAND ${CMAKE_COMMAND} -E make_directory nitro
+        COMMAND ${CMAKE_COMMAND} -E make_directory nitro/graphics
+    )
+
+    add_custom_command(OUTPUT icon.bmp
+        COMMAND ${MAGICK} ${CMAKE_CURRENT_SOURCE_DIR}/icon.ico icon.bmp
+    )
+
+    add_nds_rom(VVVVVV
+        AUTHOR "Terry Cavanagh"
+        ICON icon.bmp
+        NITRO_DIRS nitro
+        DEPENDS ${NITRO_DEPS}
+    )
+endif()
 
 # SDL2 Dependency (Detection pulled from FAudio)
 if(DEFINED SDL2_INCLUDE_DIRS AND DEFINED SDL2_LIBRARIES)

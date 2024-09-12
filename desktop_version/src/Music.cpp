@@ -20,6 +20,9 @@
 
 /* stb_vorbis */
 
+#ifdef __NDS__
+#define assert SDL_assert
+#else
 #define malloc SDL_malloc
 #define realloc SDL_realloc
 #define free VVV_free
@@ -69,6 +72,7 @@
 #define fread(dst, size, count, io) SDL_RWread(io, dst, size, count)
 #define fseek(io, offset, whence) SDL_RWseek(io, offset, whence)
 #define ftell(io) SDL_RWtell(io)
+#endif
 
 #define FAudio_alloca(x) SDL_stack_alloc(uint8_t, x)
 #define FAudio_dealloca(x) SDL_stack_free(x)
@@ -122,6 +126,7 @@ public:
 
     void LoadWAV(const char* fileName, unsigned char* mem, const size_t length)
     {
+        #ifndef __NDS__
         SDL_AudioSpec spec;
         SDL_RWops *fileIn;
         fileIn = SDL_RWFromConstMem(mem, length);
@@ -138,12 +143,14 @@ public:
         format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
         format.cbSize = 0;
         valid = true;
+        #endif
 end:
         VVV_free(mem);
     }
 
     void LoadOGG(const char* fileName, unsigned char* mem, const size_t length)
     {
+        #ifndef __NDS__
         int err;
         stb_vorbis_info vorbis_info;
         vorbis = stb_vorbis_open_memory(mem, length, &err, NULL);
@@ -170,16 +177,19 @@ end:
 
         ogg_file = mem;
         valid = true;
+        #endif
     }
 
     void Dispose(void)
     {
+        #ifndef __NDS__
         VVV_free(wav_buffer);
 
         VVV_free(decoded_buf_playing);
         VVV_free(decoded_buf_reserve);
         VVV_freefunc(stb_vorbis_close, vorbis);
         VVV_free(ogg_file);
+        #endif
     }
 
     void Play(void)
@@ -252,6 +262,7 @@ end:
 
     static void Init(int audio_rate)
     {
+        #ifndef __NDS__
         if (voices == NULL)
         {
             voices = (FAudioSourceVoice**) SDL_malloc(sizeof(FAudioSourceVoice*) * VVV_MAX_CHANNELS);
@@ -273,26 +284,32 @@ end:
                 }
             }
         }
+        #endif
     }
 
     static void Pause(void)
     {
+        #ifndef __NDS__
         for (size_t i = 0; i < VVV_MAX_CHANNELS; i++)
         {
             FAudioSourceVoice_Stop(voices[i], 0, FAUDIO_COMMIT_NOW);
         }
+        #endif
     }
 
     static void Resume(void)
     {
+        #ifndef __NDS__
         for (size_t i = 0; i < VVV_MAX_CHANNELS; i++)
         {
             FAudioSourceVoice_Start(voices[i], 0, FAUDIO_COMMIT_NOW);
         }
+        #endif
     }
 
     static void Destroy(void)
     {
+        #ifndef __NDS__
         if (voices != NULL)
         {
             for (int i = 0; i < VVV_MAX_CHANNELS; i++)
@@ -301,19 +318,23 @@ end:
             }
             VVV_free(voices);
         }
+        #endif
     }
 
     static void SetVolume(int soundVolume)
     {
+        #ifndef __NDS__
         volume = (float) soundVolume / VVV_MAX_VOLUME;
         for (size_t i = 0; i < VVV_MAX_CHANNELS; i++)
         {
             FAudioVoice_SetVolume(voices[i], volume, FAUDIO_COMMIT_NOW);
         }
+        #endif
     }
 
     static void refillReserve(FAudioVoiceCallback* callback, void* ctx)
     {
+        #ifndef __NDS__
         bool inbounds;
         SoundTrack* t = (SoundTrack*) ctx;
         FAudioBuffer faudio_buffer;
@@ -335,6 +356,7 @@ end:
         }
 
         FAudioSourceVoice_SubmitSourceBuffer(voices[t->voice_index], &faudio_buffer, NULL);
+        #endif
     }
 
     static void swapBuffers(FAudioVoiceCallback* callback, void* ctx)
@@ -374,6 +396,7 @@ class MusicTrack
 public:
     MusicTrack(SDL_RWops *rw)
     {
+        #ifndef __NDS__
         SDL_zerop(this);
         read_buf = (Uint8*) SDL_malloc(rw->size(rw));
         SDL_RWread(rw, read_buf, rw->size(rw), 1);
@@ -407,6 +430,7 @@ public:
         vorbis_comment = stb_vorbis_get_comment(vorbis);
         parseComments(this, vorbis_comment.comment_list, vorbis_comment.comment_list_length);
         valid = true;
+        #endif
 
 end:
         SDL_RWclose(rw);
@@ -414,6 +438,7 @@ end:
 
     void Dispose(void)
     {
+        #ifndef __NDS__
         VVV_freefunc(stb_vorbis_close, vorbis);
         VVV_free(read_buf);
         VVV_free(decoded_buf_playing);
@@ -422,6 +447,7 @@ end:
         {
             VVV_freefunc(FAudioVoice_DestroyVoice, musicVoice);
         }
+        #endif
     }
 
     bool Play(bool loop)
@@ -467,13 +493,15 @@ end:
     }
 
     static void Halt(void)
-    {
+    {  
+        #ifndef __NDS__
         if (!IsHalted())
         {
             FAudioSourceVoice_FlushSourceBuffers(musicVoice);
             VVV_freefunc(FAudioVoice_DestroyVoice, musicVoice);
             paused = true;
         }
+        #endif
     }
 
     static bool IsHalted(void)
@@ -483,11 +511,13 @@ end:
 
     static void Pause(void)
     {
+        #ifndef __NDS__
         if (!IsHalted())
         {
             FAudioSourceVoice_Stop(musicVoice, 0, FAUDIO_COMMIT_NOW);
             paused = true;
         }
+        #endif
     }
 
     static bool IsPaused(void)
@@ -497,20 +527,24 @@ end:
 
     static void Resume(void)
     {
+        #ifndef __NDS__
         if (!IsHalted())
         {
             FAudioSourceVoice_Start(musicVoice, 0, FAUDIO_COMMIT_NOW);
             paused = false;
         }
+        #endif
     }
 
     static void SetVolume(int musicVolume)
     {
+        #ifndef __NDS__
         float adj_vol = (float) musicVolume / VVV_MAX_VOLUME;
         if (!IsHalted())
         {
             FAudioVoice_SetVolume(musicVoice, adj_vol, FAUDIO_COMMIT_NOW);
         }
+        #endif
     }
 
     stb_vorbis* vorbis;
@@ -534,6 +568,7 @@ end:
 
     static void refillReserve(FAudioVoiceCallback* callback, void* ctx)
     {
+        #ifndef __NDS__
         MusicTrack* t = (MusicTrack*) ctx;
         FAudioBuffer faudio_buffer;
         SDL_zero(faudio_buffer);
@@ -577,6 +612,7 @@ end:
         }
         t->sample_pos += faudio_buffer.PlayLength;
         FAudioSourceVoice_SubmitSourceBuffer(musicVoice, &faudio_buffer, NULL);
+        #endif
     }
 
     static void swapBuffers(FAudioVoiceCallback* callback, void* ctx)
@@ -731,6 +767,7 @@ musicclass::musicclass(void)
 
 void musicclass::init(void)
 {
+    #ifndef __NDS__
     if (FAudioCreate(&faudioctx, 0, FAUDIO_DEFAULT_PROCESSOR))
     {
         vlog_error("Unable to initialize FAudio");
@@ -772,6 +809,7 @@ void musicclass::init(void)
     soundTracks.push_back(SoundTrack( "sounds/newrecord.wav" ));
     soundTracks.push_back(SoundTrack( "sounds/trophy.wav" ));
     soundTracks.push_back(SoundTrack( "sounds/rescue.wav" ));
+    #endif
 
 #ifdef VVV_COMPILEMUSIC
     binaryBlob musicWriteBlob;
@@ -785,6 +823,9 @@ void musicclass::init(void)
 
     num_mmmmmm_tracks = 0;
     num_pppppp_tracks = 0;
+#ifdef __NDS__
+    mmmmmm = usingmmmmmm = false;
+#else
 
     if (!mmmmmm_blob.unPackBinary("mmmmmm.vvv"))
     {
@@ -886,6 +927,7 @@ void musicclass::init(void)
         num_pppppp_tracks++;
         index_++;
     }
+#endif
 }
 
 void musicclass::destroy(void)
@@ -911,6 +953,7 @@ void musicclass::destroy(void)
 
 void musicclass::play(int t)
 {
+    #ifndef __NDS__
     if (mmmmmm && usingmmmmmm)
     {
         // Don't conjoin this if-statement with the above one...
@@ -990,6 +1033,7 @@ void musicclass::play(int t)
             fadeMusicVolumeIn(3000);
         }
     }
+    #endif
 }
 
 void musicclass::resume(void)

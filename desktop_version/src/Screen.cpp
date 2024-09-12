@@ -114,7 +114,7 @@ void Screen::GetSettings(struct ScreenSettings* settings)
     settings->badSignal = badSignalEffect;
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__NDS__)
 /* Apple doesn't like icons anymore... */
 void Screen::LoadIcon(void)
 {

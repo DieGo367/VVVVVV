@@ -4,7 +4,7 @@
 class warpclass
 {
 public:
-    const short* loadlevel(int rx, int ry);
+    const unsigned char* loadlevel(int rx, int ry, int* dataLen);
     const char* roomname;
     bool roomname_special;
     int rcol;

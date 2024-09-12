@@ -13,6 +13,7 @@
 #include "Maths.h"
 #include "Music.h"
 #include "Script.h"
+#include "TileDecode.h"
 #include "Unused.h"
 #include "UtilityClass.h"
 
@@ -1456,8 +1457,9 @@ void mapclass::loadlevel(int rx, int ry)
     {
         tileset = 1;
         extrarow = 1;
-        const short* tmap = otherlevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        int tdataLen;
+        const unsigned char* tdata = otherlevel.loadlevel(rx, ry, &tdataLen);
+        decodeTilesInt(contents, tdata, tdataLen);
         setroomname(otherlevel.roomname);
         roomname_special = otherlevel.roomname_special;
         hiddenname = otherlevel.hiddenname;
@@ -1466,8 +1468,9 @@ void mapclass::loadlevel(int rx, int ry)
     }
     case 2: //The Lab
     {
-        const short* tmap = lablevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        int tdataLen;
+        const unsigned char* tdata = lablevel.loadlevel(rx, ry, &tdataLen);
+        decodeTilesInt(contents, tdata, tdataLen);
         setroomname(lablevel.roomname);
         roomname_special = lablevel.roomname_special;
         tileset = 1;
@@ -1514,8 +1517,9 @@ void mapclass::loadlevel(int rx, int ry)
         break;
     case 4: //The Warpzone
     {
-        const short* tmap = warplevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        int tdataLen;
+        const unsigned char* tdata = warplevel.loadlevel(rx, ry, &tdataLen);
+        decodeTilesInt(contents, tdata, tdataLen);
         setroomname(warplevel.roomname);
         roomname_special = warplevel.roomname_special;
         tileset = 1;
@@ -1533,8 +1537,9 @@ void mapclass::loadlevel(int rx, int ry)
     }
     case 5: //Space station
     {
-        const short* tmap = spacestation2.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        int tdataLen;
+        const unsigned char* tdata = spacestation2.loadlevel(rx, ry, &tdataLen);
+        decodeTilesInt(contents, tdata, tdataLen);
         setroomname(spacestation2.roomname);
         roomname_special = spacestation2.roomname_special;
         tileset = 0;
@@ -1542,8 +1547,9 @@ void mapclass::loadlevel(int rx, int ry)
     }
     case 6: //final level
     {
-        const short* tmap = finallevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        int tdataLen;
+        const unsigned char* tdata = finallevel.loadlevel(rx, ry, &tdataLen);
+        decodeTilesInt(contents, tdata, tdataLen);
         setroomname(finallevel.roomname);
         roomname_special = finallevel.roomname_special;
         tileset = 1;
@@ -1702,8 +1708,9 @@ void mapclass::loadlevel(int rx, int ry)
     }
     case 11: //Tower Hallways //Content is held in final level routine
     {
-        const short* tmap = finallevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        int tdataLen;
+        const unsigned char* tdata = finallevel.loadlevel(rx, ry, &tdataLen);
+        decodeTilesInt(contents, tdata, tdataLen);
         setroomname(finallevel.roomname);
         roomname_special = finallevel.roomname_special;
         tileset = 2;

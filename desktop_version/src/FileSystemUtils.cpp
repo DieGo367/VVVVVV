@@ -35,7 +35,7 @@ static int mkdir(char* path, int mode)
 #include <sys/stat.h>
 #include <emscripten.h>
 #define MAX_PATH PATH_MAX
-#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__) || defined(__DragonFly__) || defined(__unix__)
+#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__) || defined(__DragonFly__) || defined(__unix__) || defined(__NDS__)
 #include <limits.h>
 #include <sys/stat.h>
 #define MAX_PATH PATH_MAX
@@ -308,6 +308,12 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
 
     PHYSFS_File* dataZip = PHYSFS_openRead("/apk/assets/data.zip");
     if (!dataZip || !PHYSFS_mountHandle(dataZip, "data.zip", NULL, 1))
+#elif defined(__NDS__)
+    // mount all data from nitrofs instead
+    if (PHYSFS_mount("nitro:/", NULL, 1)) {
+        doesLangDirExist = true;
+        doesFontsDirExist = true;
+    } else
 #else
     doesLangDirExist = mount_pre_datazip(mainLangDir, "lang", "lang/", langDir);
     vlog_info("Languages directory: %s", mainLangDir);

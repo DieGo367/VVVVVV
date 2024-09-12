@@ -3739,8 +3739,10 @@ bool Graphics::reloadresources(void)
 
     destroy();
 
+    #ifndef __NDS__
     make_array(&grphx.im_sprites_surf, sprites_surf, 32);
     make_array(&grphx.im_flipsprites_surf, flipsprites_surf, 32);
+    #endif
 
     images[IMAGE_LEVELCOMPLETE] = grphx.im_image0;
     images[IMAGE_MINIMAP] = grphx.im_image1;

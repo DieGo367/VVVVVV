@@ -17,7 +17,7 @@ static SDL_Color pre_lightcol = {0, 0, 0, 0};
 static int pre_curcol = 0, pre_coltimer = 0, pre_offset = 0;
 
 static int pre_frontrectx=30, pre_frontrecty=20, pre_frontrectw=260, pre_frontrecth=200;
-static int pre_temprectx=0, pre_temprecty=0, pre_temprectw=320, pre_temprecth=240;
+static int pre_temprectx=0, pre_temprecty=0, pre_temprectw=320, pre_temprecth=16;
 
 void preloaderinput(void)
 {

@@ -1,0 +1,5 @@
+#include <endian.h>
+
+#define SDL_BYTE_ORDER BYTE_ORDER
+#define SDL_LIL_ENDIAN LITTLE_ENDIAN
+#define SDL_BIG_ENDIAN BIG_ENDIAN

@@ -15,6 +15,7 @@
 // Used to load PNG data
 extern "C"
 {
+    #ifndef __NDS__
     extern unsigned lodepng_decode32(
         unsigned char** out,
         unsigned* w,
@@ -22,6 +23,7 @@ extern "C"
         const unsigned char* in,
         size_t insize
     );
+    #endif
     extern unsigned lodepng_encode24(
         unsigned char** out,
         size_t* outsize,
@@ -32,6 +34,7 @@ extern "C"
     extern const char* lodepng_error_text(unsigned code);
 }
 
+#ifndef __NDS__
 static SDL_Surface* LoadImageRaw(const char* filename, unsigned char** data)
 {
     *data = NULL;
@@ -174,9 +177,74 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
 
     return texture;
 }
+#endif
+
+#ifdef __NDS__
+#include <nds/arm9/grf.h>
+static void filterPalette(uint16_t *palette, const TextureLoadType type) {
+    if (!palette) return;
+    switch (type) {
+    case TEX_WHITE:
+        for (int i = 1; i < palette[0]; i++) {
+            palette[i] = 0xFFFF;
+        }
+        break;
+    case TEX_GRAYSCALE:
+        for (int i = 1; i < palette[0]; i++) {
+            Uint8 r = palette[i] & 0b11111;
+            Uint8 g = palette[i] >> 5 & 0b11111;
+            Uint8 b = palette[i] >> 10 & 0b11111;
+            // magic grayscale numbers taken from LoadTextureFromRaw. TODO: test to see if this looks right
+            Uint8 gray = (Uint8)SDL_floor(r * 0.299 + g * 0.587 + b * 0.114 + 0.5) & 0b11111;
+            palette[i] = 1 << 15 | gray << 10 | gray << 5 | gray;
+        }
+        break;
+    default:
+        break;
+    }
+}
+#endif
 
 SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
 {
+    #ifdef __NDS__
+    // nocashf("Loading image %s", filename);
+    unsigned char* fileIn;
+    size_t length;
+    FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
+
+    if (fileIn == NULL) {
+        vlog_error("Image not found: %s", filename);
+        SDL_assert(0 && "Image file missing!");
+        return NULL;
+    }
+
+    GRFHeader header;
+    void *data = NULL, *palette = NULL;
+    size_t dataSize, paletteSize;
+    GRFError error = grfLoadMem(fileIn, &header, &data, &dataSize, NULL, NULL, &palette, &paletteSize);
+    VVV_free(fileIn);
+    
+    if (error != GRF_NO_ERROR) {
+        vlog_error("Could not load %s: %i", filename, error);
+        return NULL;
+    }
+
+    SDL_Texture *tex = SnDsL_CreateTextureFromGRFData(
+        header.gfxWidth, header.gfxHeight, header.gfxAttr,
+        data, palette, paletteSize / sizeof(uint16_t)
+    );
+    if (!tex) {
+        VVV_free(data); VVV_free(palette);
+        vlog_error("Could not load %s: OOM", filename);
+        return NULL;
+    }
+
+    filterPalette((uint16_t *) palette, loadtype);
+
+    return tex;
+    #else
+    
     unsigned char* data;
 
     SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
@@ -197,6 +265,7 @@ SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
     }
 
     return texture;
+    #endif // __NDS__
 }
 
 static SDL_Texture* LoadImage(const char* filename)
@@ -207,12 +276,21 @@ static SDL_Texture* LoadImage(const char* filename)
 /* Any unneeded variants can be NULL */
 static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Texture** white, SDL_Texture** grayscale)
 {
+    #ifdef __NDS__
+    SDL_Texture *mainTex = LoadImage(filename);
+    size_t palSize = mainTex->palette[0] * sizeof(Uint16);
+    #else
     unsigned char* data;
     SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
+    #endif
 
     if (colored != NULL)
     {
+        #ifdef __NDS__
+        *colored = mainTex;
+        #else
         *colored = LoadTextureFromRaw(filename, loadedImage, TEX_COLOR);
+        #endif
         if (*colored == NULL)
         {
             vlog_error("Image not found: %s", filename);
@@ -222,9 +300,19 @@ static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Textur
 
     if (grayscale != NULL)
     {
+        #ifdef __NDS__
+        void *palette = malloc(palSize);
+        memcpy(palette, mainTex->palette, palSize);
+        filterPalette((Uint16 *)palette, TEX_GRAYSCALE);
+        *grayscale = SnDsL_CreateTextureFromGRFData(mainTex->w, mainTex->h, mainTex->bpp, mainTex->data, palette, mainTex->palette[0]);
+        #else
         *grayscale = LoadTextureFromRaw(filename, loadedImage, TEX_GRAYSCALE);
+        #endif
         if (*grayscale == NULL)
         {
+            #ifdef __NDS__
+            VVV_free(palette);
+            #endif
             vlog_error("Image not found: %s", filename);
             SDL_assert(0 && "Image not found! See stderr.");
         }
@@ -232,25 +320,47 @@ static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Textur
 
     if (white != NULL)
     {
+        #ifdef __NDS__
+        size_t palSize = mainTex->palette[0] * sizeof(Uint16);
+        void *palette = malloc(palSize);
+        memcpy(palette, mainTex->palette, palSize);
+        filterPalette((Uint16 *)palette, TEX_GRAYSCALE);
+        *white = SnDsL_CreateTextureFromGRFData(mainTex->w, mainTex->h, mainTex->bpp, mainTex->data, palette, mainTex->palette[0]);
+        #else
         *white = LoadTextureFromRaw(filename, loadedImage, TEX_WHITE);
+        #endif
         if (*white == NULL)
         {
+            #ifdef __NDS__
+            VVV_free(palette);
+            #endif
             vlog_error("Image not found: %s", filename);
             SDL_assert(0 && "Image not found! See stderr.");
         }
     }
 
+    #ifdef __NDS__
+    if (mainTex && *colored == NULL) {
+        VVV_free(mainTex->palette);
+        if (!(*white || *grayscale)) VVV_free(mainTex->data);
+        VVV_free(mainTex);
+    }
+    #else
     if (loadedImage != NULL)
     {
         VVV_freefunc(SDL_FreeSurface, loadedImage);
     }
 
     VVV_free(data);
+    #endif
 }
 
 /* The pointers `texture` and `surface` cannot be NULL */
 static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface** surface)
 {
+    #ifdef __NDS__
+    *texture = LoadImage(filename, TEX_WHITE);
+    #else
     unsigned char* data;
     SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
 
@@ -274,6 +384,7 @@ static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface
     }
 
     VVV_free(data);
+    #endif
 }
 
 static void LoadSpritesTranslation(
@@ -285,7 +396,9 @@ static void LoadSpritesTranslation(
     /* Create a sprites texture for display in another language.
      * surface_english is used as a base. Parts of the translation (filename)
      * will replace parts of the base, as instructed in the mask XML. */
-
+    #ifdef __NDS__
+    return; // todo: implement
+    #else
     if (surface_english == NULL)
     {
         vlog_error("LoadSpritesTranslation: English surface is NULL!");
@@ -346,6 +459,7 @@ static void LoadSpritesTranslation(
 
     VVV_freefunc(SDL_FreeSurface, translated);
     VVV_freefunc(SDL_FreeSurface, working);
+    #endif
 }
 
 void GraphicsResources::init_translations(void)
@@ -406,6 +520,31 @@ void GraphicsResources::init_translations(void)
 
 void GraphicsResources::init(void)
 {
+    #ifdef __NDS__
+    LoadVariants("graphics/tiles.grf", &im_tiles, &im_tiles_white, &im_tiles_tint);
+    LoadVariants("graphics/tiles2.grf", &im_tiles2, NULL, &im_tiles2_tint);
+    LoadVariants("graphics/entcolours.grf", &im_entcolours, NULL, &im_entcolours_tint);
+
+    LoadSprites("graphics/sprites.grf", &im_sprites, &im_sprites_surf);
+    im_flipsprites = im_sprites;
+    im_flipsprites_surf = im_sprites_surf;
+
+    im_tiles3 = LoadImage("graphics/tiles3.grf");
+    im_teleporter = LoadImage("graphics/teleporter.grf", TEX_WHITE);
+
+    im_image0 = LoadImage("graphics/levelcomplete.grf");
+    im_image5 = im_image0;
+    im_image1 = LoadImage("graphics/minimap.grf");
+    im_image2 = LoadImage("graphics/covered.grf");
+    im_image3 = LoadImage("graphics/elephant.grf", TEX_WHITE);
+    im_image4 = LoadImage("graphics/gamecomplete.grf");
+    im_image6 = im_image4;
+    im_image7 = LoadImage("graphics/site.grf", TEX_WHITE);
+    im_image8 = LoadImage("graphics/site2.grf", TEX_WHITE);
+    im_image9 = LoadImage("graphics/site3.grf", TEX_WHITE);
+    im_image10 = LoadImage("graphics/ending.grf");
+    im_image11 = LoadImage("graphics/site4.grf", TEX_WHITE);
+    #else
     LoadVariants("graphics/tiles.png", &im_tiles, &im_tiles_white, &im_tiles_tint);
     LoadVariants("graphics/tiles2.png", &im_tiles2, NULL, &im_tiles2_tint);
     LoadVariants("graphics/entcolours.png", &im_entcolours, NULL, &im_entcolours_tint);
@@ -428,6 +567,7 @@ void GraphicsResources::init(void)
     im_image9 = LoadImage("graphics/site3.png", TEX_WHITE);
     im_image10 = LoadImage("graphics/ending.png");
     im_image11 = LoadImage("graphics/site4.png", TEX_WHITE);
+    #endif // __NDS__
 
     im_sprites_translated = NULL;
     im_flipsprites_translated = NULL;
@@ -436,12 +576,14 @@ void GraphicsResources::init(void)
 
     im_image12 = SDL_CreateTexture(gameScreen.m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 240, 180);
 
+    #ifndef __NDS__
     if (im_image12 == NULL)
     {
         vlog_error("Failed to create minimap texture: %s", SDL_GetError());
         SDL_assert(0 && "Failed to create minimap texture! See stderr.");
         return;
     }
+    #endif
 }
 
 

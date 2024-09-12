@@ -3,6 +3,9 @@
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #endif
+#ifdef __NDS__
+#include <nds/interrupts.h>
+#endif
 
 #include "ButtonGlyphs.h"
 #include "CustomLevels.h"
@@ -864,6 +867,9 @@ int main(int argc, char *argv[])
 #else
     while (true)
     {
+        #ifdef __NDS__
+	    swiWaitForVBlank();
+        #endif
         f_time = SDL_GetTicks64();
 
         const Uint64 f_timetaken = f_time - f_timePrev;

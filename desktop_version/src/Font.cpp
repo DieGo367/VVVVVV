@@ -274,7 +274,11 @@ static uint8_t load_font(FontContainer* container, const char* name)
     char name_png[256];
     char name_txt[256];
     char name_xml[256];
+    #ifdef __NDS__
+    SDL_snprintf(name_png, sizeof(name_png), "graphics/%s.grf", name);
+    #else
     SDL_snprintf(name_png, sizeof(name_png), "graphics/%s.png", name);
+    #endif
     SDL_snprintf(name_txt, sizeof(name_txt), "graphics/%s.txt", name);
     SDL_snprintf(name_xml, sizeof(name_xml), "graphics/%s.fontmeta", name);
     SDL_strlcpy(f->name, name, sizeof(f->name));
@@ -401,7 +405,12 @@ static uint8_t load_font(FontContainer* container, const char* name)
          * Or well... 2.3 interpreted these as
          * "all unicode from 0 to however much is in the image"... */
 
+        #ifdef __NDS__
+        #define temp_surface f->image
+        #define ReadPixel SnDsL_ReadPixel
+        #else
         SDL_Surface* temp_surface = LoadImageSurface(name_png);
+        #endif
         if (temp_surface != NULL)
         {
             const uint32_t chars_per_line = temp_surface->w / f->glyph_w;
@@ -438,7 +447,12 @@ static uint8_t load_font(FontContainer* container, const char* name)
                 add_glyphinfo(f, codepoint, codepoint);
             }
 
+        #ifdef __NDS__
+        #undef temp_surface
+        #undef ReadPixel
+        #else
             VVV_freefunc(SDL_FreeSurface, temp_surface);
+        #endif
         }
     }
 
@@ -625,7 +639,11 @@ static void load_font_filename(bool is_custom, const char* filename)
 {
     // Load font.png, and everything that matches *.fontmeta (but not font.fontmeta)
     size_t expected_ext_start;
+    #ifdef __NDS__
+    bool is_fontpng = SDL_strcmp(filename, "font.grf") == 0;
+    #else
     bool is_fontpng = SDL_strcmp(filename, "font.png") == 0;
+    #endif
     if (is_fontpng)
     {
         expected_ext_start = SDL_strlen(filename)-4;
