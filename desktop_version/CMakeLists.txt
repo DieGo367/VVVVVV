@@ -411,8 +411,10 @@ foreach(static_library IN LISTS STATIC_LIBRARIES)
     target_compile_options(${static_library} PRIVATE ${GLOBAL_COMPILE_FLAGS})
 endforeach(static_library)
 
-if(NDS)
+if(NINTENDO_DS)
     target_compile_definitions(VVVVVV PRIVATE -Dasm=__asm__) # needed for c99
+    set(CMAKE_C_FLAGS_RELEASE "-g -O2") # -DNDEBUG causes a Data Abort for some reason
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
     # minimize lodepng to just the encoding part
     target_compile_definitions(lodepng-static PRIVATE
@@ -440,11 +442,15 @@ if(NDS)
     set(SDL2_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/SnDsL/include)
     set(SDL2_LIBRARIES sndsl-static)
 
-    # prepare nitro files and output nds rom
-
+    # prepare nitro files
     find_program(MAGICK magick REQUIRED)
+    set(GRIT ${BLOCKSDS}/tools/grit/grit)
     set(DATA_ZIP ${CMAKE_CURRENT_SOURCE_DIR}/data.zip)
-
+    set(FONT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/fonts)
+    add_custom_command(
+        OUTPUT nitro/graphics
+        COMMAND ${CMAKE_COMMAND} -E make_directory nitro/graphics
+    )
     set(IMG_1BIT
         elephant
         gamecomplete
@@ -467,62 +473,59 @@ if(NDS)
     )
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
-    foreach(IMAGE_TYPE IMG_1BIT IMG_2BIT IMG_4BIT IMG_8BIT FONTS_WHITE FONTS_COLOR)
-        foreach(IMAGE ${${IMAGE_TYPE}})
-            list(APPEND ${IMAGE_TYPE}_SRCS graphics/${IMAGE}.png)
-            list(APPEND NITRO_DEPS nitro/graphics/${IMAGE}.grf)
-        endforeach()
-    endforeach()
+    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${FONTS_WHITE} ${FONTS_COLOR})
+        set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
+        set(GRIT_FLAGS -ftr -fh! -gb -gT FF00FF)
 
-    foreach(IMAGE ${IMG_1BIT})
-        add_custom_command(
-            OUTPUT graphics/${IMAGE}.png
-            DEPENDS ${DATA_ZIP} nitro/graphics
-            COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} graphics/${IMAGE}.png
-            COMMAND ${MAGICK} graphics/${IMAGE}.png -colors 2 -background "#FF00FF" -alpha remove graphics/${IMAGE}.png VERBATIM
-        )
-    endforeach()
-    foreach(IMAGE ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT})
-        add_custom_command(
-            OUTPUT graphics/${IMAGE}.png
-            DEPENDS ${DATA_ZIP} nitro/graphics
-            COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} graphics/${IMAGE}.png
-            COMMAND ${MAGICK} graphics/${IMAGE}.png -background "#FF00FF" -alpha remove graphics/${IMAGE}.png VERBATIM
-        )
-    endforeach()
-    foreach(FONT ${FONTS_WHITE} ${FONTS_COLOR})
-        add_custom_command(
-            OUTPUT graphics/${FONT}.png
-            DEPENDS ${CMAKE_SOURCE_DIR}/fonts/${FONT}.png ${CMAKE_SOURCE_DIR}/fonts/${FONT}.fontmeta nitro/graphics
-            COMMAND ${CMAKE_COMMAND} -E make_directory graphics
-            COMMAND ${MAGICK} ${CMAKE_CURRENT_SOURCE_DIR}/fonts/${FONT}.png -background "#FF00FF" -alpha remove graphics/${FONT}.png VERBATIM
-            # while we're here, copy over the metadata file
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/fonts/${FONT}.fontmeta nitro/graphics/${FONT}.fontmeta
-        )
-    endforeach()
+        if(IMAGE IN_LIST IMG_1BIT OR IMAGE IN_LIST FONTS_WHITE)
+            set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gB1 -pn2)
+        elseif(IMAGE IN_LIST IMG_2BIT)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gB2 -pn4)
+        elseif(IMAGE IN_LIST IMG_4BIT)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gB4 -pn16)
+        elseif(IMAGE IN_LIST IMG_8BIT)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gB8 -pn206)
+        elseif(IMAGE IN_LIST FONTS_COLOR)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gB8 -pn25)
+        endif()
 
-    set(GRIT_COMMON -ftr -fh! -gb -gT FF00FF)
-    add_grit_rule(FLAGS ${GRIT_COMMON} -gB1 -pn2   OUTDIR nitro/graphics SOURCES ${IMG_1BIT_SRCS} ${FONTS_WHITE_SRCS})
-    add_grit_rule(FLAGS ${GRIT_COMMON} -gB2 -pn4   OUTDIR nitro/graphics SOURCES ${IMG_2BIT_SRCS})
-    add_grit_rule(FLAGS ${GRIT_COMMON} -gB4 -pn16  OUTDIR nitro/graphics SOURCES ${IMG_4BIT_SRCS})
-    add_grit_rule(FLAGS ${GRIT_COMMON} -gB8 -pn206 OUTDIR nitro/graphics SOURCES ${IMG_8BIT_SRCS})
-    add_grit_rule(FLAGS ${GRIT_COMMON} -gB8 -pn25  OUTDIR nitro/graphics SOURCES ${FONTS_COLOR_SRCS})
-
-    add_custom_command(OUTPUT nitro nitro/graphics
+        if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
+            set(EXTRA_DEPENDS ${FONT_PATH}/${IMAGE}.png ${FONT_PATH}/${IMAGE}.fontmeta)
+            set(SRC_PATH ${FONT_PATH})
+            set(START_CMD true)
+            set(END_CMD copy_if_different ${FONT_PATH}/${IMAGE}.fontmeta nitro/graphics/${IMAGE}.fontmeta)
+        else()
+            set(EXTRA_DEPENDS ${DATA_ZIP})
+            set(SRC_PATH graphics)
+            set(START_CMD tar x ${DATA_ZIP} graphics/${IMAGE}.png)
+            set(END_CMD true)
+        endif()
+        add_custom_command(
+            OUTPUT nitro/graphics/${IMAGE}.grf
+            BYPRODUCTS graphics
+            DEPENDS nitro/graphics ${EXTRA_DEPENDS}
+            COMMAND ${CMAKE_COMMAND} -E ${START_CMD}
+            COMMAND ${MAGICK} ${SRC_PATH}/${IMAGE}.png ${MAGICK_FLAGS} graphics/${IMAGE}.png VERBATIM
+            COMMAND ${GRIT} graphics/${IMAGE}.png ${GRIT_FLAGS} -o nitro/graphics/${IMAGE}.grf
+            COMMAND ${CMAKE_COMMAND} -E ${END_CMD}
+        )
+        list(APPEND NITRO_DEPS nitro/graphics/${IMAGE}.grf)
+    endforeach()
+    add_custom_target(VVVVVV_NITROFS DEPENDS ${NITRO_DEPS})
+    
+    # these need to exist at project configuration since nds_create_rom checks for them
+    execute_process(
         COMMAND ${CMAKE_COMMAND} -E make_directory nitro
-        COMMAND ${CMAKE_COMMAND} -E make_directory nitro/graphics
-    )
-
-    add_custom_command(OUTPUT icon.bmp
         COMMAND ${MAGICK} ${CMAKE_CURRENT_SOURCE_DIR}/icon.ico icon.bmp
     )
 
-    add_nds_rom(VVVVVV
+    nds_create_rom(VVVVVV
         AUTHOR "Terry Cavanagh"
-        ICON icon.bmp
-        NITRO_DIRS nitro
-        DEPENDS ${NITRO_DEPS}
+        ICON ${CMAKE_CURRENT_BINARY_DIR}/icon.bmp
+        NITROFS ${CMAKE_CURRENT_BINARY_DIR}/nitro
     )
+    add_dependencies(VVVVVV_nds VVVVVV_NITROFS)
 endif()
 
 # SDL2 Dependency (Detection pulled from FAudio)
