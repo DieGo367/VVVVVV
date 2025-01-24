@@ -1409,10 +1409,12 @@ static void draw_tile_drawer(int tileset)
         int texturewidth;
         int textureheight;
 
+        #ifndef __NDS__
         if (graphics.query_texture(graphics.grphx.im_tiles, NULL, NULL, &texturewidth, &textureheight) != 0)
         {
             return;
         }
+        #endif
 
         const int numtiles = (int)(texturewidth / 8) * (textureheight / 8);
 
@@ -3277,7 +3279,9 @@ void editorinput(void)
 
                     bool tiles1 = (cl.getroomprop(ed.levx, ed.levy)->tileset == 0);
 
+                    #ifndef __NDS__
                     if (graphics.query_texture(tiles1 ? graphics.grphx.im_tiles : graphics.grphx.im_tiles2, NULL, NULL, &texturewidth, &textureheight) != 0)
+                    #endif
                         return;
 
                     const int numtiles = (int)(texturewidth / 8) * (textureheight / 8);

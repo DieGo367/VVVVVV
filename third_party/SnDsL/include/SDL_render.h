@@ -64,6 +64,12 @@ int SDL_RenderCopy(SDL_Renderer *rend, SDL_Texture *tex, const SDL_Rect *clip, c
 #define SDL_RenderCopyEx(rend, tex, srcRect, destRect, angle, center, flip) SDL_RenderCopy(rend, tex, srcRect, destRect)
 #define SDL_RenderPresent(rend)
 
+typedef struct {
+	uint16_t *map;
+} SnDsL_Tileset;
+SnDsL_Tileset *SnDsL_CreateTileset(void *map);
+void SnDsL_DestroyTileset(SnDsL_Tileset *tiles);
+
 // blendmode.h
 
 typedef enum {

@@ -464,16 +464,11 @@ if(NINTENDO_DS)
     )
     set(IMG_2BIT covered)
     set(IMG_4BIT ending)
-    set(IMG_8BIT
-        entcolours
-        minimap
-        tiles
-        tiles2
-        tiles3
-    )
+    set(IMG_8BIT entcolours minimap tiles3)
+    set(TILES tiles tiles2)
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
-    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${FONTS_WHITE} ${FONTS_COLOR})
+    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${TILES} ${FONTS_WHITE} ${FONTS_COLOR})
         set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
         set(GRIT_FLAGS -ftr -fh! -gb -gT FF00FF)
 
@@ -488,6 +483,8 @@ if(NINTENDO_DS)
             set(GRIT_FLAGS ${GRIT_FLAGS} -gB8 -pn206)
         elseif(IMAGE IN_LIST FONTS_COLOR)
             set(GRIT_FLAGS ${GRIT_FLAGS} -gB8 -pn25)
+        elseif(IMAGE IN_LIST TILES)
+            set(GRIT_FLAGS -ftr -fh! -gt -gB8 -m)
         endif()
 
         if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)

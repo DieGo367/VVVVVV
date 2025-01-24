@@ -21,9 +21,13 @@ public:
     SDL_Surface* im_sprites_surf;
     SDL_Surface* im_flipsprites_surf;
 
+#ifdef __NDS__
+    SnDsL_Tileset* im_tiles;
+#else
     SDL_Texture* im_tiles;
     SDL_Texture* im_tiles_white;
     SDL_Texture* im_tiles_tint;
+#endif
     SDL_Texture* im_tiles2;
     SDL_Texture* im_tiles2_tint;
     SDL_Texture* im_tiles3;

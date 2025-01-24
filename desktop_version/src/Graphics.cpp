@@ -783,7 +783,11 @@ void Graphics::drawtile(int x, int y, int t)
 {
     if (shouldrecoloroneway(t, tiles1_mounted))
     {
+    #ifdef __NDS__
+        draw_grid_tile(grphx.im_tiles, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
+    #else
         draw_grid_tile(grphx.im_tiles_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
+    #endif
     }
     else
     {
@@ -1194,6 +1198,23 @@ void Graphics::draw_texture_part(SDL_Texture* image, const int x, const int y, c
 
     copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
 }
+
+#ifdef __NDS__
+#include <nds/arm9/background.h>
+void Graphics::draw_grid_tile(SnDsL_Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
+    u16 *map = bgGetMapPtr(3);
+    int tileX = x/8, tileY = y/8;
+    map[tileX + tileY * 64] = tileset->map[t];
+}
+
+void Graphics::draw_grid_tile(SnDsL_Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const int r, const int g, const int b) {
+    draw_grid_tile(tileset, t, x, y, width, height);
+}
+
+void Graphics::draw_grid_tile(SnDsL_Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const SDL_Color color) {
+    draw_grid_tile(tileset, t, x, y, width, height, color.r, color.g, color.b);
+}
+#endif
 
 void Graphics::draw_grid_tile(SDL_Texture* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
 {
@@ -1777,7 +1798,11 @@ void Graphics::drawcoloredtile(
     const int t,
     const int r, const int g, const int b
 ) {
+    #ifdef __NDS__
+    draw_grid_tile(grphx.im_tiles, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
+    #else
     draw_grid_tile(grphx.im_tiles_white, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
+    #endif
 }
 
 
@@ -2052,8 +2077,13 @@ void Graphics::drawentity(const int i, const int yoff)
     }
 
     SDL_Texture* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
+    #ifdef __NDS__
+    SnDsL_Tileset *tiles = grphx.im_tiles;
+    SnDsL_Tileset *tiles_tint = tiles;
+    #else
     SDL_Texture* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
     SDL_Texture* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
+    #endif
 
     const int xp = lerp(obj.entities[i].lerpoldxp, obj.entities[i].xp);
     const int yp = lerp(obj.entities[i].lerpoldyp, obj.entities[i].yp);
@@ -2293,7 +2323,11 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.x += tpoint.x;
             drawRect.y += tpoint.y;
 
+            #ifdef __NDS__
+            draw_grid_tile(grphx.im_tiles, 1167, drawRect.x, drawRect.y, 8, 8, ct);
+            #else
             draw_grid_tile(grphx.im_tiles_white, 1167, drawRect.x, drawRect.y, 8, 8, ct);
+            #endif
 
         }
         else if (obj.entities[i].xp > 340 && obj.entities[i].vx < 0)
@@ -2313,7 +2347,11 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.x += tpoint.x;
             drawRect.y += tpoint.y;
 
+            #ifdef __NDS__
+            draw_grid_tile(grphx.im_tiles, 1166, drawRect.x, drawRect.y, 8, 8, ct);
+            #else
             draw_grid_tile(grphx.im_tiles_white, 1166, drawRect.x, drawRect.y, 8, 8, ct);
+            #endif
         }
         break;
     }
@@ -2328,10 +2366,14 @@ void Graphics::drawentity(const int i, const int yoff)
 
 void Graphics::drawbackground( int t )
 {
+    #ifdef __NDS__
+    fill_rect(NULL, 0, 0, 0, 0);
+    #endif
     switch(t)
     {
     case 1:
         // Starfield
+        #ifndef __NDS__
         fill_rect(0, 0, 0);
         for (int i = 0; i < numstars; i++)
         {
@@ -2346,6 +2388,7 @@ void Graphics::drawbackground( int t )
                 fill_rect(&star_rect, getRGB(0x55,0x55,0x55));
             }
         }
+        #endif
         break;
     case 2:
     {
@@ -2805,9 +2848,13 @@ void Graphics::drawmap(void)
     {
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
+        #ifdef __NDS__
+        u16 *bgMap = bgGetMapPtr(3);
+        #else
         set_render_target(foregroundTexture);
         set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
         clear(0, 0, 0, 0);
+        #endif
 
         for (int y = 0; y < 30; y++)
         {
@@ -2841,6 +2888,9 @@ void Graphics::drawmap(void)
                         drawtile3(x * 8, y * 8, tile, map.rcol);
                     }
                 }
+                #ifdef __NDS__
+                else bgMap[x + y * 64] = grphx.im_tiles->map[0];
+                #endif
             }
         }
 
@@ -3729,7 +3779,9 @@ bool Graphics::reloadresources(void)
     grphx.destroy();
     grphx.init();
 
+    #ifndef __NDS__
     MAYBE_FAIL(checktexturesize("tiles.png", grphx.im_tiles, 8, 8));
+    #endif
     MAYBE_FAIL(checktexturesize("tiles2.png", grphx.im_tiles2, 8, 8));
     MAYBE_FAIL(checktexturesize("tiles3.png", grphx.im_tiles3, 8, 8));
     MAYBE_FAIL(checktexturesize("entcolours.png", grphx.im_entcolours, 8, 8));

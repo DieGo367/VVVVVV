@@ -177,9 +177,7 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
 
     return texture;
 }
-#endif
-
-#ifdef __NDS__
+#else
 #include <nds/arm9/grf.h>
 static void filterPalette(uint16_t *palette, const TextureLoadType type) {
     if (!palette) return;
@@ -273,24 +271,45 @@ static SDL_Texture* LoadImage(const char* filename)
     return LoadImage(filename, TEX_COLOR);
 }
 
+#ifdef __NDS__
+#include <nds/arm9/background.h>
+static void LoadTileset(const char *filename, SnDsL_Tileset **tileset) {
+    unsigned char *fileIn;
+    size_t length;
+    FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
+    if (fileIn == NULL) {
+        vlog_error("Image not found: %s", filename);
+        SDL_assert(0 && "Image file missing!");
+        return;
+    }
+    GRFHeader header;
+    void *data = NULL, *palette = NULL, *map = NULL;
+    size_t dataSize, paletteSize, mapSize;
+    GRFError error = grfLoadMem(fileIn, &header, &data, &dataSize, &map, &mapSize, &palette, &paletteSize);
+    VVV_free(fileIn);
+
+    if (error != GRF_NO_ERROR) {
+        vlog_error("Could not load %s: %i", filename, error);
+        return;
+    }
+
+    memcpy(bgGetGfxPtr(3), data, dataSize);
+    memcpy(BG_PALETTE + 1, (u16 *)palette + 1, paletteSize - sizeof(u16));
+    free(data);
+    free(palette);
+
+    *tileset = SnDsL_CreateTileset(map);
+}
+#else
 /* Any unneeded variants can be NULL */
 static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Texture** white, SDL_Texture** grayscale)
 {
-    #ifdef __NDS__
-    SDL_Texture *mainTex = LoadImage(filename);
-    size_t palSize = mainTex->palette[0] * sizeof(Uint16);
-    #else
     unsigned char* data;
     SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
-    #endif
 
     if (colored != NULL)
     {
-        #ifdef __NDS__
-        *colored = mainTex;
-        #else
         *colored = LoadTextureFromRaw(filename, loadedImage, TEX_COLOR);
-        #endif
         if (*colored == NULL)
         {
             vlog_error("Image not found: %s", filename);
@@ -300,19 +319,9 @@ static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Textur
 
     if (grayscale != NULL)
     {
-        #ifdef __NDS__
-        void *palette = malloc(palSize);
-        memcpy(palette, mainTex->palette, palSize);
-        filterPalette((Uint16 *)palette, TEX_GRAYSCALE);
-        *grayscale = SnDsL_CreateTextureFromGRFData(mainTex->w, mainTex->h, mainTex->bpp, mainTex->data, palette, mainTex->palette[0]);
-        #else
         *grayscale = LoadTextureFromRaw(filename, loadedImage, TEX_GRAYSCALE);
-        #endif
         if (*grayscale == NULL)
         {
-            #ifdef __NDS__
-            VVV_free(palette);
-            #endif
             vlog_error("Image not found: %s", filename);
             SDL_assert(0 && "Image not found! See stderr.");
         }
@@ -320,40 +329,22 @@ static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Textur
 
     if (white != NULL)
     {
-        #ifdef __NDS__
-        size_t palSize = mainTex->palette[0] * sizeof(Uint16);
-        void *palette = malloc(palSize);
-        memcpy(palette, mainTex->palette, palSize);
-        filterPalette((Uint16 *)palette, TEX_GRAYSCALE);
-        *white = SnDsL_CreateTextureFromGRFData(mainTex->w, mainTex->h, mainTex->bpp, mainTex->data, palette, mainTex->palette[0]);
-        #else
         *white = LoadTextureFromRaw(filename, loadedImage, TEX_WHITE);
-        #endif
         if (*white == NULL)
         {
-            #ifdef __NDS__
-            VVV_free(palette);
-            #endif
             vlog_error("Image not found: %s", filename);
             SDL_assert(0 && "Image not found! See stderr.");
         }
     }
 
-    #ifdef __NDS__
-    if (mainTex && *colored == NULL) {
-        VVV_free(mainTex->palette);
-        if (!(*white || *grayscale)) VVV_free(mainTex->data);
-        VVV_free(mainTex);
-    }
-    #else
     if (loadedImage != NULL)
     {
         VVV_freefunc(SDL_FreeSurface, loadedImage);
     }
 
     VVV_free(data);
-    #endif
 }
+#endif
 
 /* The pointers `texture` and `surface` cannot be NULL */
 static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface** surface)
@@ -521,9 +512,9 @@ void GraphicsResources::init_translations(void)
 void GraphicsResources::init(void)
 {
     #ifdef __NDS__
-    LoadVariants("graphics/tiles.grf", &im_tiles, &im_tiles_white, &im_tiles_tint);
-    LoadVariants("graphics/tiles2.grf", &im_tiles2, NULL, &im_tiles2_tint);
-    LoadVariants("graphics/entcolours.grf", &im_entcolours, NULL, &im_entcolours_tint);
+    LoadTileset("graphics/tiles.grf", &im_tiles);
+    // LoadVariants("graphics/tiles2.grf", &im_tiles2, NULL, &im_tiles2_tint);
+    // LoadVariants("graphics/entcolours.grf", &im_entcolours, NULL, &im_entcolours_tint);
 
     LoadSprites("graphics/sprites.grf", &im_sprites, &im_sprites_surf);
     im_flipsprites = im_sprites;
@@ -590,9 +581,13 @@ void GraphicsResources::init(void)
 void GraphicsResources::destroy(void)
 {
 #define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
+#ifdef __NDS__
+    VVV_freefunc(SnDsL_DestroyTileset, im_tiles);
+#else
     CLEAR(im_tiles);
     CLEAR(im_tiles_white);
     CLEAR(im_tiles_tint);
+#endif
     CLEAR(im_tiles2);
     CLEAR(im_tiles2_tint);
     CLEAR(im_tiles3);

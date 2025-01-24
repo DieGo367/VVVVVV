@@ -302,3 +302,18 @@ int SDL_GetTextureAlphaMod(SDL_Texture *tex, uint8_t *alpha) {
 	if (alpha) *alpha = tex->alphaMod;
 	return 0;
 }
+
+
+SnDsL_Tileset *SnDsL_CreateTileset(void *map) {
+	SnDsL_Tileset *tiles = malloc(sizeof(SnDsL_Tileset));
+	*tiles = (SnDsL_Tileset){
+		.map = map
+	};
+	return tiles;
+}
+void SnDsL_DestroyTileset(SnDsL_Tileset *tiles) {
+	if (tiles) {
+		if (tiles->map) free(tiles->map);
+		free(tiles);
+	}
+}
