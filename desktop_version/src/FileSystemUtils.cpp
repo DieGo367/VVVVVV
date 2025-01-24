@@ -352,11 +352,13 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         return 0;
     }
 
+    #ifndef __NDS__
     SDL_snprintf(output, sizeof(output), "%s%s", basePath, "gamecontrollerdb.txt");
     if (SDL_GameControllerAddMappingsFromFile(output) < 0)
     {
         vlog_info("gamecontrollerdb.txt not found!");
     }
+    #endif
 
     isInit = true;
     return 1;

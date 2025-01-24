@@ -76,7 +76,9 @@ public:
     bool linealreadyemptykludge;
 
 private:
+#ifndef __NDS__
     std::map<SDL_JoystickID, SDL_GameController*> controllers;
+#endif
     std::map<SDL_GameControllerButton, bool> buttonmap;
     int xVel, yVel;
     Uint32 wasFullscreen;

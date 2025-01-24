@@ -79,6 +79,9 @@ static char glyph[GLYPH_TOTAL][5];
 
 typedef enum
 {
+#ifdef __NDS__
+    LAYOUT_NINTENDO_DS,
+#else
     LAYOUT_NINTENDO_SWITCH_PRO,
     LAYOUT_NINTENDO_SWITCH_JOYCON_L,
     LAYOUT_NINTENDO_SWITCH_JOYCON_R,
@@ -89,6 +92,7 @@ typedef enum
 
     /* Added after 2.4 */
     LAYOUT_GAMECUBE,
+#endif
 
     LAYOUT_TOTAL
 }
@@ -97,6 +101,15 @@ ButtonGlyphLayout;
 /* SDL provides Xbox buttons, we'd like to show the correct
  * (controller-specific) glyphs or labels for those... */
 static const char* glyph_layout[LAYOUT_TOTAL][SDL_CONTROLLER_BUTTON_RIGHTSHOULDER + 1] = {
+    #ifdef __NDS__
+    { // NINTENDO_DS
+        glyph[GLYPH_NINTENDO_DECK_A], glyph[GLYPH_NINTENDO_DECK_B],
+        glyph[GLYPH_NINTENDO_DECK_X], glyph[GLYPH_NINTENDO_DECK_Y],
+        "SELECT", glyph[GLYPH_UNKNOWN], "START",
+        glyph[GLYPH_UNKNOWN], glyph[GLYPH_UNKNOWN],
+        glyph[GLYPH_NINTENDO_L], glyph[GLYPH_NINTENDO_R]
+    }
+    #else
     { // NINTENDO_SWITCH_PRO
         glyph[GLYPH_NINTENDO_DECK_B], glyph[GLYPH_NINTENDO_DECK_A],
         glyph[GLYPH_NINTENDO_DECK_Y], glyph[GLYPH_NINTENDO_DECK_X],
@@ -153,10 +166,16 @@ static const char* glyph_layout[LAYOUT_TOTAL][SDL_CONTROLLER_BUTTON_RIGHTSHOULDE
         glyph[GLYPH_UNKNOWN], glyph[GLYPH_UNKNOWN],
         glyph[GLYPH_UNKNOWN], glyph[GLYPH_NINTENDO_GAMECUBE_Z]
     }
+    #endif
 };
 
+#ifdef __NDS__
+static bool keyboard_is_active = false;
+static ButtonGlyphLayout layout = LAYOUT_NINTENDO_DS;
+#else
 static bool keyboard_is_active = true;
 static ButtonGlyphLayout layout = LAYOUT_GENERIC;
+#endif
 
 void BUTTONGLYPHS_init(void)
 {
@@ -199,6 +218,9 @@ void BUTTONGLYPHS_keyboard_set_active(bool active)
 
 void BUTTONGLYPHS_update_layout(SDL_GameController *c)
 {
+    #ifdef __NDS__
+    layout = LAYOUT_NINTENDO_DS;
+    #else
     Uint16 vendor = SDL_GameControllerGetVendor(c);
     Uint16 product = SDL_GameControllerGetProduct(c);
 
@@ -260,6 +282,7 @@ void BUTTONGLYPHS_update_layout(SDL_GameController *c)
          */
         layout = LAYOUT_XBOX;
     }
+    #endif
 }
 
 const char* BUTTONGLYPHS_get_wasd_text(void)

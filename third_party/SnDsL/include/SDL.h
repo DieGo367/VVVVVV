@@ -18,7 +18,7 @@ extern "C" {
 #include "SDL_assert.h"
 #include "SDL_audio.h"
 #include "SDL_endian.h"
-#include "SDL_events.h"
+#include "SDL_keyboard.h"
 #include "SDL_log.h"
 #include "SDL_pixels.h"
 #include "SDL_rect.h"
@@ -72,6 +72,28 @@ void SDL_Quit(void);
 inline int SDL_OpenURL(const char *url) {
 	return -1;
 }
+
+// gamecontroller.h
+#define SDL_GameController void
+typedef enum {
+	SDL_CONTROLLER_BUTTON_INVALID = -1,
+	SDL_CONTROLLER_BUTTON_A,
+	SDL_CONTROLLER_BUTTON_B,
+	SDL_CONTROLLER_BUTTON_X,
+	SDL_CONTROLLER_BUTTON_Y,
+	SDL_CONTROLLER_BUTTON_BACK,
+	SDL_CONTROLLER_BUTTON_GUIDE,
+	SDL_CONTROLLER_BUTTON_START,
+	SDL_CONTROLLER_BUTTON_LEFTSTICK,
+	SDL_CONTROLLER_BUTTON_RIGHTSTICK,
+	SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+	SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+	SDL_CONTROLLER_BUTTON_DPAD_UP,
+	SDL_CONTROLLER_BUTTON_DPAD_DOWN,
+	SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+	SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+	SDL_CONTROLLER_BUTTON_MAX
+} SDL_GameControllerButton;
 
 // platform.h
 

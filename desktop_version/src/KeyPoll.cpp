@@ -101,6 +101,7 @@ void KeyPoll::toggleFullscreen(void)
     }
 }
 
+#ifndef __NDS__
 static int changemousestate(
     int timeout,
     const bool show,
@@ -149,6 +150,7 @@ static int changemousestate(
 
     return timeout;
 }
+#endif
 
 /* Also used in Input.cpp. */
 void recomputetextboxes(void);
@@ -219,6 +221,32 @@ bool cycle_language(bool should_recompute_textboxes)
     return should_recompute_textboxes;
 }
 
+#ifdef __NDS__
+#include <nds/arm9/input.h>
+void KeyPoll::Poll() {
+    scanKeys();
+    u32 active = keysCurrent();
+    buttonmap[SDL_CONTROLLER_BUTTON_START]         = active & KEY_START;
+    buttonmap[SDL_CONTROLLER_BUTTON_GUIDE]         = active & KEY_SELECT;
+    buttonmap[SDL_CONTROLLER_BUTTON_A]             = active & KEY_A;
+    buttonmap[SDL_CONTROLLER_BUTTON_B]             = active & KEY_B;
+    buttonmap[SDL_CONTROLLER_BUTTON_X]             = active & KEY_X;
+    buttonmap[SDL_CONTROLLER_BUTTON_Y]             = active & KEY_Y;
+    buttonmap[SDL_CONTROLLER_BUTTON_LEFTSHOULDER]  = active & KEY_L;
+    buttonmap[SDL_CONTROLLER_BUTTON_RIGHTSHOULDER] = active & KEY_R;
+    buttonmap[SDL_CONTROLLER_BUTTON_DPAD_UP]       = active & KEY_UP;
+    buttonmap[SDL_CONTROLLER_BUTTON_DPAD_DOWN]     = active & KEY_DOWN;
+    buttonmap[SDL_CONTROLLER_BUTTON_DPAD_LEFT]     = active & KEY_LEFT;
+    buttonmap[SDL_CONTROLLER_BUTTON_DPAD_RIGHT]    = active & KEY_RIGHT;
+    leftbutton = active & KEY_TOUCH;
+    if (leftbutton) {
+        touchPosition touch;
+        touchRead(&touch);
+        mousex = (touch.px) * SCREEN_WIDTH_PIXELS / 256;
+        mousey = (touch.py) * SCREEN_HEIGHT_PIXELS / 192;
+    }
+}
+#else
 void KeyPoll::Poll(void)
 {
     static int raw_mousex = 0;
@@ -581,6 +609,7 @@ void KeyPoll::Poll(void)
         recomputetextboxes();
     }
 }
+#endif
 
 bool KeyPoll::isDown(SDL_Keycode key)
 {

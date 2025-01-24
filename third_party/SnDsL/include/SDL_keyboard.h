@@ -26,13 +26,6 @@ typedef enum {
 	SDLK_ESCAPE
 } SDL_KeyCode;
 
-// mouse.h
-
-#define SDL_BUTTON_LEFT		1
-#define SDL_BUTTON_MIDDLE	2
-#define SDL_BUTTON_RIGHT	3
-#define SDL_ShowCursor(toggle) SDL_DISABLE
-
 // clipboard.h
 
 #define SDL_GetClipboardText() ""
