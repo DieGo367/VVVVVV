@@ -1,4 +1,3 @@
-#include "SDL_video.h"
 #include "SDL_render.h"
 #include "SDL_assert.h"
 #include "SDL_rect.h"

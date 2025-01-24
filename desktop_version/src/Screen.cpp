@@ -17,6 +17,59 @@
 #include "Render.h"
 #include "Vlogging.h"
 
+#ifdef __NDS__
+void ScreenSettings_default(struct ScreenSettings* _this)
+{
+    _this->windowDisplay = 0;
+    _this->windowWidth = SCREEN_WIDTH_PIXELS;
+    _this->windowHeight = SCREEN_HEIGHT_PIXELS;
+    _this->fullscreen = true;
+    _this->useVsync = true;
+    _this->scalingMode = SCALING_STRETCH;
+    _this->linearFilter = false;
+    _this->badSignal = false;
+}
+void Screen::init(const struct ScreenSettings* settings) {
+    m_window = NULL;
+    m_renderer = NULL;
+    windowDisplay = settings->windowDisplay;
+    windowWidth = settings->windowWidth;
+    windowHeight = settings->windowHeight;
+    isWindowed = !settings->fullscreen;
+    scalingMode = settings->scalingMode;
+    isFiltered = settings->linearFilter;
+    badSignalEffect = settings->badSignal;
+    vsync = settings->useVsync;
+}
+void Screen::destroy(void) {}
+
+void Screen::GetSettings(struct ScreenSettings* settings) {}
+
+void Screen::LoadIcon(void) {}
+
+void Screen::ResizeScreen(int x, int y) {}
+void Screen::ResizeToNearestMultiple(void) {}
+void Screen::GetScreenSize(int* x, int* y) {
+    // Use the "internal" resolution for now
+    *x = SCREEN_WIDTH_PIXELS;
+    *y = SCREEN_HEIGHT_TILES;
+}
+
+void Screen::RenderPresent(void) {
+    graphics.clear();
+}
+
+void Screen::toggleFullScreen(void) {}
+void Screen::toggleScalingMode(void) {}
+void Screen::toggleLinearFilter(void) {}
+void Screen::toggleVSync(void) {}
+
+void Screen::recacheTextures(void) {}
+
+bool Screen::isForcedFullscreen(void) {
+    return true;
+}
+#else
 void ScreenSettings_default(struct ScreenSettings* _this)
 {
     _this->windowDisplay = 0;
@@ -114,7 +167,7 @@ void Screen::GetSettings(struct ScreenSettings* settings)
     settings->badSignal = badSignalEffect;
 }
 
-#if defined(__APPLE__) || defined(__NDS__)
+#ifdef __APPLE__
 /* Apple doesn't like icons anymore... */
 void Screen::LoadIcon(void)
 {
@@ -389,3 +442,4 @@ bool Screen::isForcedFullscreen(void)
     return SDL_GetHintBoolean("SteamTenfoot", SDL_FALSE);
 #endif
 }
+#endif

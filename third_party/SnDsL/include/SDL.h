@@ -26,7 +26,6 @@ extern "C" {
 #include "SDL_rwops.h"
 #include "SDL_surface.h"
 #include "SDL_timer.h"
-#include "SDL_video.h"
 
 
 #define SDL_INIT_AUDIO			0b1
@@ -135,6 +134,11 @@ typedef struct SDL_mutex {} SDL_mutex;
 #define SDL_DestroyMutex(mutex)
 #define SDL_LockMutex(mutex) 0
 #define SDL_UnlockMutex(mutex) 0
+
+// video.h
+#define SDL_Window void
+#define SDL_ShowWindow(win)
+#define SDL_MinimizeWindow(win)
 
 // messagebox.h
 
