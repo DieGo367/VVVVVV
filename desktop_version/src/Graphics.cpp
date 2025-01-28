@@ -150,6 +150,10 @@ void Graphics::init(void)
     levelcomplete_mounted = false;
     flipgamecomplete_mounted = false;
     fliplevelcomplete_mounted = false;
+
+    #ifdef __NDS__
+    active_tileset = -1;
+    #endif
 }
 
 void Graphics::destroy(void)
@@ -800,7 +804,11 @@ void Graphics::drawtile2(int x, int y, int t)
 {
     if (shouldrecoloroneway(t, tiles2_mounted))
     {
+    #ifdef __NDS__
+        draw_grid_tile(grphx.im_tiles2, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
+    #else
         draw_grid_tile(grphx.im_tiles2_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
+    #endif
     }
     else
     {
@@ -812,6 +820,9 @@ void Graphics::drawtile3(int x, int y, int t, int off, int height_subtract /*= 0
 {
     t += off * 30;
 
+    #ifdef __NDS__ // ignore height_subtract for now
+    draw_grid_tile(grphx.im_tiles3, t, x, y, tiles_rect.w, tiles_rect.h);
+    #else
     // Can't use drawgridtile because we want to draw a slice of the tile,
     // so do the logic ourselves (except include height_subtract in the final call)
 
@@ -823,6 +834,7 @@ void Graphics::drawtile3(int x, int y, int t, int off, int height_subtract /*= 0
     const int x2 = (t % (width / 8)) * 8;
     const int y2 = (t / (width / 8)) * 8;
     draw_texture_part(grphx.im_tiles3, x, y, x2, y2, 8, 8 - height_subtract, 1, 1);
+    #endif
 }
 
 const char* Graphics::textbox_line(
@@ -1201,17 +1213,17 @@ void Graphics::draw_texture_part(SDL_Texture* image, const int x, const int y, c
 
 #ifdef __NDS__
 #include <nds/arm9/background.h>
-void Graphics::draw_grid_tile(SnDsL_Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
+void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
     u16 *map = bgGetMapPtr(3);
     int tileX = x/8, tileY = y/8;
     map[tileX + tileY * 64] = tileset->map[t];
 }
 
-void Graphics::draw_grid_tile(SnDsL_Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const int r, const int g, const int b) {
+void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const int r, const int g, const int b) {
     draw_grid_tile(tileset, t, x, y, width, height);
 }
 
-void Graphics::draw_grid_tile(SnDsL_Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const SDL_Color color) {
+void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const SDL_Color color) {
     draw_grid_tile(tileset, t, x, y, width, height, color.r, color.g, color.b);
 }
 #endif
@@ -1799,7 +1811,12 @@ void Graphics::drawcoloredtile(
     const int r, const int g, const int b
 ) {
     #ifdef __NDS__
-    draw_grid_tile(grphx.im_tiles, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
+    if (active_tileset == 1) {
+        draw_grid_tile(grphx.im_tiles2, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
+    }
+    else {
+        draw_grid_tile(grphx.im_tiles, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
+    }
     #else
     draw_grid_tile(grphx.im_tiles_white, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
     #endif
@@ -2078,8 +2095,8 @@ void Graphics::drawentity(const int i, const int yoff)
 
     SDL_Texture* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
     #ifdef __NDS__
-    SnDsL_Tileset *tiles = grphx.im_tiles;
-    SnDsL_Tileset *tiles_tint = tiles;
+    Tileset *tiles = grphx.im_tiles;
+    Tileset *tiles_tint = tiles;
     #else
     SDL_Texture* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
     SDL_Texture* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
@@ -2850,6 +2867,12 @@ void Graphics::drawmap(void)
 
         #ifdef __NDS__
         u16 *bgMap = bgGetMapPtr(3);
+        if (map.tileset != active_tileset) {
+            Tileset *set = map.tileset == 0 ? grphx.im_tiles : map.tileset == 1 ? grphx.im_tiles2 : grphx.im_tiles3;
+            memcpy(bgGetGfxPtr(3), set->data, set->dataSize);
+            memcpy(BG_PALETTE + 1, set->palette + 1, set->paletteSize - sizeof(u16));
+            active_tileset = map.tileset;
+        }
         #else
         set_render_target(foregroundTexture);
         set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
@@ -2889,7 +2912,7 @@ void Graphics::drawmap(void)
                     }
                 }
                 #ifdef __NDS__
-                else bgMap[x + y * 64] = grphx.im_tiles->map[0];
+                else bgMap[x + y * 64] = 0;
                 #endif
             }
         }
@@ -3781,9 +3804,9 @@ bool Graphics::reloadresources(void)
 
     #ifndef __NDS__
     MAYBE_FAIL(checktexturesize("tiles.png", grphx.im_tiles, 8, 8));
-    #endif
     MAYBE_FAIL(checktexturesize("tiles2.png", grphx.im_tiles2, 8, 8));
     MAYBE_FAIL(checktexturesize("tiles3.png", grphx.im_tiles3, 8, 8));
+    #endif
     MAYBE_FAIL(checktexturesize("entcolours.png", grphx.im_entcolours, 8, 8));
     MAYBE_FAIL(checktexturesize("sprites.png", grphx.im_sprites, 32, 32));
     MAYBE_FAIL(checktexturesize("flipsprites.png", grphx.im_flipsprites, 32, 32));

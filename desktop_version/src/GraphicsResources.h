@@ -10,6 +10,16 @@ enum TextureLoadType
     TEX_GRAYSCALE
 };
 
+#ifdef __NDS__
+typedef struct {
+    void *data;
+    size_t dataSize;
+    u16 *palette;
+    size_t paletteSize;
+    u16 *map;
+} Tileset;
+#endif
+
 class GraphicsResources
 {
 public:
@@ -22,15 +32,17 @@ public:
     SDL_Surface* im_flipsprites_surf;
 
 #ifdef __NDS__
-    SnDsL_Tileset* im_tiles;
+    Tileset* im_tiles;
+    Tileset* im_tiles2;
+    Tileset* im_tiles3;
 #else
     SDL_Texture* im_tiles;
     SDL_Texture* im_tiles_white;
     SDL_Texture* im_tiles_tint;
-#endif
     SDL_Texture* im_tiles2;
     SDL_Texture* im_tiles2_tint;
     SDL_Texture* im_tiles3;
+#endif
     SDL_Texture* im_entcolours;
     SDL_Texture* im_entcolours_tint;
     SDL_Texture* im_sprites;

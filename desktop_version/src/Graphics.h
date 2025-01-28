@@ -164,9 +164,9 @@ public:
     void draw_texture_part(SDL_Texture* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
 
     #ifdef __NDS__
-    void draw_grid_tile(SnDsL_Tileset *tileset, int t, int x, int y, int width, int height);
-    void draw_grid_tile(SnDsL_Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
-    void draw_grid_tile(SnDsL_Tileset *tileset, int t, int x, int y, int width, int height, SDL_Color color);
+    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height);
+    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
+    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, SDL_Color color);
     #endif
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int scalex, int scaley);
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height);
@@ -440,6 +440,10 @@ public:
     void render_roomname(uint32_t font_flag, const char* roomname, int r, int g, int b);
 
     void print_roomtext(int x, int y, const char* text, bool rtl);
+
+    #ifdef __NDS__
+    int active_tileset;
+    #endif
 };
 
 #ifndef GRAPHICS_DEFINITION

@@ -272,8 +272,7 @@ static SDL_Texture* LoadImage(const char* filename)
 }
 
 #ifdef __NDS__
-#include <nds/arm9/background.h>
-static void LoadTileset(const char *filename, SnDsL_Tileset **tileset) {
+static void LoadTileset(const char *filename, Tileset **tileset) {
     unsigned char *fileIn;
     size_t length;
     FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
@@ -293,12 +292,20 @@ static void LoadTileset(const char *filename, SnDsL_Tileset **tileset) {
         return;
     }
 
-    memcpy(bgGetGfxPtr(3), data, dataSize);
-    memcpy(BG_PALETTE + 1, (u16 *)palette + 1, paletteSize - sizeof(u16));
-    free(data);
-    free(palette);
-
-    *tileset = SnDsL_CreateTileset(map);
+    *tileset = (Tileset *)malloc(sizeof(Tileset));
+    (*tileset)->data = data;
+    (*tileset)->dataSize = dataSize;
+    (*tileset)->palette = (u16 *)palette;
+    (*tileset)->paletteSize = paletteSize;
+    (*tileset)->map = (u16 *)map;
+}
+static void DestroyTileset(Tileset *tileset) {
+    if (tileset) {
+        if (tileset->data) free(tileset->data);
+        if (tileset->palette) free(tileset->palette);
+        if (tileset->map) free(tileset->map);
+        free(tileset);
+    }
 }
 #else
 /* Any unneeded variants can be NULL */
@@ -513,14 +520,14 @@ void GraphicsResources::init(void)
 {
     #ifdef __NDS__
     LoadTileset("graphics/tiles.grf", &im_tiles);
-    // LoadVariants("graphics/tiles2.grf", &im_tiles2, NULL, &im_tiles2_tint);
+    LoadTileset("graphics/tiles2.grf", &im_tiles2);
+    LoadTileset("graphics/tiles3.grf", &im_tiles3);
     // LoadVariants("graphics/entcolours.grf", &im_entcolours, NULL, &im_entcolours_tint);
 
     LoadSprites("graphics/sprites.grf", &im_sprites, &im_sprites_surf);
     im_flipsprites = im_sprites;
     im_flipsprites_surf = im_sprites_surf;
 
-    im_tiles3 = LoadImage("graphics/tiles3.grf");
     im_teleporter = LoadImage("graphics/teleporter.grf", TEX_WHITE);
 
     im_image0 = LoadImage("graphics/levelcomplete.grf");
@@ -582,15 +589,18 @@ void GraphicsResources::destroy(void)
 {
 #define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
 #ifdef __NDS__
-    VVV_freefunc(SnDsL_DestroyTileset, im_tiles);
+#define CLEAR_TILES(tiles) VVV_freefunc(DestroyTileset, tiles)
+    CLEAR_TILES(im_tiles);
+    CLEAR_TILES(im_tiles2);
+    CLEAR_TILES(im_tiles3);
 #else
     CLEAR(im_tiles);
     CLEAR(im_tiles_white);
     CLEAR(im_tiles_tint);
-#endif
     CLEAR(im_tiles2);
     CLEAR(im_tiles2_tint);
     CLEAR(im_tiles3);
+#endif
     CLEAR(im_entcolours);
     CLEAR(im_entcolours_tint);
     CLEAR(im_sprites);
