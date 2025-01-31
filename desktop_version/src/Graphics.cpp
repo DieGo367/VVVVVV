@@ -769,7 +769,7 @@ void Graphics::draw_sprite(const int x, const int y, const int slot, const int t
     oamSet(
         &oamMain,
         slot,
-        x * 4 / 5 - 2, y * 4 / 5 - 3,
+        x * 4 / 5 - 3, y * 4 / 5 - 3,
         0,
         slot,
         SpriteSize_32x32,
