@@ -259,7 +259,11 @@ void Game::init(void)
     gameoverdelay = 0;
     framecounter = 0;
     seed_use_sdl_getticks = false;
+    #ifdef __NDS__
+    editor_disabled = true;
+    #else
     editor_disabled = false;
+    #endif
     resetgameclock();
     gamesaved = false;
     gamesavefailed = false;
@@ -1888,12 +1892,14 @@ void Game::updatestate(void)
         case 82:
             //Time Trial Complete!
             obj.removetrigger(82);
+            #ifndef __NDS__
             if (map.custommode && !map.custommodeforreal)
             {
                 returntoeditor();
                 ed.show_note(loc::gettext("Time trial completed"));
                 break;
             }
+            #endif
 
             if (translator_exploring)
             {
@@ -2454,11 +2460,13 @@ void Game::updatestate(void)
                     graphics.fademode = FADE_START_FADEOUT;
                     setstate(1014);
                 }
+                #ifndef __NDS__
                 else
                 {
                     returntoeditor();
                     ed.show_note(loc::gettext("Level completed"));
                 }
+                #endif
             }
             else
             {
@@ -7568,15 +7576,18 @@ static void hardreset(void)
     script.hardreset();
 }
 
+#ifndef __NDS__
 static void returntoeditor_callback(void)
 {
     extern Game game;
     game.returntoeditor();
     ed.show_note(loc::gettext("Level quits to menu"));
 }
+#endif
 
 void Game::quittomenu(void)
 {
+    #ifndef __NDS__
     if (gamestate != EDITORMODE && map.custommode && !map.custommodeforreal)
     {
         /* We are playtesting! Go back to the editor
@@ -7585,6 +7596,7 @@ void Game::quittomenu(void)
         DEFER_CALLBACK(returntoeditor_callback);
         return;
     }
+    #endif
 
     gamestate = TITLEMODE;
     graphics.fademode = FADE_START_FADEIN;
@@ -7681,6 +7693,7 @@ static void resetbg(void)
     graphics.backgrounddrawn = false;
 }
 
+#ifndef __NDS__
 void Game::returntoeditor(void)
 {
     gamestate = EDITORMODE;
@@ -7716,6 +7729,7 @@ void Game::returntoeditor(void)
     graphics.backgrounddrawn = false;
     graphics.foregrounddrawn = false;
 }
+#endif
 
 static void returntoingametemp(void)
 {
@@ -7749,6 +7763,7 @@ void Game::returntoingame(void)
     ingame_titlemode = false;
     mapheld = true;
 
+    #ifndef __NDS__
     if (ingame_editormode)
     {
         ingame_editormode = false;
@@ -7757,6 +7772,7 @@ void Game::returntoingame(void)
         ed.settingskey = true;
     }
     else
+    #endif
     {
         DEFER_CALLBACK(returntoingametemp);
         gamestate = MAPMODE;

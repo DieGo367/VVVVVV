@@ -1464,12 +1464,14 @@ void scriptclass::run(void)
             }
             else if (words[0] == "rollcredits")
             {
+                #ifndef __NDS__
                 if (map.custommode && !map.custommodeforreal)
                 {
                     game.returntoeditor();
                     ed.show_note(loc::gettext("Rolled credits"));
                 }
                 else
+                #endif
                 {
                     game.gamestate = GAMECOMPLETE;
                     graphics.fademode = FADE_START_FADEIN;
@@ -2575,8 +2577,10 @@ void scriptclass::startgamemode(const enum StartMode mode)
 
     switch (mode)
     {
+    #ifndef __NDS__
     case Start_EDITORPLAYTESTING:
         break;
+    #endif
     default:
         textbox_colours.clear();
         add_default_colours();
@@ -2585,11 +2589,13 @@ void scriptclass::startgamemode(const enum StartMode mode)
 
     hardreset();
 
+    #ifndef __NDS__
     if (mode == Start_EDITOR)
     {
         game.gamestate = EDITORMODE;
     }
     else
+    #endif
     {
         game.gamestate = GAMEMODE;
     }
@@ -2597,13 +2603,17 @@ void scriptclass::startgamemode(const enum StartMode mode)
     // Font handling
     switch (mode)
     {
+    #ifndef __NDS__
     case Start_EDITORPLAYTESTING:
+    #endif
     case Start_CUSTOM:
     case Start_CUSTOM_QUICKSAVE:
         break;
+    #ifndef __NDS__
     case Start_EDITOR:
         font::set_level_font_new();
         break;
+    #endif
     default:
         font::set_level_font_interface();
     }
@@ -2611,7 +2621,9 @@ void scriptclass::startgamemode(const enum StartMode mode)
     /* Indicate invincibility, glitchrunner, etc. for all modes except these */
     switch (mode)
     {
+    #ifndef __NDS__
     case Start_EDITOR:
+    #endif
     case Start_CUTSCENETEST:
         break;
     case Start_QUIT:
@@ -2619,7 +2631,9 @@ void scriptclass::startgamemode(const enum StartMode mode)
 
     default:
         /* If there's editor return text, make this show up after it */
+        #ifndef __NDS__
         game.mode_indicator_timer = ed.return_message_timer + 2000;
+        #endif
         game.old_mode_indicator_timer = game.mode_indicator_timer;
     }
 
@@ -2791,6 +2805,7 @@ void scriptclass::startgamemode(const enum StartMode mode)
         }
         break;
 
+    #ifndef __NDS__
     case Start_EDITOR:
         cl.reset();
         ed.reset();
@@ -2828,6 +2843,7 @@ void scriptclass::startgamemode(const enum StartMode mode)
             music.currentsong = -1;
         }
         break;
+    #endif
 
     case Start_CUSTOM:
     case Start_CUSTOM_QUICKSAVE:

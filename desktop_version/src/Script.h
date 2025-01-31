@@ -46,8 +46,10 @@ enum StartMode
     Start_INTERMISSION2_VERMILION,
     Start_INTERMISSION2_VERDIGRIS,
     Start_INTERMISSION2_VICTORIA,
+    #ifndef __NDS__
     Start_EDITOR,
     Start_EDITORPLAYTESTING,
+    #endif
     Start_CUSTOM,
     Start_CUSTOM_QUICKSAVE,
     Start_QUIT,

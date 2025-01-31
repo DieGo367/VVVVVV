@@ -586,12 +586,14 @@ static void menuactionpress(void)
             {
                 music.playef(Sound_CRY);
             }
+            #ifndef __NDS__
             else
             {
                 music.playef(Sound_VIRIDIAN);
                 startmode(Start_EDITOR);
                 ed.filename = "";
             }
+            #endif
         }
         else if (!game.editor_disabled && game.currentmenuoption == 2)
         {
@@ -2653,6 +2655,7 @@ void gameinput(void)
         game.hascontrol = false;
     }
 
+    #ifndef __NDS__
     //Returning to editor mode must always be possible
     if (map.custommode && !map.custommodeforreal)
     {
@@ -2672,6 +2675,7 @@ void gameinput(void)
             }
         }
     }
+    #endif
 
     //Entity type 0 is player controled
     bool has_control = false;

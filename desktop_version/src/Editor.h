@@ -1,6 +1,7 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
+#ifndef __NDS__
 #include "Constants.h"
 #include "CustomLevels.h"
 
@@ -295,5 +296,6 @@ void editorinput(void);
 #ifndef ED_DEFINITION
 extern editorclass ed;
 #endif
+#endif // !__NDS__
 
 #endif /* EDITOR_H */

@@ -3019,12 +3019,14 @@ void Graphics::drawmap(void)
             {
                 int tile;
                 int tileset;
+                #ifndef __NDS__
                 if (game.gamestate == EDITORMODE)
                 {
                     tile = cl.gettile(ed.levx, ed.levy, x, y);
                     tileset = (cl.getroomprop(ed.levx, ed.levy)->tileset == 0) ? 0 : 1;
                 }
                 else
+                #endif
                 {
                     tile = map.contents[TILE_IDX(x, y)];
                     tileset = map.tileset;

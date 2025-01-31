@@ -201,7 +201,11 @@ bool cycle_language(bool should_recompute_textboxes)
     }
 
     if (game.gamestate == TITLEMODE
+    #ifdef __NDS__
+    )
+    #else
     || (game.gamestate == EDITORMODE && ed.state == EditorState_MENU))
+    #endif
     {
         if (game.currentmenuname == Menu::translator_options_limitscheck)
         {

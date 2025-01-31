@@ -563,7 +563,9 @@ public:
     bool fadetolab;
     int fadetolabdelay;
 
+    #ifndef __NDS__
     void returntoeditor(void);
+    #endif
 
     bool inline inspecial(void)
     {

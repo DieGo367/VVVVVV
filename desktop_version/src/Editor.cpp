@@ -1,3 +1,4 @@
+#ifndef __NDS__
 #define ED_DEFINITION
 #include "Editor.h"
 
@@ -923,9 +924,7 @@ static void draw_entities(void)
                     ed.entcolreal = graphics.getcol(18);
                 }
 
-                #ifndef __NDS__ // imma be real, i'm gonna nuke the editor later anyway. TODO
                 graphics.draw_sprite(x, y, ed.get_enemy_tile(room->enemytype), ed.entcolreal);
-                #endif
 
                 if (movement >= 0 && movement < 4)
                 {
@@ -996,15 +995,11 @@ static void draw_entities(void)
                 graphics.draw_rect(x, y, 32, 8, graphics.getRGB(255, 255, 255));
                 break;
             case 9: // Shiny Trinkets
-                #ifndef __NDS__
                 graphics.draw_sprite(x, y, 22, 196, 196, 196);
-                #endif
                 graphics.draw_rect(x, y, 16, 16, graphics.getRGB(255, 164, 164));
                 break;
             case 10: // Checkpoints
-                #ifndef __NDS__
                 graphics.draw_sprite(x, y, 20 + entity->p1, 196, 196, 196);
-                #endif
                 graphics.draw_rect(x, y, 16, 16, graphics.getRGB(255, 164, 164));
                 break;
             case 11: // Gravity Lines
@@ -1029,9 +1024,7 @@ static void draw_entities(void)
             {
                 std::string text;
 
-                #ifndef __NDS__
                 graphics.draw_sprite(x, y, 18 + (ed.entframe % 2), 196, 196, 196);
-                #endif
                 graphics.draw_rect(x, y, 16, 16, graphics.getRGB(255, 164, 164));
 
                 if (i == edent_under_cursor)
@@ -1047,16 +1040,13 @@ static void draw_entities(void)
                 break;
             }
             case 15: // Crewmates
-                #ifndef __NDS__
                 graphics.draw_sprite(x - 4, y, 144, graphics.crewcolourreal(entity->p1));
-                #endif
                 graphics.draw_rect(x, y, 16, 24, graphics.getRGB(164, 164, 164));
                 break;
             case 16: // Start Point
             {
                 const short labelcol = ed.entframe < 2 ? 255 : 196;
 
-                #ifndef __NDS__
                 if (entity->p1 == 0)  // Facing right
                 {
                     graphics.draw_sprite(x - 4, y, 0, graphics.col_crewcyan);
@@ -1065,7 +1055,6 @@ static void draw_entities(void)
                 {
                     graphics.draw_sprite(x - 4, y, 3, graphics.col_crewcyan);
                 }
-                #endif
 
                 graphics.draw_rect(x, y, 16, 24, graphics.getRGB(255, 255, 164));
                 font::print(PR_BOR | PR_CEN | PR_CJK_HIGH, x + 8, y - 8, loc::gettext("START"), labelcol, labelcol, labelcol);
@@ -1108,9 +1097,7 @@ static void draw_entities(void)
                     corrected_y -= 8;
                 }
 
-                #ifndef __NDS__
                 graphics.draw_sprite(x, corrected_y + 8, sprite + 16, 96, 96, 96);
-                #endif
                 graphics.draw_rect(x, y, 16, 24, graphics.getRGB(164, 164, 164));
                 if (i == edent_under_cursor)
                 {
@@ -1156,9 +1143,7 @@ static void draw_entities(void)
             const int y = entity->p2 % 30 * 8;
             std::string text;
 
-            #ifndef __NDS__
             graphics.draw_sprite(x, y, 18 + (ed.entframe % 2), 64, 64, 64);
-            #endif
             graphics.draw_rect((entity->p1 * 8) - (ed.levx * 40 * 8), (entity->p2 * 8) - (ed.levy * 30 * 8), 16, 16, graphics.getRGB(96, 64, 64));
 
             if (ed.tilex == x / 8 && ed.tiley == y / 8)
@@ -1192,9 +1177,7 @@ static void draw_ghosts(void)
                 SDL_Color ct = ed.ghosts[i].realcol;
                 const int alpha = 3 * ct.a / 4;
                 ct.a = (Uint8)alpha;
-                #ifndef __NDS__
                 graphics.draw_sprite(ed.ghosts[i].x, ed.ghosts[i].y, ed.ghosts[i].frame, ct);
-                #endif
             }
         }
 
@@ -1427,12 +1410,10 @@ static void draw_tile_drawer(int tileset)
         int texturewidth;
         int textureheight;
 
-        #ifndef __NDS__
         if (graphics.query_texture(graphics.grphx.im_tiles, NULL, NULL, &texturewidth, &textureheight) != 0)
         {
             return;
         }
-        #endif
 
         const int numtiles = (int)(texturewidth / 8) * (textureheight / 8);
 
@@ -1732,14 +1713,10 @@ void editorclass::draw_tool(EditorTools tool, int x, int y)
         graphics.drawtile(x + 4, y + 4, 8);
         break;
     case EditorTool_TRINKETS:
-        #ifndef __NDS__
         graphics.draw_sprite(x, y, 22, 196, 196, 196);
-        #endif
         break;
     case EditorTool_CHECKPOINTS:
-        #ifndef __NDS__
         graphics.draw_sprite(x, y, 21, 196, 196, 196);
-        #endif
         break;
     case EditorTool_DISAPPEARING_PLATFORMS:
         graphics.drawtile(x, y + 4, 3);
@@ -1754,9 +1731,7 @@ void editorclass::draw_tool(EditorTools tool, int x, int y)
         graphics.drawtile(x + 8, y + 4, 1);
         break;
     case EditorTool_ENEMIES:
-        #ifndef __NDS__
         graphics.draw_sprite(x, y, 78 + entframe, 196, 196, 196);
-        #endif
         break;
     case EditorTool_GRAVITY_LINES:
         graphics.fill_rect(x + 2, y + 8, 12, 1, graphics.getRGB(255, 255, 255));
@@ -1766,30 +1741,22 @@ void editorclass::draw_tool(EditorTools tool, int x, int y)
         font::print(PR_FONT_8X8, x + 1, y + 9, "CD", 196, 196, 255 - help.glow);
         break;
     case EditorTool_TERMINALS:
-        #ifndef __NDS__
         graphics.draw_sprite(x, y, 17, 196, 196, 196);
-        #endif
         break;
     case EditorTool_SCRIPTS:
         graphics.draw_rect(x + 4, y + 4, 8, 8, graphics.getRGB(96, 96, 96));
         break;
     case EditorTool_WARP_TOKENS:
-        #ifndef __NDS__
         graphics.draw_sprite(x, y, 18 + (entframe % 2), 196, 196, 196);
-        #endif
         break;
     case EditorTool_WARP_LINES:
         graphics.fill_rect(x + 6, y + 2, 4, 12, graphics.getRGB(255, 255, 255));
         break;
     case EditorTool_CREWMATES:
-        #ifndef __NDS__
         graphics.draw_sprite(x, y, 186, graphics.col_crewblue);
-        #endif
         break;
     case EditorTool_START_POINT:
-        #ifndef __NDS__
         graphics.draw_sprite(x, y, 184, graphics.col_crewcyan);
-        #endif
         break;
     default:
         break;
@@ -3311,9 +3278,7 @@ void editorinput(void)
 
                     bool tiles1 = (cl.getroomprop(ed.levx, ed.levy)->tileset == 0);
 
-                    #ifndef __NDS__
                     if (graphics.query_texture(tiles1 ? graphics.grphx.im_tiles : graphics.grphx.im_tiles2, NULL, NULL, &texturewidth, &textureheight) != 0)
-                    #endif
                         return;
 
                     const int numtiles = (int)(texturewidth / 8) * (textureheight / 8);
@@ -4345,3 +4310,4 @@ void editorclass::switch_warpdir(const bool reversed)
 
     graphics.backgrounddrawn = false;
 }
+#endif // !__NDS__

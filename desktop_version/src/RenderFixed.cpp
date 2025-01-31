@@ -131,11 +131,13 @@ void gamerenderfixed(void)
 
     map.updateroomnames();
 
+    #ifndef __NDS__
     ed.old_return_message_timer = ed.return_message_timer;
     if (map.custommode && !map.custommodeforreal && ed.return_message_timer > 0)
     {
         ed.return_message_timer -= 15;
     }
+    #endif
 
     game.old_mode_indicator_timer = game.mode_indicator_timer;
     if (game.mode_indicator_timer > 0)
@@ -143,6 +145,7 @@ void gamerenderfixed(void)
         game.mode_indicator_timer -= 15;
     }
 
+    #ifndef __NDS__
     // Editor ghosts!
     if (game.ghostsenabled)
     {
@@ -170,6 +173,7 @@ void gamerenderfixed(void)
             }
         }
     }
+    #endif
 }
 
 void titlerenderfixed(void)

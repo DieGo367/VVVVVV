@@ -2411,6 +2411,7 @@ void gamerender(void)
 
     int return_editor_alpha = 0;
     bool draw_return_editor_text = false;
+    #ifndef __NDS__
     if (map.custommode && !map.custommodeforreal && !game.advancetext)
     {
         return_editor_alpha = graphics.lerp(
@@ -2418,6 +2419,7 @@ void gamerender(void)
         );
         draw_return_editor_text = return_editor_alpha > 100;
     }
+    #endif
 
     int mode_indicator_alpha = graphics.lerp(
         game.old_mode_indicator_timer, game.mode_indicator_timer

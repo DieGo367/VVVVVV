@@ -43,7 +43,9 @@ scriptclass script;
 
 std::vector<CustomEntity> customentities;
 customlevelclass cl;
+#ifndef __NDS__
 editorclass ed;
+#endif
 
 UtilityClass help;
 Graphics graphics;
@@ -178,6 +180,7 @@ static const inline struct ImplFunc* get_gamestate_funcs(
         {Func_fixed, gamecompletelogic2},
     FUNC_LIST_END
 
+    #ifndef __NDS__
     FUNC_LIST_BEGIN(EDITORMODE)
         {Func_fixed, flipmodeoff},
         {Func_input, editorinput},
@@ -185,6 +188,7 @@ static const inline struct ImplFunc* get_gamestate_funcs(
         {Func_fixed, editorrenderfixed},
         {Func_delta, editorrender},
     FUNC_LIST_END
+    #endif
 
     FUNC_LIST_BEGIN(PRELOADER)
         {Func_input, preloaderinput},
@@ -586,7 +590,9 @@ int main(int argc, char *argv[])
     else if (print_addresses)
     {
         printf("cl         : %p\n", (void*) &cl);
+        #ifndef __NDS__
         printf("ed         : %p\n", (void*) &ed);
+        #endif
         printf("game       : %p\n", (void*) &game);
         printf("gameScreen : %p\n", (void*) &gameScreen);
         printf("graphics   : %p\n", (void*) &graphics);

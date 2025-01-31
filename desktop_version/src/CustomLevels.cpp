@@ -1005,7 +1005,9 @@ bool customlevelclass::load(std::string _path)
     tinyxml2::XMLElement* pElem;
 
     reset();
+    #ifndef __NDS__
     ed.reset();
+    #endif
 
     static const char *levelDir = "levels/";
     if (_path.compare(0, SDL_strlen(levelDir), levelDir) != 0)
@@ -1044,7 +1046,9 @@ bool customlevelclass::load(std::string _path)
         goto fail;
     }
 
+    #ifndef __NDS__
     ed.loaded_filepath = _path;
+    #endif
 
     version = 0;
     level_font_name = "font";
@@ -1470,6 +1474,7 @@ bool customlevelclass::save(const std::string& _path)
     std::string newpath("levels/" + _path);
 
     // Try to preserve the XML of the currently-loaded one
+    #ifndef __NDS__
     bool already_exists = !ed.loaded_filepath.empty()
     && FILESYSTEM_loadTiXml2Document(ed.loaded_filepath.c_str(), doc);
     if (!already_exists && !ed.loaded_filepath.empty())
@@ -1478,6 +1483,7 @@ bool customlevelclass::save(const std::string& _path)
     }
 
     ed.loaded_filepath = newpath;
+    #endif
 
     tinyxml2::XMLElement* msg;
 
@@ -1945,11 +1951,13 @@ SDL_Color customlevelclass::getonewaycol(const int rx, const int ry)
 // This version detects the room automatically
 SDL_Color customlevelclass::getonewaycol(void)
 {
+    #ifndef __NDS__
     if (game.gamestate == EDITORMODE)
     {
         return getonewaycol(ed.levx, ed.levy);
     }
     else if (map.custommode)
+    #endif
     {
         return getonewaycol(game.roomx - 100, game.roomy - 100);
     }
