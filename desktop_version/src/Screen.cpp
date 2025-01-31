@@ -18,6 +18,8 @@
 #include "Vlogging.h"
 
 #ifdef __NDS__
+#include <nds/arm9/background.h>
+#include <nds/arm9/sprite.h>
 void ScreenSettings_default(struct ScreenSettings* _this)
 {
     _this->windowDisplay = 0;
@@ -40,6 +42,20 @@ void Screen::init(const struct ScreenSettings* settings) {
     isFiltered = settings->linearFilter;
     badSignalEffect = settings->badSignal;
     vsync = settings->useVsync;
+
+	videoSetMode(MODE_5_2D);
+    vramSetBankA(VRAM_A_MAIN_BG);
+	vramSetBankD(VRAM_D_MAIN_BG_0x06020000);
+	bgInit(2, BgType_Bmp16, BgSize_B16_256x256, 8, 0);
+	bgInit(3, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
+	bgSetCenter(3, 20, 15);
+	bgSetScale(3, (5 << 8) / 4, (5 << 8) / 4);
+	bgSetScroll(3, 25, 19);
+	bgUpdate();
+
+	vramSetBankB(VRAM_B_MAIN_SPRITE);
+	oamInit(&oamMain, SpriteMapping_1D_256, false);
+    oamRotateScale(&oamMain, 1, 0, (5 << 8) / 4, (5 << 8) / 4);
 }
 void Screen::destroy(void) {}
 
@@ -56,7 +72,10 @@ void Screen::GetScreenSize(int* x, int* y) {
 }
 
 void Screen::RenderPresent(void) {
-    graphics.clear();
+    oamUpdate(&oamMain);
+    for (int i = 0; i < SPRITE_COUNT; i++) { // NDS_TODO: not do this here. have game objects clean up after themselves, and menu switches too
+        if (oamMain.oamMemory[i].attribute[0]) oamClearSprite(&oamMain, i);
+    }
 }
 
 void Screen::toggleFullScreen(void) {}

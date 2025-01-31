@@ -145,7 +145,11 @@ public:
 
     void drawpixeltextbox(int x, int y, int w, int h, int r, int g, int b);
 
+    #ifdef __NDS__
+    void drawcrewman(int x, int y, int slot, int t, bool act, bool noshift =false);
+    #else
     void drawcrewman(int x, int y, int t, bool act, bool noshift =false);
+    #endif
 
     int crewcolour(const int t);
 
@@ -181,10 +185,16 @@ public:
     const char* textbox_line(char* buffer, size_t buffer_len, size_t textbox_i, size_t line_i);
     void drawgui(void);
 
+    #ifdef __NDS__
+    void draw_sprite(int x, int y, int slot, int t, int r, int g, int b);
+    void draw_sprite(int x, int y, int slot, int t, SDL_Color color);
+    void draw_flipsprite(int x, int y, int slot, int t, SDL_Color color);
+    #else
     void draw_sprite(int x, int y, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int t, SDL_Color color);
 
     void draw_flipsprite(int x, int y, int t, SDL_Color color);
+    #endif
 
     void scroll_texture(SDL_Texture* texture, SDL_Texture* temp, int x, int y);
 
@@ -253,7 +263,11 @@ public:
 
     void map_option(int opt, int num_opts, const std::string& text, bool selected = false);
 
+    #ifdef __NDS__
+    void drawspritesetcol(int x, int y, int slot, int t, int c);
+    #else
     void drawspritesetcol(int x, int y, int t, int c);
+    #endif
 
 
     void flashlight(void);

@@ -24,6 +24,11 @@
 #include "VFormat.h"
 #include "Vlogging.h"
 
+#ifdef __NDS__
+#include <nds/arm9/background.h>
+#include <nds/arm9/sprite.h>
+#endif
+
 void Graphics::init(void)
 {
     flipmode = false;
@@ -231,10 +236,17 @@ void Graphics::destroy_buffers(void)
     VVV_freefunc(SDL_FreeSurface, tempScreenshot2x);
 }
 
+#ifdef __NDS__
+void Graphics::drawspritesetcol(int x, int y, int slot, int t, int c)
+{
+    draw_sprite(x, y, slot, t, getcol(c));
+}
+#else
 void Graphics::drawspritesetcol(int x, int y, int t, int c)
 {
     draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, getcol(c));
 }
+#endif
 
 void Graphics::updatetitlecolours(void)
 {
@@ -443,9 +455,11 @@ void Graphics::print_level_creator(
         sprite_x = 103;
         print_flags |= PR_RIGHT;
     }
+    #ifndef __NDS__ // NDS_TODO: draw this happy face manually somehow, can't use the sprites as they are
     set_texture_color_mod(grphx.im_sprites, r, g, b);
     draw_texture_part(grphx.im_sprites, face_x, y - 1, sprite_x, 2, 10, 10, 1, 1);
     set_texture_color_mod(grphx.im_sprites, 255, 255, 255);
+    #endif
     font::print(print_flags, text_x, y, creator, r, g, b);
 }
 
@@ -538,6 +552,7 @@ bool Graphics::substitute(SDL_Texture** texture)
 
     SDL_Texture* subst = NULL;
 
+    #ifndef __NDS__ // sprites aren't textures anymore. though sprite localization is a NDS_TODO
     if (*texture == grphx.im_sprites)
     {
         subst = grphx.im_sprites_translated;
@@ -546,6 +561,7 @@ bool Graphics::substitute(SDL_Texture** texture)
     {
         subst = grphx.im_flipsprites_translated;
     }
+    #endif
 
     if (subst == NULL)
     {
@@ -745,6 +761,39 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
     return draw_points(points, count);
 }
 
+#ifdef __NDS__
+void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b)
+{
+    SPRITE_PALETTE[1] = (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3);
+    const int SPRITE_SIZE_BYTES = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/2; // 4bpp
+    oamSet(
+        &oamMain,
+        slot,
+        x * 4 / 5 - 2, y * 4 / 5 - 3,
+        0,
+        0,
+        SpriteSize_32x32,
+        SpriteColorFormat_16Color,
+        SPRITE_GFX + (t*SPRITE_SIZE_BYTES/sizeof(u16)),
+        1,
+        false,
+        false,
+        false,
+        false,
+        false
+    );
+}
+
+void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
+{
+    draw_sprite(x, y, slot, t, color.r, color.g, color.b);
+}
+
+void Graphics::draw_flipsprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
+{
+    draw_sprite(x, y, slot, t, color);
+}
+#else
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
 {
     draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, r, g, b);
@@ -759,6 +808,7 @@ void Graphics::draw_flipsprite(const int x, const int y, const int t, const SDL_
 {
     draw_grid_tile(grphx.im_flipsprites, t, x, y, sprites_rect.w, sprites_rect.h, color);
 }
+#endif // __NDS__
 
 void Graphics::scroll_texture(SDL_Texture* texture, SDL_Texture* temp, const int x, const int y)
 {
@@ -1077,6 +1127,9 @@ void Graphics::drawgui(void)
                 y = yp + textboxes[i].h - sprite->y - sprites_rect.h;
             }
 
+            #ifdef __NDS__
+            // NDS_TODO: see what this does
+            #else
             draw_grid_tile(
                 grphx.im_sprites,
                 sprite->tile,
@@ -1088,6 +1141,7 @@ void Graphics::drawgui(void)
                 1,
                 (flipmode ? -1 : 1)
             );
+            #endif
         }
     }
 }
@@ -1212,7 +1266,6 @@ void Graphics::draw_texture_part(SDL_Texture* image, const int x, const int y, c
 }
 
 #ifdef __NDS__
-#include <nds/arm9/background.h>
 void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
     u16 *map = bgGetMapPtr(3);
     int tileX = x/8, tileY = y/8;
@@ -1342,6 +1395,64 @@ void Graphics::setbars(const int position)
     oldcutscenebarspos = position;
 }
 
+#ifdef __NDS__
+void Graphics::drawcrewman(int x, int y, int slot, int t, bool act, bool noshift /*=false*/)
+{
+    if (!act)
+    {
+        if (noshift)
+        {
+            if (flipmode)
+            {
+                draw_sprite(x, y, slot, 14, col_crewinactive);
+            }
+            else
+            {
+                draw_sprite(x, y, slot, 12, col_crewinactive);
+            }
+        }
+        else
+        {
+            if (flipmode)
+            {
+                draw_sprite(x - 8, y, slot, 14, col_crewinactive);
+            }
+            else
+            {
+                draw_sprite(x - 8, y, slot, 12, col_crewinactive);
+            }
+        }
+    }
+    else
+    {
+        if (flipmode) crewframe += 6;
+
+        switch(t)
+        {
+        case 0:
+            draw_sprite(x, y, slot, crewframe, col_crewcyan);
+            break;
+        case 1:
+            draw_sprite(x, y, slot, crewframe, col_crewpurple);
+            break;
+        case 2:
+            draw_sprite(x, y, slot, crewframe, col_crewyellow);
+            break;
+        case 3:
+            draw_sprite(x, y, slot, crewframe, col_crewred);
+            break;
+        case 4:
+            draw_sprite(x, y, slot, crewframe, col_crewgreen);
+            break;
+        case 5:
+            draw_sprite(x, y, slot, crewframe, col_crewblue);
+            break;
+        }
+
+        if (flipmode) crewframe -= 6;
+    }
+}
+#else
 void Graphics::drawcrewman(int x, int y, int t, bool act, bool noshift /*=false*/)
 {
     if (!act)
@@ -1398,6 +1509,7 @@ void Graphics::drawcrewman(int x, int y, int t, bool act, bool noshift /*=false*
         if (flipmode) crewframe -= 6;
     }
 }
+#endif
 
 void Graphics::drawpixeltextbox(
     const int x,
@@ -2093,11 +2205,11 @@ void Graphics::drawentity(const int i, const int yoff)
         custom_gray = false;
     }
 
-    SDL_Texture* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
     #ifdef __NDS__
     Tileset *tiles = grphx.im_tiles;
     Tileset *tiles_tint = tiles;
     #else
+    SDL_Texture* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
     SDL_Texture* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
     SDL_Texture* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
     #endif
@@ -2118,7 +2230,11 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
+        #ifdef __NDS__
+        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        #endif
 
         // screenwrapping!
         SDL_Point wrappedPoint;
@@ -2149,6 +2265,7 @@ void Graphics::drawentity(const int i, const int yoff)
             wrappedPoint.y -= 232;
         }
 
+        #ifndef __NDS__ // NDS_TODO: check sprite wrapping behavior
         const bool isInWrappingAreaOfTower = map.towermode && !map.minitowermode && map.ypos >= 500 && map.ypos <= 5000;
         if (wrapX && (map.warpx || isInWrappingAreaOfTower))
         {
@@ -2171,6 +2288,7 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += wrappedPoint.y;
             draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         }
+        #endif
         break;
     }
     case 1:
@@ -2252,6 +2370,9 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
+        #ifdef __NDS__ // NDS_TODO: big sprites
+        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
@@ -2280,6 +2401,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         draw_grid_tile(sprites, obj.entities[i].drawframe + 13, drawRect.x, drawRect.y, 32, 32, ct);
+        #endif
         break;
     }
     case 10: // 2x1 Sprite
@@ -2293,6 +2415,9 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
+        #ifdef __NDS__ // NDS_TODO: big sprites
+        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
@@ -2303,6 +2428,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         draw_grid_tile(sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
+        #endif
         break;
     }
     case 11: // The fucking elephant
@@ -2318,7 +2444,11 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
+        #ifdef __NDS__ // NDS_TODO: again, check wrapping behavior
+        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        #endif
 
         // if we're outside the screen, we need to draw indicators
 
@@ -2375,7 +2505,11 @@ void Graphics::drawentity(const int i, const int yoff)
     case 13:
     {
         // Special for epilogue: huge hero!
+        #ifdef __NDS__
+        // NDS_TODO: uhhhh we'll see how I do this later
+        #else
         draw_grid_tile(grphx.im_sprites, obj.entities[i].drawframe, xp, yp - yoff, sprites_rect.w, sprites_rect.h, obj.entities[i].realcol, 6, 6);
+        #endif
         break;
     }
     }
@@ -2869,7 +3003,7 @@ void Graphics::drawmap(void)
         u16 *bgMap = bgGetMapPtr(3);
         if (map.tileset != active_tileset) {
             Tileset *set = map.tileset == 0 ? grphx.im_tiles : map.tileset == 1 ? grphx.im_tiles2 : grphx.im_tiles3;
-            memcpy(bgGetGfxPtr(3), set->data, set->dataSize);
+            memcpy(bgGetGfxPtr(3), set->gfx, set->gfxSize);
             memcpy(BG_PALETTE + 1, set->palette + 1, set->paletteSize - sizeof(u16));
             active_tileset = map.tileset;
         }
@@ -3808,8 +3942,10 @@ bool Graphics::reloadresources(void)
     MAYBE_FAIL(checktexturesize("tiles3.png", grphx.im_tiles3, 8, 8));
     #endif
     MAYBE_FAIL(checktexturesize("entcolours.png", grphx.im_entcolours, 8, 8));
+    #ifndef __NDS__
     MAYBE_FAIL(checktexturesize("sprites.png", grphx.im_sprites, 32, 32));
     MAYBE_FAIL(checktexturesize("flipsprites.png", grphx.im_flipsprites, 32, 32));
+    #endif
     MAYBE_FAIL(checktexturesize("teleporter.png", grphx.im_teleporter, 96, 96));
 
     destroy();

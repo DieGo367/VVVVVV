@@ -459,7 +459,6 @@ if(NINTENDO_DS)
         site2
         site3
         site4
-        sprites
         teleporter
     )
     set(IMG_2BIT covered)
@@ -468,7 +467,7 @@ if(NINTENDO_DS)
     set(TILES tiles tiles2 tiles3)
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
-    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${TILES} ${FONTS_WHITE} ${FONTS_COLOR})
+    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${TILES} sprites ${FONTS_WHITE} ${FONTS_COLOR})
         set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
         set(GRIT_FLAGS -ftr -fh! -gb -gT FF00FF)
 
@@ -485,6 +484,9 @@ if(NINTENDO_DS)
             set(GRIT_FLAGS ${GRIT_FLAGS} -gB8 -pn25)
         elseif(IMAGE IN_LIST TILES)
             set(GRIT_FLAGS -ftr -fh! -gt -gB8 -m)
+        elseif(IMAGE STREQUAL sprites)
+            set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS} -crop 32x32 -append)
+            set(GRIT_FLAGS -ftr -fh! -gt -gT FF00FF -gB4 -pn2)
         endif()
 
         if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)

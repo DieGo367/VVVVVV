@@ -179,28 +179,6 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
 }
 #else
 #include <nds/arm9/grf.h>
-static void filterPalette(uint16_t *palette, const TextureLoadType type) {
-    if (!palette) return;
-    switch (type) {
-    case TEX_WHITE:
-        for (int i = 1; i < palette[0]; i++) {
-            palette[i] = 0xFFFF;
-        }
-        break;
-    case TEX_GRAYSCALE:
-        for (int i = 1; i < palette[0]; i++) {
-            Uint8 r = palette[i] & 0b11111;
-            Uint8 g = palette[i] >> 5 & 0b11111;
-            Uint8 b = palette[i] >> 10 & 0b11111;
-            // magic grayscale numbers taken from LoadTextureFromRaw. TODO: test to see if this looks right
-            Uint8 gray = (Uint8)SDL_floor(r * 0.299 + g * 0.587 + b * 0.114 + 0.5) & 0b11111;
-            palette[i] = 1 << 15 | gray << 10 | gray << 5 | gray;
-        }
-        break;
-    default:
-        break;
-    }
-}
 #endif
 
 SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
@@ -218,9 +196,9 @@ SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
     }
 
     GRFHeader header;
-    void *data = NULL, *palette = NULL;
-    size_t dataSize, paletteSize;
-    GRFError error = grfLoadMem(fileIn, &header, &data, &dataSize, NULL, NULL, &palette, &paletteSize);
+    void *gfx = NULL, *palette = NULL;
+    size_t gfxSize, paletteSize;
+    GRFError error = grfLoadMem(fileIn, &header, &gfx, &gfxSize, NULL, NULL, &palette, &paletteSize);
     VVV_free(fileIn);
     
     if (error != GRF_NO_ERROR) {
@@ -230,15 +208,19 @@ SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
 
     SDL_Texture *tex = SnDsL_CreateTextureFromGRFData(
         header.gfxWidth, header.gfxHeight, header.gfxAttr,
-        data, palette, paletteSize / sizeof(uint16_t)
+        gfx, palette, paletteSize / sizeof(uint16_t)
     );
     if (!tex) {
-        VVV_free(data); VVV_free(palette);
+        VVV_free(gfx); VVV_free(palette);
         vlog_error("Could not load %s: OOM", filename);
         return NULL;
     }
 
-    filterPalette((uint16_t *) palette, loadtype);
+    if (loadtype == TEX_WHITE) {
+        for (int i = 1; i < tex->palette[0]; i++) {
+            tex->palette[i] = 0xFFFF;
+        }
+    }
 
     return tex;
     #else
@@ -282,9 +264,9 @@ static void LoadTileset(const char *filename, Tileset **tileset) {
         return;
     }
     GRFHeader header;
-    void *data = NULL, *palette = NULL, *map = NULL;
-    size_t dataSize, paletteSize, mapSize;
-    GRFError error = grfLoadMem(fileIn, &header, &data, &dataSize, &map, &mapSize, &palette, &paletteSize);
+    void *gfx = NULL, *palette = NULL, *map = NULL;
+    size_t gfxSize, paletteSize, mapSize;
+    GRFError error = grfLoadMem(fileIn, &header, &gfx, &gfxSize, &map, &mapSize, &palette, &paletteSize);
     VVV_free(fileIn);
 
     if (error != GRF_NO_ERROR) {
@@ -293,15 +275,15 @@ static void LoadTileset(const char *filename, Tileset **tileset) {
     }
 
     *tileset = (Tileset *)malloc(sizeof(Tileset));
-    (*tileset)->data = data;
-    (*tileset)->dataSize = dataSize;
+    (*tileset)->gfx = gfx;
+    (*tileset)->gfxSize = gfxSize;
     (*tileset)->palette = (u16 *)palette;
     (*tileset)->paletteSize = paletteSize;
     (*tileset)->map = (u16 *)map;
 }
 static void DestroyTileset(Tileset *tileset) {
     if (tileset) {
-        if (tileset->data) free(tileset->data);
+        if (tileset->gfx) free(tileset->gfx);
         if (tileset->palette) free(tileset->palette);
         if (tileset->map) free(tileset->map);
         free(tileset);
@@ -353,12 +335,48 @@ static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Textur
 }
 #endif
 
+#ifdef __NDS__
+#include <nds/arm9/sprite.h>
+static void LoadSprites(const char *filename, Spritesheet **spritesheet) {
+    unsigned char *fileIn;
+    size_t length;
+    FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
+    if (fileIn == NULL) {
+        vlog_error("Image not found: %s", filename);
+        SDL_assert(0 && "Image file missing!");
+        return;
+    }
+    GRFHeader header;
+    void *gfx = NULL;
+    size_t gfxSize;
+    GRFError error = grfLoadMem(fileIn, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
+    VVV_free(fileIn);
+    
+    if (error != GRF_NO_ERROR) {
+        vlog_error("Could not load %s: %i", filename, error);
+        return;
+    }
+
+    *spritesheet = (Spritesheet *)malloc(sizeof(Spritesheet));
+    (*spritesheet)->gfx = gfx;
+
+    const int SPRITE_SIZE_BYTES = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/2; // 4bpp
+    for (int i = 0; i < 190; i++) {
+        u16 *vramGfx = SPRITE_GFX + (i*SPRITE_SIZE_BYTES/sizeof(u16));
+        memcpy(vramGfx, (u8 *)gfx + SPRITE_SIZE_BYTES * i, SPRITE_SIZE_BYTES);
+    }
+    free(gfx);
+}
+static void DestroySpritesheet(Spritesheet *spritesheet) {
+    if (spritesheet) {
+        if (spritesheet->gfx) free(spritesheet->gfx);
+        free(spritesheet);
+    }
+}
+#else
 /* The pointers `texture` and `surface` cannot be NULL */
 static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface** surface)
 {
-    #ifdef __NDS__
-    *texture = LoadImage(filename, TEX_WHITE);
-    #else
     unsigned char* data;
     SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
 
@@ -382,8 +400,8 @@ static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface
     }
 
     VVV_free(data);
-    #endif
 }
+#endif
 
 static void LoadSpritesTranslation(
     const char* filename,
@@ -524,7 +542,7 @@ void GraphicsResources::init(void)
     LoadTileset("graphics/tiles3.grf", &im_tiles3);
     // LoadVariants("graphics/entcolours.grf", &im_entcolours, NULL, &im_entcolours_tint);
 
-    LoadSprites("graphics/sprites.grf", &im_sprites, &im_sprites_surf);
+    LoadSprites("graphics/sprites.grf", &im_sprites);
     im_flipsprites = im_sprites;
     im_flipsprites_surf = im_sprites_surf;
 
@@ -603,8 +621,14 @@ void GraphicsResources::destroy(void)
 #endif
     CLEAR(im_entcolours);
     CLEAR(im_entcolours_tint);
+#ifdef __NDS__
+#define CLEAR_SPRITES(sprites) VVV_freefunc(DestroySpritesheet, sprites)
+    CLEAR_SPRITES(im_sprites);
+    CLEAR_SPRITES(im_flipsprites);
+#else
     CLEAR(im_sprites);
     CLEAR(im_flipsprites);
+#endif
     CLEAR(im_teleporter);
 
     CLEAR(im_image0);
@@ -624,6 +648,10 @@ void GraphicsResources::destroy(void)
     CLEAR(im_sprites_translated);
     CLEAR(im_flipsprites_translated);
 #undef CLEAR
+#ifdef __NDS__
+#undef CLEAR_TILES
+#undef CLEAR_SPRITES
+#endif
 
     VVV_freefunc(SDL_FreeSurface, im_sprites_surf);
     VVV_freefunc(SDL_FreeSurface, im_flipsprites_surf);

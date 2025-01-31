@@ -12,12 +12,15 @@ enum TextureLoadType
 
 #ifdef __NDS__
 typedef struct {
-    void *data;
-    size_t dataSize;
+    void *gfx;
+    size_t gfxSize;
     u16 *palette;
     size_t paletteSize;
     u16 *map;
 } Tileset;
+typedef struct {
+    void *gfx;
+} Spritesheet;
 #endif
 
 class GraphicsResources
@@ -31,22 +34,27 @@ public:
     SDL_Surface* im_sprites_surf;
     SDL_Surface* im_flipsprites_surf;
 
-#ifdef __NDS__
-    Tileset* im_tiles;
-    Tileset* im_tiles2;
-    Tileset* im_tiles3;
-#else
+    #ifdef __NDS__
+    Tileset *im_tiles;
+    Tileset *im_tiles2;
+    Tileset *im_tiles3;
+    #else
     SDL_Texture* im_tiles;
     SDL_Texture* im_tiles_white;
     SDL_Texture* im_tiles_tint;
     SDL_Texture* im_tiles2;
     SDL_Texture* im_tiles2_tint;
     SDL_Texture* im_tiles3;
-#endif
+    #endif
     SDL_Texture* im_entcolours;
     SDL_Texture* im_entcolours_tint;
+    #ifdef __NDS__
+    Spritesheet *im_sprites;
+    Spritesheet *im_flipsprites;
+    #else
     SDL_Texture* im_sprites;
     SDL_Texture* im_flipsprites;
+    #endif
     SDL_Texture* im_teleporter;
     SDL_Texture* im_image0;
     SDL_Texture* im_image1;
