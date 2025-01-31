@@ -413,7 +413,7 @@ static void LoadSpritesTranslation(
      * surface_english is used as a base. Parts of the translation (filename)
      * will replace parts of the base, as instructed in the mask XML. */
     #ifdef __NDS__
-    return; // todo: implement
+    return; // NDS_TODO: implement
     #else
     if (surface_english == NULL)
     {
