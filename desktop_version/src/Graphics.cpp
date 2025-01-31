@@ -764,14 +764,14 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 #ifdef __NDS__
 void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b)
 {
-    SPRITE_PALETTE[1] = (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3);
+    SPRITE_PALETTE[slot*16 + 1] = (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3);
     const int SPRITE_SIZE_BYTES = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/2; // 4bpp
     oamSet(
         &oamMain,
         slot,
         x * 4 / 5 - 2, y * 4 / 5 - 3,
         0,
-        0,
+        slot,
         SpriteSize_32x32,
         SpriteColorFormat_16Color,
         SPRITE_GFX + (t*SPRITE_SIZE_BYTES/sizeof(u16)),
