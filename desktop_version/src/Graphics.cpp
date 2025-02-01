@@ -3396,6 +3396,9 @@ SDL_Color Graphics::getcol( int t )
 
 void Graphics::menuoffrender(void)
 {
+    #ifdef __NDS__
+    clear_sprites();
+    #endif
     if (copy_texture(gameplayTexture, NULL, NULL) != 0)
     {
         return;
