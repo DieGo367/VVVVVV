@@ -387,6 +387,9 @@ static void slidermodeinput(void)
 
 static void menuactionpress(void)
 {
+    #ifdef __NDS__
+    graphics.clear_sprites();
+    #endif
     if (game.menutestmode)
     {
         music.playef(Sound_CRUMBLE);
@@ -3174,6 +3177,9 @@ void mapinput(void)
     {
         if (game.press_action || game.press_left || game.press_right || game.press_map)
         {
+            #ifdef __NDS__
+            graphics.clear_sprites();
+            #endif
             game.jumpheld = true;
         }
 

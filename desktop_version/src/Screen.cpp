@@ -73,9 +73,6 @@ void Screen::GetScreenSize(int* x, int* y) {
 
 void Screen::RenderPresent(void) {
     oamUpdate(&oamMain);
-    for (int i = 0; i < SPRITE_COUNT; i++) { // NDS_TODO: not do this here. have game objects clean up after themselves, and menu switches too
-        if (oamMain.oamMemory[i].attribute[0]) oamClearSprite(&oamMain, i);
-    }
 }
 
 void Screen::toggleFullScreen(void) {}

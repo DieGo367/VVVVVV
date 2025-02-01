@@ -911,6 +911,9 @@ void mapclass::gotoroom(int rx, int ry)
         if (!player_found)
         {
             obj.entities.erase(obj.entities.begin() + i);
+            #ifdef __NDS__
+            graphics.clear_sprite(i);
+            #endif
         }
         else
         {

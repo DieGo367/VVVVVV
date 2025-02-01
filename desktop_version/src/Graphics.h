@@ -189,6 +189,9 @@ public:
     void draw_sprite(int x, int y, int slot, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int slot, int t, SDL_Color color);
     void draw_flipsprite(int x, int y, int slot, int t, SDL_Color color);
+    void clear_sprite(int slot);
+    void clear_sprites(void);
+    void clear_sprites(bool forceUpdate);
     #else
     void draw_sprite(int x, int y, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int t, SDL_Color color);

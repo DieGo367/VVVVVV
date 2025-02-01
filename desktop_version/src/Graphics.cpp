@@ -764,6 +764,10 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 #ifdef __NDS__
 void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b)
 {
+    if (slot >= 16) {
+        vlog_error("Tried to draw sprite id %d", slot);
+        return;
+    }
     SPRITE_PALETTE[slot*16 + 1] = (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3);
     const int SPRITE_SIZE_BYTES = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/2; // 4bpp
     oamSet(
@@ -792,6 +796,20 @@ void Graphics::draw_sprite(const int x, const int y, const int slot, const int t
 void Graphics::draw_flipsprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
 {
     draw_sprite(x, y, slot, t, color);
+}
+
+void Graphics::clear_sprite(const int slot)
+{
+    oamClearSprite(&oamMain, slot);
+}
+void Graphics::clear_sprites(const bool forceUpdate)
+{
+    oamClear(&oamMain, 0, 16); // I'm assuming that there are never more than 16 sprites in use
+    if (forceUpdate) oamUpdate(&oamMain);
+}
+void Graphics::clear_sprites(void)
+{
+    clear_sprites(false);
 }
 #else
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
