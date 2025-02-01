@@ -359,13 +359,7 @@ static void LoadSprites(const char *filename, Spritesheet **spritesheet) {
 
     *spritesheet = (Spritesheet *)malloc(sizeof(Spritesheet));
     (*spritesheet)->gfx = gfx;
-
-    const int SPRITE_SIZE_BYTES = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/2; // 4bpp
-    for (int i = 0; i < 190; i++) {
-        u16 *vramGfx = SPRITE_GFX + (i*SPRITE_SIZE_BYTES/sizeof(u16));
-        memcpy(vramGfx, (u8 *)gfx + SPRITE_SIZE_BYTES * i, SPRITE_SIZE_BYTES);
-    }
-    free(gfx);
+    memcpy(SPRITE_GFX, gfx, gfxSize);
 }
 static void DestroySpritesheet(Spritesheet *spritesheet) {
     if (spritesheet) {

@@ -188,6 +188,8 @@ public:
     #ifdef __NDS__
     void draw_sprite(int x, int y, int slot, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int slot, int t, SDL_Color color);
+    void draw_sprite_wide(int x, int y, int slot, int t, SDL_Color color);
+    void draw_sprite_large(int x, int y, int slot, int t, SDL_Color color);
     void draw_flipsprite(int x, int y, int slot, int t, SDL_Color color);
     void clear_sprite(int slot);
     void clear_sprites(void);

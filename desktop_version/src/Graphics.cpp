@@ -762,23 +762,24 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 }
 
 #ifdef __NDS__
-void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b)
+static void drawsprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b, const SpriteSize size)
 {
     if (slot >= 16) {
         vlog_error("Tried to draw sprite id %d", slot);
         return;
     }
     SPRITE_PALETTE[slot*16 + 1] = (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3);
-    const int SPRITE_SIZE_BYTES = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/2; // 4bpp
+    const int SPRITE_SIZE_U16 = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4; // 32x32 at 4bpp, so 4 pixels per short
     oamSet(
         &oamMain,
         slot,
-        x * 4 / 5 - 3, y * 4 / 5 - 3,
+        x * 4 / 5 - (size == SpriteSize_32x32 ? 3 : 6),
+        y * 4 / 5 - (size == SpriteSize_64x64 ? 6 : 3),
         0,
         slot,
-        SpriteSize_32x32,
+        size,
         SpriteColorFormat_16Color,
-        SPRITE_GFX + (t*SPRITE_SIZE_BYTES/sizeof(u16)),
+        SPRITE_GFX + (t*SPRITE_SIZE_U16),
         1,
         false,
         false,
@@ -788,9 +789,22 @@ void Graphics::draw_sprite(const int x, const int y, const int slot, const int t
     );
 }
 
+void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b)
+{
+    drawsprite(x, y, slot, t, r, g, b, SpriteSize_32x32);
+}
 void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
 {
     draw_sprite(x, y, slot, t, color.r, color.g, color.b);
+}
+void Graphics::draw_sprite_wide(const int x, const int y, const int slot, const int t, const SDL_Color color)
+{
+    drawsprite(x, y, slot, t, color.r, color.g, color.b, SpriteSize_64x32);
+}
+void Graphics::draw_sprite_large(const int x, const int y, const int slot, const int t, const SDL_Color color)
+{
+    int trueTile = (t%4 > 1) ? t + 10 : t;
+    drawsprite(x, y, slot, trueTile, color.r, color.g, color.b, SpriteSize_64x64);
 }
 
 void Graphics::draw_flipsprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
@@ -2388,8 +2402,8 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        #ifdef __NDS__ // NDS_TODO: big sprites
-        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        #ifdef __NDS__
+        draw_sprite_large(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
@@ -2433,8 +2447,8 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        #ifdef __NDS__ // NDS_TODO: big sprites
-        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        #ifdef __NDS__
+        draw_sprite_wide(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 

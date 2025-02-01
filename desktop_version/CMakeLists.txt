@@ -485,7 +485,20 @@ if(NINTENDO_DS)
         elseif(IMAGE IN_LIST TILES)
             set(GRIT_FLAGS -ftr -fh! -gt -gB8 -m)
         elseif(IMAGE STREQUAL sprites)
-            set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS} -crop 32x32 -append)
+            set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS}
+                # separate out sprites by their sizes
+                \( -clone 0 -crop 32x32 -delete 54-55,64-67,72-75,84-87,96-99,108-111,120-143 \)
+                \( -clone 0 -crop 64x32 -delete 0-26,28-31,34--1 \)
+                \( -clone 0 -crop 64x64 -delete 0-17,20-23,26-29,36--1 \)
+                -delete 0
+                # put the bigger sprites back into the list in order
+                -insert 98 -insert 98 -insert 99 -insert 98  # clock
+                -insert 100 -insert 98 -insert 90 -insert 82 # the big guy
+                -insert 74 -insert 66                        # factory
+                -insert 62 -insert 62 -insert 54             # BOOO, TRUTH, and OOOB
+                # cut up each sprite individually, then take all the rows and stack them vertically
+                +repage -crop 32x8 -append
+            )
             set(GRIT_FLAGS -ftr -fh! -gt -gT FF00FF -gB4 -pn2)
         endif()
 
