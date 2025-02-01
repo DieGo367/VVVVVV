@@ -51,11 +51,12 @@ public:
     #ifdef __NDS__
     Spritesheet *im_sprites;
     Spritesheet *im_flipsprites;
+    u16 *im_teleporter;
     #else
     SDL_Texture* im_sprites;
     SDL_Texture* im_flipsprites;
-    #endif
     SDL_Texture* im_teleporter;
+    #endif
     SDL_Texture* im_image0;
     SDL_Texture* im_image1;
     SDL_Texture* im_image2;

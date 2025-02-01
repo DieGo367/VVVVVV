@@ -459,47 +459,62 @@ if(NINTENDO_DS)
         site2
         site3
         site4
-        teleporter
     )
     set(IMG_2BIT covered)
     set(IMG_4BIT ending)
     set(IMG_8BIT entcolours minimap)
     set(TILES tiles tiles2 tiles3)
+    set(SPRITES sprites teleporter)
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
-    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${TILES} sprites ${FONTS_WHITE} ${FONTS_COLOR})
+    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${TILES} ${SPRITES} ${FONTS_WHITE} ${FONTS_COLOR})
         set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
-        set(GRIT_FLAGS -ftr -fh! -gb -gT FF00FF)
+        set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
 
         if(IMAGE IN_LIST IMG_1BIT OR IMAGE IN_LIST FONTS_WHITE)
             set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gB1 -pn2)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB1 -pn2)
         elseif(IMAGE IN_LIST IMG_2BIT)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gB2 -pn4)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn4)
         elseif(IMAGE IN_LIST IMG_4BIT)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gB4 -pn16)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB4 -pn16)
         elseif(IMAGE IN_LIST IMG_8BIT)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gB8 -pn206)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn206)
         elseif(IMAGE IN_LIST FONTS_COLOR)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gB8 -pn25)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn25)
         elseif(IMAGE IN_LIST TILES)
             set(GRIT_FLAGS -ftr -fh! -gt -gB8 -m)
-        elseif(IMAGE STREQUAL sprites)
-            set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS}
-                # separate out sprites by their sizes
-                \( -clone 0 -crop 32x32 -delete 54-55,64-67,72-75,84-87,96-99,108-111,120-143 \)
-                \( -clone 0 -crop 64x32 -delete 0-26,28-31,34--1 \)
-                \( -clone 0 -crop 64x64 -delete 0-17,20-23,26-29,36--1 \)
-                -delete 0
-                # put the bigger sprites back into the list in order
-                -insert 98 -insert 98 -insert 99 -insert 98  # clock
-                -insert 100 -insert 98 -insert 90 -insert 82 # the big guy
-                -insert 74 -insert 66                        # factory
-                -insert 62 -insert 62 -insert 54             # BOOO, TRUTH, and OOOB
-                # cut up each sprite individually, then take all the rows and stack them vertically
-                +repage -crop 32x8 -append
-            )
-            set(GRIT_FLAGS -ftr -fh! -gt -gT FF00FF -gB4 -pn2)
+        elseif(IMAGE IN_LIST SPRITES)
+            if(IMAGE STREQUAL teleporter)
+                set(MAGICK_FLAGS -background "#FF00FF" -crop 96x96 +repage
+                    \( -clone 0,1 -flatten \)
+                    \( -clone 0,2 -flatten \)
+                    \( -clone 0,3 -flatten \)
+                    \( -clone 0,4 -flatten \)
+                    \( -clone 0,5 -flatten \)
+                    \( -clone 0,6 -flatten \)
+                    \( -clone 0,7 -flatten \)
+                    \( -clone 0,8 -flatten \)
+                    \( -clone 0,9 -flatten \)
+                    -delete 0-9 -crop 64x64 +repage -crop 32x8 -append
+                )
+            else()
+                set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS}
+                    # separate out sprites by their sizes
+                    \( -clone 0 -crop 32x32 -delete 54-55,64-67,72-75,84-87,96-99,108-111,120-143 \)
+                    \( -clone 0 -crop 64x32 -delete 0-26,28-31,34--1 \)
+                    \( -clone 0 -crop 64x64 -delete 0-17,20-23,26-29,36--1 \)
+                    -delete 0
+                    # put the bigger sprites back into the list in order
+                    -insert 98 -insert 98 -insert 99 -insert 98  # clock
+                    -insert 100 -insert 98 -insert 90 -insert 82 # the big guy
+                    -insert 74 -insert 66                        # factory
+                    -insert 62 -insert 62 -insert 54             # BOOO, TRUTH, and OOOB
+                    # cut up each sprite individually, then take all the rows and stack them vertically
+                    +repage -crop 32x8 -append
+                )
+            endif()
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gt -gB4 -pn3)
         endif()
 
         if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)

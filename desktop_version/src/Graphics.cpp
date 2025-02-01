@@ -158,6 +158,7 @@ void Graphics::init(void)
 
     #ifdef __NDS__
     active_tileset = -1;
+    teleporter_slot = -1;
     #endif
 }
 
@@ -814,6 +815,10 @@ void Graphics::draw_flipsprite(const int x, const int y, const int slot, const i
 
 void Graphics::clear_sprite(const int slot)
 {
+    if (slot == teleporter_slot) {
+        oamClear(&oamMain, 13, 3);
+        teleporter_slot = -1;
+    }
     oamClearSprite(&oamMain, slot);
 }
 void Graphics::clear_sprites(const bool forceUpdate)
@@ -2386,7 +2391,11 @@ void Graphics::drawentity(const int i, const int yoff)
         drawgravityline(i, xp, yp - yoff, 0, obj.entities[i].h - 1);
         break;
     case 7: // Teleporter
+        #ifdef __NDS__
+        drawtele(xp, yp - yoff, i, obj.entities[i].drawframe, obj.entities[i].realcol);
+        #else
         drawtele(xp, yp - yoff, obj.entities[i].drawframe, obj.entities[i].realcol);
+        #endif
         break;
     // case 8:    // Special: Moving platform, 8 tiles
         // Note: This code is in the 4-tile code
@@ -3878,17 +3887,102 @@ void Graphics::draw_screenshot_border(void)
     set_blendmode(SDL_BLENDMODE_NONE);
 }
 
+#ifdef __NDS__
+void Graphics::drawtele(int x, int y, int slot, int t, const SDL_Color color)
+#else
 void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
+#endif
 {
     SDL_Rect telerect;
     setRect(telerect, x, y, tele_rect.w, tele_rect.h);
 
+    #ifndef __NDS__
     draw_grid_tile(grphx.im_teleporter, 0, x, y, tele_rect.w, tele_rect.h, 16, 16, 16);
+    #endif
 
     if (t > 9) t = 8;
     if (t < 1) t = 1;
 
+    #ifdef __NDS__
+    const int TELE_SPRITE_SIZE_U16 = 96*96 / 4; // 4bpp
+    u16 * const TELE_SPRITE_RESERVED = SPRITE_GFX + 0xC000;
+    memcpy(TELE_SPRITE_RESERVED, grphx.im_teleporter + TELE_SPRITE_SIZE_U16 * (t-1), TELE_SPRITE_SIZE_U16*sizeof(u16));
+    SPRITE_PALETTE[slot*16 + 1] = (1 << 15 | ((color.b) >> 3) << 10 | ((color.g) >> 3) << 5 | (color.r) >> 3);
+    SPRITE_PALETTE[slot*16 + 2] = (1 << 15 | ((16) >> 3) << 10 | ((16) >> 3) << 5 | (16) >> 3);
+
+    oamSet(
+        &oamMain,
+        slot,
+        x * 4 / 5 - 6,
+        y * 4 / 5 - 6,
+        0,
+        slot,
+        SpriteSize_64x64,
+        SpriteColorFormat_16Color,
+        TELE_SPRITE_RESERVED,
+        1,
+        false,
+        false,
+        false,
+        false,
+        false
+    );
+    // assume I can use slots 13-15
+    oamSet(
+        &oamMain,
+        13,
+        (x+64) * 4 / 5 - 3,
+        y * 4 / 5 - 6,
+        0,
+        slot,
+        SpriteSize_32x64,
+        SpriteColorFormat_16Color,
+        TELE_SPRITE_RESERVED + (64*64)/4,
+        1,
+        false,
+        false,
+        false,
+        false,
+        false
+    );
+    oamSet(
+        &oamMain,
+        14,
+        x * 4 / 5 - 6,
+        (y+64) * 4 / 5 - 3,
+        0,
+        slot,
+        SpriteSize_64x32,
+        SpriteColorFormat_16Color,
+        TELE_SPRITE_RESERVED + (96*64)/4,
+        1,
+        false,
+        false,
+        false,
+        false,
+        false
+    );
+    oamSet(
+        &oamMain,
+        15,
+        (x+64) * 4 / 5 - 3,
+        (y+64) * 4 / 5 - 3,
+        0,
+        slot,
+        SpriteSize_32x32,
+        SpriteColorFormat_16Color,
+        TELE_SPRITE_RESERVED + (96*96 - 32*32)/4,
+        1,
+        false,
+        false,
+        false,
+        false,
+        false
+    );
+    teleporter_slot = slot;
+    #else
     draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
+    #endif
 }
 
 SDL_Color Graphics::getRGBA(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
@@ -3977,13 +4071,11 @@ bool Graphics::reloadresources(void)
     MAYBE_FAIL(checktexturesize("tiles.png", grphx.im_tiles, 8, 8));
     MAYBE_FAIL(checktexturesize("tiles2.png", grphx.im_tiles2, 8, 8));
     MAYBE_FAIL(checktexturesize("tiles3.png", grphx.im_tiles3, 8, 8));
-    #endif
     MAYBE_FAIL(checktexturesize("entcolours.png", grphx.im_entcolours, 8, 8));
-    #ifndef __NDS__
     MAYBE_FAIL(checktexturesize("sprites.png", grphx.im_sprites, 32, 32));
     MAYBE_FAIL(checktexturesize("flipsprites.png", grphx.im_flipsprites, 32, 32));
-    #endif
     MAYBE_FAIL(checktexturesize("teleporter.png", grphx.im_teleporter, 96, 96));
+    #endif
 
     destroy();
 

@@ -301,7 +301,11 @@ public:
 
     void drawtrophytext(void);
 
+    #ifdef __NDS__
+    void drawtele(int x, int y, int slot, int t, SDL_Color c);
+    #else
     void drawtele(int x, int y, int t, SDL_Color c);
+    #endif
 
     SDL_Color getRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
@@ -462,6 +466,7 @@ public:
 
     #ifdef __NDS__
     int active_tileset;
+    int teleporter_slot;
     #endif
 };
 
