@@ -432,7 +432,6 @@ if(NINTENDO_DS)
         ../third_party/SnDsL/src/main.c
         ../third_party/SnDsL/src/audio.c
         ../third_party/SnDsL/src/messagebox.c
-        ../third_party/SnDsL/src/surface.c
     )
     target_include_directories(sndsl-static PRIVATE ../third_party/SnDsL/include)
     if(ENABLE_WARNINGS)

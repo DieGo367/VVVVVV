@@ -36,9 +36,6 @@ public:
 
     void init_translations(void);
 
-    SDL_Surface* im_sprites_surf;
-    SDL_Surface* im_flipsprites_surf;
-
     #ifdef __NDS__
     Tileset *im_tiles;
     Tileset *im_tiles2;
@@ -65,6 +62,9 @@ public:
     Bitmap* im_sprites_translated;
     Bitmap* im_flipsprites_translated;
     #else
+    SDL_Surface* im_sprites_surf;
+    SDL_Surface* im_flipsprites_surf;
+
     SDL_Texture* im_tiles;
     SDL_Texture* im_tiles_white;
     SDL_Texture* im_tiles_tint;
@@ -95,15 +95,15 @@ public:
     #endif
 };
 
-SDL_Surface* LoadImageSurface(const char* filename);
 #ifdef __NDS__
 Bitmap* LoadImage(const char *filename, TextureLoadType loadtype);
 void DestroyImage(Bitmap *image);
 #else
+SDL_Surface* LoadImageSurface(const char* filename);
 SDL_Texture* LoadImage(const char *filename, TextureLoadType loadtype);
-#endif
 
 bool SaveImage(const SDL_Surface* surface, const char* filename);
+#endif
 bool SaveScreenshot(void);
 
 #endif /* GRAPHICSRESOURCES_H */

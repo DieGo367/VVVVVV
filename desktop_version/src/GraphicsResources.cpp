@@ -159,7 +159,7 @@ static u16 *LoadTeleporter(const char *filename)
 static void LoadSpritesTranslation(
     const char* filename,
     tinyxml2::XMLDocument* mask,
-    SDL_Surface* surface_english,
+    // SDL_Surface* surface_english,
     Bitmap** texture
 ) {
     // NDS_TODO: implement
@@ -528,7 +528,9 @@ void GraphicsResources::init_translations(void)
         LoadSpritesTranslation(
             path_sprites,
             &doc_mask,
+            #ifndef __NDS__
             im_sprites_surf,
+            #endif
             &im_sprites_translated
         );
     }
@@ -537,7 +539,9 @@ void GraphicsResources::init_translations(void)
         LoadSpritesTranslation(
             path_flipsprites,
             &doc_mask,
+            #ifndef __NDS__
             im_flipsprites_surf,
+            #endif
             &im_flipsprites_translated
         );
     }
@@ -553,7 +557,6 @@ void GraphicsResources::init(void)
 
     im_sprites = LoadSprites("graphics/sprites.grf");
     im_flipsprites = im_sprites;
-    im_flipsprites_surf = im_sprites_surf;
 
     im_teleporter = LoadTeleporter("graphics/teleporter.grf");
 
@@ -659,10 +662,13 @@ void GraphicsResources::destroy(void)
     CLEAR(im_flipsprites_translated);
 #undef CLEAR
 
+    #ifndef __NDS__
     VVV_freefunc(SDL_FreeSurface, im_sprites_surf);
     VVV_freefunc(SDL_FreeSurface, im_flipsprites_surf);
+    #endif
 }
 
+#ifndef __NDS__
 bool SaveImage(const SDL_Surface* surface, const char* filename)
 {
     unsigned char* out;
@@ -692,9 +698,13 @@ bool SaveImage(const SDL_Surface* surface, const char* filename)
 
     return success;
 }
+#endif
 
 bool SaveScreenshot(void)
 {
+    #ifdef __NDS__
+    return false; // NDS_TODO: screenshots
+    #else
     static time_t last_time = 0;
     static int subsecond_counter = 0;
 
@@ -754,4 +764,5 @@ bool SaveScreenshot(void)
 
     vlog_info("Saved screenshot %s", name);
     return true;
+    #endif
 }

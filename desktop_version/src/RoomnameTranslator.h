@@ -8,7 +8,9 @@ namespace roomname_translator
     extern bool enabled;
     extern bool edit_mode;
 
+    #ifndef __NDS__
     extern SDL_Surface* dimbuffer;
+    #endif
     extern SDL_Rect fullscreen_rect;
 
     void set_enabled(bool value);

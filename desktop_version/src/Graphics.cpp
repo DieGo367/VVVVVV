@@ -117,8 +117,10 @@ void Graphics::init(void)
     tempShakeTexture = NULL;
     backgroundTexture = NULL;
     foregroundTexture = NULL;
+    #ifndef __NDS__
     tempScreenshot = NULL;
     tempScreenshot2x = NULL;
+    #endif
     towerbg = TowerBG();
     titlebg = TowerBG();
     trinketr = 0;
@@ -172,14 +174,18 @@ void Graphics::destroy(void)
     } \
     name.clear();
 
+    #ifndef __NDS__
     CLEAR_ARRAY(sprites_surf)
     CLEAR_ARRAY(flipsprites_surf)
+    #endif
 
 #undef CLEAR_ARRAY
 }
 
+#ifndef __NDS__
 static SDL_Surface* tempFilterSrc = NULL;
 static SDL_Surface* tempFilterDest = NULL;
+#endif
 
 void Graphics::create_buffers(void)
 {
@@ -238,11 +244,11 @@ void Graphics::destroy_buffers(void)
     VVV_freefunc(SDL_DestroyTexture, tempScrollingTexture);
     VVV_freefunc(SDL_DestroyTexture, towerbg.texture);
     VVV_freefunc(SDL_DestroyTexture, titlebg.texture);
-    #endif
     VVV_freefunc(SDL_FreeSurface, tempFilterSrc);
     VVV_freefunc(SDL_FreeSurface, tempFilterDest);
     VVV_freefunc(SDL_FreeSurface, tempScreenshot);
     VVV_freefunc(SDL_FreeSurface, tempScreenshot2x);
+    #endif
 }
 
 #ifdef __NDS__
@@ -2322,11 +2328,16 @@ void Graphics::drawcoloredtile(
 }
 
 
+#ifdef __NDS__
+bool Graphics::Hitest(int frame1, SDL_Point p1, int frame2, SDL_Point p2, int size2)
+#else
 bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2, SDL_Point p2)
+#endif
 {
 
     //find rectangle where they intersect:
 
+    #ifndef __NDS__ // NDS_TODO: collision
     int r1_left = p1.x;
     int r1_right = r1_left + surface1->w;
     int r2_left = p2.x;
@@ -2365,6 +2376,7 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
             }
         }
     }
+    #endif
     return false;
 
 }
@@ -4053,12 +4065,12 @@ void Graphics::flashlight(void)
 
 void Graphics::screenshake(void)
 {
+    #ifndef __NDS__
     if (gameScreen.badSignalEffect)
     {
         ApplyFilter(&tempFilterSrc, &tempFilterDest);
     }
 
-    #ifndef __NDS__
     set_render_target(tempShakeTexture);
     #endif
     set_blendmode(SDL_BLENDMODE_NONE);
@@ -4162,12 +4174,12 @@ void Graphics::render(void)
     ime_render();
     draw_screenshot_border();
 
+    #ifndef __NDS__
     if (gameScreen.badSignalEffect)
     {
         ApplyFilter(&tempFilterSrc, &tempFilterDest);
     }
 
-    #ifndef __NDS__
     set_render_target(NULL);
     #endif
     set_blendmode(SDL_BLENDMODE_NONE);

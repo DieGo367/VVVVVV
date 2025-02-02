@@ -29,6 +29,7 @@ uint32_t LOC_toupper_ch(uint32_t ch)
     return loc::toupper_ch(ch);
 }
 
+#ifndef __NDS__
 SDL_Surface* GRAPHICS_tempScreenshot(void)
 {
     return graphics.tempScreenshot;
@@ -48,5 +49,6 @@ uint8_t UTIL_UpscaleScreenshot2x(SDL_Surface* src, SDL_Surface** dest)
 {
     return UpscaleScreenshot2x(src, dest);
 }
+#endif
 
 } /* extern "C" */

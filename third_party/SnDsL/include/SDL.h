@@ -20,10 +20,8 @@ extern "C" {
 #include "SDL_endian.h"
 #include "SDL_keyboard.h"
 #include "SDL_log.h"
-#include "SDL_pixels.h"
 #include "SDL_rect.h"
 #include "SDL_rwops.h"
-#include "SDL_surface.h"
 #include "SDL_timer.h"
 
 
@@ -139,6 +137,16 @@ typedef struct SDL_mutex {} SDL_mutex;
 #define SDL_Window void
 #define SDL_ShowWindow(win)
 #define SDL_MinimizeWindow(win)
+
+// pixels.h
+typedef struct SDL_Color
+{
+	Uint8 r;
+	Uint8 g;
+	Uint8 b;
+	Uint8 a;
+} SDL_Color;
+#define SDL_Colour SDL_Color
 
 // render.h
 

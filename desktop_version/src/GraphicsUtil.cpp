@@ -21,6 +21,7 @@ void setRect( SDL_Rect& _r, int x, int y, int w, int h )
     _r.h = h;
 }
 
+#ifndef __NDS__
 static SDL_Surface* RecreateSurfaceWithDimensions(
     SDL_Surface* surface,
     const int width,
@@ -164,6 +165,7 @@ SDL_Color ReadPixel(const SDL_Surface* surface, const int x, const int y)
 
     return color;
 }
+#endif
 
 static int oldscrollamount = 0;
 static int scrollamount = 0;
@@ -189,9 +191,9 @@ void UpdateFilter(void)
     }
 }
 
+#ifndef __NDS__
 void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
 {
-    #ifndef __NDS__
     if (src == NULL || dest == NULL)
     {
         SDL_assert(0 && "NULL src or dest!");
@@ -274,14 +276,10 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
     }
 
     SDL_UpdateTexture(graphics.gameTexture, NULL, (*dest)->pixels, (*dest)->pitch);
-    #endif
 }
 
 bool TakeScreenshot(SDL_Surface** surface)
 {
-    #ifdef __NDS__ // NDS_TODO: screenshots
-    return false;
-    #else
     if (surface == NULL)
     {
         SDL_assert(0 && "surface is NULL!");
@@ -350,7 +348,6 @@ bool TakeScreenshot(SDL_Surface** surface)
     }
 
     return true;
-    #endif
 }
 
 bool UpscaleScreenshot2x(SDL_Surface* src, SDL_Surface** dest)
@@ -389,3 +386,4 @@ bool UpscaleScreenshot2x(SDL_Surface* src, SDL_Surface** dest)
 
     return true;
 }
+#endif
