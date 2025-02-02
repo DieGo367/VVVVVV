@@ -36,6 +36,7 @@ typedef enum {
 #define SDL_memcmp memcmp
 #define SDL_memcpy memcpy
 #define SDL_memmove memmove
+void memset16(uint16_t *dst, uint16_t src, size_t count);
 
 #define SDL_strlen strlen
 #define SDL_strchr strchr

@@ -1718,8 +1718,8 @@ void customlevelclass::generatecustomminimap(void)
 
     #ifndef __NDS__
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-    #endif
     graphics.set_render_target(graphics.images[IMAGE_CUSTOMMINIMAP]);
+    #endif
     graphics.clear();
 
     // Scan over the map size

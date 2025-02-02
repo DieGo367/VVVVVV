@@ -39,8 +39,10 @@ public:
     int scalingMode;
     bool vsync;
 
+    #ifndef __NDS__
     SDL_Window *m_window;
     SDL_Renderer *m_renderer;
+    #endif
 };
 
 #ifndef GAMESCREEN_DEFINITION

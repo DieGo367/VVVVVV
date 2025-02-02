@@ -972,7 +972,9 @@ static void inline deltaloop(void)
         {
             graphics.clear();
 
+            #ifndef __NDS__
             graphics.set_render_target(graphics.gameTexture);
+            #endif
 
             implfunc->func();
 

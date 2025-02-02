@@ -232,8 +232,6 @@ public:
     );
 
     #ifdef __NDS__
-    int set_render_target(Bitmap* texture);
-
     int set_texture_color_mod(Bitmap* texture, Uint8 r, Uint8 g, Uint8 b);
 
     int set_texture_alpha_mod(Bitmap* texture, Uint8 alpha);
@@ -519,6 +517,7 @@ public:
     #ifdef __NDS__
     int active_tileset;
     int teleporter_slot;
+    u16 draw_color;
     #endif
 };
 

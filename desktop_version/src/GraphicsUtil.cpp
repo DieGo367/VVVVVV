@@ -191,6 +191,7 @@ void UpdateFilter(void)
 
 void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
 {
+    #ifndef __NDS__
     if (src == NULL || dest == NULL)
     {
         SDL_assert(0 && "NULL src or dest!");
@@ -273,10 +274,14 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
     }
 
     SDL_UpdateTexture(graphics.gameTexture, NULL, (*dest)->pixels, (*dest)->pitch);
+    #endif
 }
 
 bool TakeScreenshot(SDL_Surface** surface)
 {
+    #ifdef __NDS__ // NDS_TODO: screenshots
+    return false;
+    #else
     if (surface == NULL)
     {
         SDL_assert(0 && "surface is NULL!");
@@ -345,6 +350,7 @@ bool TakeScreenshot(SDL_Surface** surface)
     }
 
     return true;
+    #endif
 }
 
 bool UpscaleScreenshot2x(SDL_Surface* src, SDL_Surface** dest)

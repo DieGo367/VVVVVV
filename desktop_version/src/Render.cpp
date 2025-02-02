@@ -2364,7 +2364,9 @@ static void mode_indicator_text(const int alpha)
 
 void gamerender(void)
 {
+    #ifndef __NDS__
     graphics.set_render_target(graphics.gameplayTexture);
+    #endif
     graphics.set_color(0, 0, 0, 255);
 
     if(!game.blackout)
@@ -2507,7 +2509,9 @@ void gamerender(void)
         mode_indicator_text(mode_indicator_alpha);
     }
 
+    #ifndef __NDS__
     graphics.set_render_target(graphics.gameTexture);
+    #endif
 
     graphics.copy_texture(graphics.gameplayTexture, NULL, NULL);
 
@@ -2984,7 +2988,9 @@ static void rendermapcursor(const bool flashing)
 
 void maprender(void)
 {
+    #ifndef __NDS__
     graphics.set_render_target(graphics.menuTexture);
+    #endif
     graphics.clear();
 
     draw_roomname_menu();
@@ -3522,7 +3528,9 @@ void maprender(void)
 
     }
 
+    #ifndef __NDS__
     graphics.set_render_target(graphics.gameTexture);
+    #endif
 
     if (graphics.resumegamemode || graphics.menuoffset > 0 || graphics.oldmenuoffset > 0)
     {
@@ -3554,7 +3562,9 @@ void maprender(void)
 
 void teleporterrender(void)
 {
+    #ifndef __NDS__
     graphics.set_render_target(graphics.menuTexture);
+    #endif
     graphics.clear();
 
     const int telex = map.teleporters[game.teleport_to_teleporter].x;
@@ -3625,7 +3635,9 @@ void teleporterrender(void)
         font::print(PR_CEN | PR_BOR, -1, graphics.flipmode ? 228 : 5, buffer_adv, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
     }
 
+    #ifndef __NDS__
     graphics.set_render_target(graphics.gameTexture);
+    #endif
 
     if (graphics.resumegamemode || graphics.menuoffset > 0 || graphics.oldmenuoffset > 0)
     {

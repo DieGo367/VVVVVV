@@ -5,6 +5,7 @@
 
 #ifdef __NDS__
 #define VRAM_COLOR(r, g, b) (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3)
+#define RENDER_SCALE(x) (((x)*4 + 3)/5)
 #endif
 
 void setRect(SDL_Rect& _r, int x, int y, int w, int h);

@@ -431,7 +431,6 @@ if(NINTENDO_DS)
     add_library(sndsl-static STATIC
         ../third_party/SnDsL/src/main.c
         ../third_party/SnDsL/src/audio.c
-        ../third_party/SnDsL/src/render.c
         ../third_party/SnDsL/src/messagebox.c
         ../third_party/SnDsL/src/surface.c
     )

@@ -32,8 +32,6 @@ void ScreenSettings_default(struct ScreenSettings* _this)
     _this->badSignal = false;
 }
 void Screen::init(const struct ScreenSettings* settings) {
-    m_window = NULL;
-    m_renderer = NULL;
     windowDisplay = settings->windowDisplay;
     windowWidth = settings->windowWidth;
     windowHeight = settings->windowHeight;
@@ -68,7 +66,7 @@ void Screen::ResizeToNearestMultiple(void) {}
 void Screen::GetScreenSize(int* x, int* y) {
     // Use the "internal" resolution for now
     *x = SCREEN_WIDTH_PIXELS;
-    *y = SCREEN_HEIGHT_TILES;
+    *y = SCREEN_HEIGHT_PIXELS;
 }
 
 void Screen::RenderPresent(void) {

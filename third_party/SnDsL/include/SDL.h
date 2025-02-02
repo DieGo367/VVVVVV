@@ -22,7 +22,6 @@ extern "C" {
 #include "SDL_log.h"
 #include "SDL_pixels.h"
 #include "SDL_rect.h"
-#include "SDL_render.h"
 #include "SDL_rwops.h"
 #include "SDL_surface.h"
 #include "SDL_timer.h"
@@ -136,9 +135,34 @@ typedef struct SDL_mutex {} SDL_mutex;
 #define SDL_UnlockMutex(mutex) 0
 
 // video.h
+
 #define SDL_Window void
 #define SDL_ShowWindow(win)
 #define SDL_MinimizeWindow(win)
+
+// render.h
+
+typedef enum {
+	SDL_TEXTUREACCESS_STATIC,		/**< Changes rarely, not lockable */
+	SDL_TEXTUREACCESS_STREAMING,	/**< Changes frequently, lockable */
+	SDL_TEXTUREACCESS_TARGET		/**< Texture can be used as a render target */
+} SDL_TextureAccess;
+
+#define SDL_UpdateTexture(tex, rect, pixels, pitch) 0
+#define SDL_SetTextureScaleMode(tex, scaleMode) 0
+#define SDL_SetTextureBlendMode(tex, blendMode) 0
+
+typedef enum {
+	SDL_FLIP_NONE = 0,
+	SDL_FLIP_HORIZONTAL, SDL_FLIP_VERTICAL
+} SDL_RendererFlip;
+
+// blendmode.h
+
+typedef enum {
+	SDL_BLENDMODE_NONE = 0,
+	SDL_BLENDMODE_BLEND
+} SDL_BlendMode;
 
 // messagebox.h
 

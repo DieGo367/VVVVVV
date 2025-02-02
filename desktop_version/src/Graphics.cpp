@@ -159,6 +159,7 @@ void Graphics::init(void)
     #ifdef __NDS__
     active_tileset = -1;
     teleporter_slot = -1;
+    draw_color = VRAM_COLOR(0, 0, 0);
     #endif
 }
 
@@ -472,16 +473,6 @@ void Graphics::print_level_creator(
 }
 
 #ifdef __NDS__
-int Graphics::set_render_target(Bitmap* texture)
-{
-    const int result = SDL_SetRenderTarget(gameScreen.m_renderer, texture);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set render target: %s", SDL_GetError()));
-    }
-    return result;
-}
-
 int Graphics::set_texture_color_mod(Bitmap* texture, const Uint8 r, const Uint8 g, const Uint8 b)
 {
     if (texture) texture->colorMod = VRAM_COLOR(r, g, b);
@@ -509,12 +500,7 @@ int Graphics::query_texture(Bitmap* texture, Uint32* format, int* access, int* w
 
 int Graphics::set_blendmode(const SDL_BlendMode blendmode)
 {
-    const int result = SDL_SetRenderDrawBlendMode(gameScreen.m_renderer, blendmode);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set draw mode: %s", SDL_GetError()));
-    }
-    return result;
+    return 0; // NDS_TODO
 }
 
 int Graphics::set_blendmode(Bitmap* texture, const SDL_BlendMode blendmode)
@@ -530,13 +516,8 @@ int Graphics::set_blendmode(Bitmap* texture, const SDL_BlendMode blendmode)
 int Graphics::clear(const int r, const int g, const int b, const int a)
 {
     set_color(r, g, b, a);
-
-    const int result = SDL_RenderClear(gameScreen.m_renderer);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not clear current render target: %s", SDL_GetError()));
-    }
-    return result;
+	// more performant just to ignore this for now
+    return 0;
 }
 
 int Graphics::clear(void)
@@ -592,11 +573,10 @@ int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect*
 		clipX = src->x, clipY = src->y, clipW = src->w, clipH = src->h;
 	}
 	int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
-    #define s(x) (((x)*4 + 3)/5)
 	if (dest) {
-		destX = s(dest->x), destY = s(dest->y), destW = s(dest->w), destH = s(dest->h);
+		destX = RENDER_SCALE(dest->x), destY = RENDER_SCALE(dest->y);
+        destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
 	}
-    #undef s
 
 	int offsX = destX < 0 ? -destX : 0;
 	int offsY = destY < 0 ? -destY : 0;
@@ -613,7 +593,6 @@ int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect*
 			if (texture->bpp == 16) {
 				color = ((u16 *)texture->gfx)[pixelIdx];
 				if ((color & BIT(15)) == 0) continue;
-			// check for "5"bpp grayscale
 			} else {
 				u8 value = texture->gfx[pixelIdx * texture->bpp / 8] >> pixelIdx % (8 / texture->bpp) * texture->bpp & ((1 << texture->bpp) - 1);
 				if (value == 0) continue;
@@ -637,6 +616,12 @@ int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect*
 int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
 {
     return copy_texture(texture, src, dest);
+}
+
+int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
+{
+    draw_color = a ? VRAM_COLOR(r, g, b) : 0;
+    return 0;
 }
 #else
 int Graphics::set_render_target(SDL_Texture* texture)
@@ -794,7 +779,6 @@ int Graphics::copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_
 
     return result;
 }
-#endif
 
 int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
 {
@@ -805,6 +789,7 @@ int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8
     }
     return result;
 }
+#endif
 
 int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b)
 {
@@ -818,12 +803,31 @@ int Graphics::set_color(const SDL_Color color)
 
 int Graphics::fill_rect(const SDL_Rect* rect)
 {
+    #ifdef __NDS__
+    uint16_t *gfx = bgGetGfxPtr(2);
+	int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
+	if (rect) {
+		rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
+		if (rx < 0) rw += rx, rx = 0;
+		if (ry < 0) rh += ry, ry = 0;
+		if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
+		if (ry + rh > SCREEN_HEIGHT) rh = SCREEN_HEIGHT - ry;
+	}
+	if (rw == SCREEN_WIDTH) { // faster fill!
+		memset16(gfx + ry * SCREEN_WIDTH, draw_color, rw * rh);
+	}
+	else for (int y = 0; y < rh; y++) {
+		memset16(gfx + ((ry + y) * SCREEN_WIDTH + rx), draw_color, rw);
+	}
+	return 0;
+    #else
     const int result = SDL_RenderFillRect(gameScreen.m_renderer, rect);
     if (result != 0)
     {
         WHINE_ONCE_ARGS(("Could not draw filled rectangle: %s", SDL_GetError()));
     }
     return result;
+    #endif
 }
 
 int Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
@@ -870,12 +874,40 @@ int Graphics::fill_rect(const int x, const int y, const int w, const int h, cons
 
 int Graphics::draw_rect(const SDL_Rect* rect)
 {
+    #ifdef __NDS__
+    uint16_t *gfx = bgGetGfxPtr(2);
+	int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
+	if (rect) {
+		rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y);
+        rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
+	}
+
+	for (int y = 1; y < rh - 1; y++) {
+		if (ry + y < 0 || ry + y >= SCREEN_HEIGHT) continue;
+
+		if (rx >= 0 && rx < SCREEN_WIDTH) {
+			gfx[(ry + y) * SCREEN_WIDTH + rx] = draw_color;
+		}
+		if (rx + rw - 1 >= 0 && rx + rw - 1 < SCREEN_WIDTH) {
+			gfx[(ry + y) * SCREEN_WIDTH + rx + rw - 1] = draw_color;
+		}
+	}
+
+	if (rx < 0) rw += rx, rx = 0;
+	if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
+
+	if (ry >= 0 && ry < SCREEN_HEIGHT) memset16(gfx + ry * SCREEN_WIDTH + rx, draw_color, rw);
+	if (ry + rh - 1 >= 0 && ry + rh - 1 < SCREEN_HEIGHT) memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH + rx, draw_color, rw);
+
+	return 0;
+    #else
     const int result = SDL_RenderDrawRect(gameScreen.m_renderer, rect);
     if (result != 0)
     {
         WHINE_ONCE_ARGS(("Could not draw rectangle: %s", SDL_GetError()));
     }
     return result;
+    #endif
 }
 
 int Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
@@ -912,22 +944,51 @@ int Graphics::draw_rect(const int x, const int y, const int w, const int h, cons
 
 int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
 {
+    #ifdef __NDS__
+    uint16_t *gfx = bgGetGfxPtr(2);
+	int dx = RENDER_SCALE(x2) - RENDER_SCALE(x), dy = RENDER_SCALE(y2) - RENDER_SCALE(y);
+	if (abs(dx) > abs(dy)) {
+		for (int ix = RENDER_SCALE(x); ix != RENDER_SCALE(x2); ix < RENDER_SCALE(x2) ? ix++ : ix--) {
+			int iy = ix * dy / dx;
+			if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
+			gfx[iy * SCREEN_WIDTH + ix] = draw_color;
+		}
+	} else {
+		for (int iy = RENDER_SCALE(y); iy != RENDER_SCALE(y2); iy < RENDER_SCALE(y2) ? iy++ : iy--) {
+			int ix = iy * dx / dy;
+			if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
+			gfx[iy * SCREEN_WIDTH + ix] = draw_color;
+		}
+	}
+	return 0;
+    #else
     const int result = SDL_RenderDrawLine(gameScreen.m_renderer, x, y, x2, y2);
     if (result != 0)
     {
         WHINE_ONCE_ARGS(("Could not draw line: %s", SDL_GetError()));
     }
     return result;
+    #endif
 }
 
 int Graphics::draw_points(const SDL_Point* points, const int count)
 {
+    #ifdef __NDS__
+    uint16_t *gfx = bgGetGfxPtr(2);
+	for (int i = 0; i < count; i++) {
+		int x = RENDER_SCALE(points[i].x), y = RENDER_SCALE(points[i].y);
+		if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT) continue;
+		gfx[y * SCREEN_WIDTH + x] = draw_color;
+	}
+	return 0;
+    #else
     const int result = SDL_RenderDrawPoints(gameScreen.m_renderer, points, count);
     if (result != 0)
     {
         WHINE_ONCE_ARGS(("Could not draw points: %s", SDL_GetError()));
     }
     return result;
+    #endif
 }
 
 int Graphics::draw_points(const SDL_Point* points, const int count, const int r, const int g, const int b)
@@ -3406,9 +3467,9 @@ void Graphics::drawfinalmap(void)
     {
         #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-        #endif
 
         set_render_target(foregroundTexture);
+        #endif
         set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
         clear(0, 0, 0, 0);
         if (map.tileset == 0) {
@@ -3479,8 +3540,8 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 
     #ifndef __NDS__
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-    #endif
     set_render_target(bg_obj.texture);
+    #endif
 
     if (bg_obj.tdrawback)
     {
@@ -3997,7 +4058,9 @@ void Graphics::screenshake(void)
         ApplyFilter(&tempFilterSrc, &tempFilterDest);
     }
 
+    #ifndef __NDS__
     set_render_target(tempShakeTexture);
+    #endif
     set_blendmode(SDL_BLENDMODE_NONE);
     clear();
 
@@ -4007,17 +4070,23 @@ void Graphics::screenshake(void)
 
     draw_screenshot_border();
 
+    #ifndef __NDS__
     set_render_target(gameTexture);
+    #endif
     clear();
 
     // Clear the gameplay texture so blackout() is actually black after a screenshake
     if (game.gamestate == GAMEMODE && game.blackout)
     {
+        #ifndef __NDS__
         set_render_target(gameplayTexture);
+        #endif
         clear();
     }
 
+    #ifndef __NDS__
     set_render_target(NULL);
+    #endif
     set_blendmode(SDL_BLENDMODE_NONE);
     draw_window_background();
 
@@ -4098,7 +4167,9 @@ void Graphics::render(void)
         ApplyFilter(&tempFilterSrc, &tempFilterDest);
     }
 
+    #ifndef __NDS__
     set_render_target(NULL);
+    #endif
     set_blendmode(SDL_BLENDMODE_NONE);
 
     draw_window_background();
