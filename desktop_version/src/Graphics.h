@@ -163,15 +163,26 @@ public:
 
     void drawimagecol(int t, int xp, int yp, SDL_Color ct, bool cent= false);
 
+    #ifdef __NDS__
+    void draw_texture(Bitmap* image, int x, int y);
+    void draw_texture_part(Bitmap* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
+
+    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height);
+    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
+    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, SDL_Color color);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int scalex, int scaley);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a, int scalex, int scaley);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b, int scalex, int scaley);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, SDL_Color color, int scalex, int scaley);
+    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, SDL_Color color);
+    #else
     void draw_texture(SDL_Texture* image, int x, int y);
 
     void draw_texture_part(SDL_Texture* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
 
-    #ifdef __NDS__
-    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height);
-    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
-    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, SDL_Color color);
-    #endif
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int scalex, int scaley);
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height);
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a, int scalex, int scaley);
@@ -180,6 +191,7 @@ public:
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b);
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, SDL_Color color, int scalex, int scaley);
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, SDL_Color color);
+    #endif
 
     void updatetextboxes(void);
     const char* textbox_line(char* buffer, size_t buffer_len, size_t textbox_i, size_t line_i);
@@ -194,14 +206,16 @@ public:
     void clear_sprite(int slot);
     void clear_sprites(void);
     void clear_sprites(bool forceUpdate);
+
+    void scroll_texture(Bitmap* texture, Bitmap* temp, int x, int y);
     #else
     void draw_sprite(int x, int y, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int t, SDL_Color color);
 
     void draw_flipsprite(int x, int y, int t, SDL_Color color);
-    #endif
 
     void scroll_texture(SDL_Texture* texture, SDL_Texture* temp, int x, int y);
+    #endif
 
     void printcrewname(int x, int y, int t);
     void printcrewnamedark(int x, int y, int t);
@@ -217,6 +231,18 @@ public:
         uint8_t b
     );
 
+    #ifdef __NDS__
+    int set_render_target(Bitmap* texture);
+
+    int set_texture_color_mod(Bitmap* texture, Uint8 r, Uint8 g, Uint8 b);
+
+    int set_texture_alpha_mod(Bitmap* texture, Uint8 alpha);
+
+    int query_texture(Bitmap* texture, Uint32* format, int* access, int* w, int* h);
+
+    int set_blendmode(SDL_BlendMode blendmode);
+    int set_blendmode(Bitmap* texture, SDL_BlendMode blendmode);
+    #else
     int set_render_target(SDL_Texture* texture);
 
     int set_texture_color_mod(SDL_Texture* texture, Uint8 r, Uint8 g, Uint8 b);
@@ -227,15 +253,24 @@ public:
 
     int set_blendmode(SDL_BlendMode blendmode);
     int set_blendmode(SDL_Texture* texture, SDL_BlendMode blendmode);
+    #endif
 
     int clear(int r, int g, int b, int a);
     int clear(void);
 
+    #ifdef __NDS__
+    bool substitute(Bitmap** texture);
+    void post_substitute(Bitmap* subst);
+
+    int copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest);
+    int copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
+    #else
     bool substitute(SDL_Texture** texture);
     void post_substitute(SDL_Texture* subst);
 
     int copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest);
     int copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
+    #endif
 
     int set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
     int set_color(Uint8 r, Uint8 g, Uint8 b);
@@ -331,10 +366,12 @@ public:
     bool onscreen(int t);
 
     bool reloadresources(void);
+    #ifndef __NDS__
     bool checktexturesize(
         const char* filename, SDL_Texture* texture,
         int tilewidth, int tileheight
     );
+    #endif
 
     bool tiles1_mounted;
     bool tiles2_mounted;
@@ -363,12 +400,26 @@ public:
     std::vector <SDL_Surface*> sprites_surf;
     std::vector <SDL_Surface*> flipsprites_surf;
 
+    #ifdef __NDS__
+    Bitmap* images[NUM_IMAGES];
+    #else
     SDL_Texture* images[NUM_IMAGES];
+    #endif
 
     bool flipmode;
     bool setflipmode;
     bool notextoutline;
 
+    #ifdef __NDS__
+    Bitmap* gameTexture;
+    Bitmap* tempShakeTexture;
+    Bitmap* gameplayTexture;
+    Bitmap* menuTexture;
+    Bitmap* ghostTexture;
+    Bitmap* backgroundTexture;
+    Bitmap* foregroundTexture;
+    Bitmap* tempScrollingTexture;
+    #else
     SDL_Texture* gameTexture;
     SDL_Texture* tempShakeTexture;
     SDL_Texture* gameplayTexture;
@@ -377,6 +428,7 @@ public:
     SDL_Texture* backgroundTexture;
     SDL_Texture* foregroundTexture;
     SDL_Texture* tempScrollingTexture;
+    #endif
     SDL_Surface* tempScreenshot;
     SDL_Surface* tempScreenshot2x;
 

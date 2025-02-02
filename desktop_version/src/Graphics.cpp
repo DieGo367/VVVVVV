@@ -188,10 +188,15 @@ void Graphics::create_buffers(void)
         SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, \
         (w), (h) \
     )
+#ifdef __NDS__
+#define CREATE_TEXTURE NULL
+#define CREATE_SCROLL_TEXTURE NULL
+#else
 #define CREATE_TEXTURE \
     CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS)
 #define CREATE_SCROLL_TEXTURE \
     CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS + 16, SCREEN_WIDTH_PIXELS + 16)
+#endif
 
     gameTexture = CREATE_TEXTURE;
     gameplayTexture = CREATE_TEXTURE;
@@ -221,6 +226,7 @@ void Graphics::create_buffers(void)
 
 void Graphics::destroy_buffers(void)
 {
+    #ifndef __NDS__
     VVV_freefunc(SDL_DestroyTexture, gameTexture);
     VVV_freefunc(SDL_DestroyTexture, gameplayTexture);
     VVV_freefunc(SDL_DestroyTexture, menuTexture);
@@ -231,6 +237,7 @@ void Graphics::destroy_buffers(void)
     VVV_freefunc(SDL_DestroyTexture, tempScrollingTexture);
     VVV_freefunc(SDL_DestroyTexture, towerbg.texture);
     VVV_freefunc(SDL_DestroyTexture, titlebg.texture);
+    #endif
     VVV_freefunc(SDL_FreeSurface, tempFilterSrc);
     VVV_freefunc(SDL_FreeSurface, tempFilterDest);
     VVV_freefunc(SDL_FreeSurface, tempScreenshot);
@@ -464,6 +471,174 @@ void Graphics::print_level_creator(
     font::print(print_flags, text_x, y, creator, r, g, b);
 }
 
+#ifdef __NDS__
+int Graphics::set_render_target(Bitmap* texture)
+{
+    const int result = SDL_SetRenderTarget(gameScreen.m_renderer, texture);
+    if (result != 0)
+    {
+        WHINE_ONCE_ARGS(("Could not set render target: %s", SDL_GetError()));
+    }
+    return result;
+}
+
+int Graphics::set_texture_color_mod(Bitmap* texture, const Uint8 r, const Uint8 g, const Uint8 b)
+{
+    if (texture) texture->colorMod = VRAM_COLOR(r, g, b);
+    return 0;
+}
+
+int Graphics::set_texture_alpha_mod(Bitmap* texture, const Uint8 alpha)
+{
+    if (texture) texture->alphaMod = alpha;
+    return 0;
+}
+
+int Graphics::query_texture(Bitmap* texture, Uint32* format, int* access, int* w, int* h)
+{
+    if (texture) {
+        if (format) *format = texture->bpp;
+        if (access) *access = SDL_TEXTUREACCESS_STATIC;
+        if (w) *w = texture->w;
+        if (h) *h = texture->h;
+        return 0;
+    }
+    WHINE_ONCE("Could not query texture");
+    return -1;
+}
+
+int Graphics::set_blendmode(const SDL_BlendMode blendmode)
+{
+    const int result = SDL_SetRenderDrawBlendMode(gameScreen.m_renderer, blendmode);
+    if (result != 0)
+    {
+        WHINE_ONCE_ARGS(("Could not set draw mode: %s", SDL_GetError()));
+    }
+    return result;
+}
+
+int Graphics::set_blendmode(Bitmap* texture, const SDL_BlendMode blendmode)
+{
+    const int result = SDL_SetTextureBlendMode(texture, blendmode);
+    if (result != 0)
+    {
+        WHINE_ONCE_ARGS(("Could not set texture blend mode: %s", SDL_GetError()));
+    }
+    return result;
+}
+
+int Graphics::clear(const int r, const int g, const int b, const int a)
+{
+    set_color(r, g, b, a);
+
+    const int result = SDL_RenderClear(gameScreen.m_renderer);
+    if (result != 0)
+    {
+        WHINE_ONCE_ARGS(("Could not clear current render target: %s", SDL_GetError()));
+    }
+    return result;
+}
+
+int Graphics::clear(void)
+{
+    return clear(0, 0, 0, 255);
+}
+
+bool Graphics::substitute(Bitmap** texture)
+{
+    /* Either keep the given texture the same and return false,
+     * or substitute it for a translation and return true. */
+
+    if (loc::english_sprites)
+    {
+        return false;
+    }
+    // NDS_TODO: sprite substitution
+    return false;
+}
+
+void Graphics::post_substitute(Bitmap* subst)
+{
+    set_texture_color_mod(subst, 255, 255, 255);
+    set_texture_alpha_mod(subst, 255);
+}
+
+static inline u16 colorMult(u16 target, u16 value) {
+	u8 r = (target & 0b11111) * (value & 0b11111) / 0b11111;
+	u8 g = (target >> 5 & 0b11111) * (value >> 5 & 0b11111) / 0b11111;
+	u8 b = (target >> 10 & 0b11111) * (value >> 10 & 0b11111) / 0b11111;
+	return 1 << 15 | b << 10 | g << 5 | r;
+}
+
+static inline u16 colorBlend(u16 base, u8 alpha, u16 top) {
+	u8 r = ((base & 0b11111) * (255 - alpha) + (top & 0b11111) * alpha) / 255;
+	u8 g = ((base >> 5 & 0b11111) * (255 - alpha) + (top >> 5 & 0b11111) * alpha) / 255;
+	u8 b = ((base >> 10 & 0b11111) * (255 - alpha) + (top >> 10 & 0b11111) * alpha) / 255;
+	return 1 << 15 | b << 10 | g << 5 | r;
+}
+
+int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest)
+{
+    bool is_substituted = substitute(&texture);
+
+    if (!texture) {
+        WHINE_ONCE("Could not copy texture");
+        return -1;
+    }
+	if (texture->alphaMod == 0) return 0;
+	
+	int clipX = 0, clipY = 0, clipW = texture->w, clipH = texture->h;
+	if (src) {
+		clipX = src->x, clipY = src->y, clipW = src->w, clipH = src->h;
+	}
+	int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
+    #define s(x) (((x)*4 + 3)/5)
+	if (dest) {
+		destX = s(dest->x), destY = s(dest->y), destW = s(dest->w), destH = s(dest->h);
+	}
+    #undef s
+
+	int offsX = destX < 0 ? -destX : 0;
+	int offsY = destY < 0 ? -destY : 0;
+	int rendW = (destW > SCREEN_WIDTH + offsX ? SCREEN_WIDTH + offsX : destW) + offsX;
+	int rendH = (destH > SCREEN_HEIGHT + offsY ? SCREEN_HEIGHT + offsY : destH) + offsY;
+
+	uint16_t *gfx = bgGetGfxPtr(2);
+	for (int y = offsY; y < rendH; y++) {
+		int ty = y * clipH / destH + clipY;
+		for (int x = offsX; x < rendW; x++) {
+			int tx = x * clipW / destW + clipX;
+			int pixelIdx = ty * texture->w + tx;
+			u16 color;
+			if (texture->bpp == 16) {
+				color = ((u16 *)texture->gfx)[pixelIdx];
+				if ((color & BIT(15)) == 0) continue;
+			// check for "5"bpp grayscale
+			} else {
+				u8 value = texture->gfx[pixelIdx * texture->bpp / 8] >> pixelIdx % (8 / texture->bpp) * texture->bpp & ((1 << texture->bpp) - 1);
+				if (value == 0) continue;
+				color = texture->palette[value];
+			}
+			color = colorMult(color, texture->colorMod);
+			uint16_t *px = gfx + (destY + y) * SCREEN_WIDTH + (destX + x);
+			if (texture->alphaMod != 255) *px = colorBlend(*px, texture->alphaMod, color);
+			else *px = color;
+		}
+	}
+
+    if (is_substituted)
+    {
+        post_substitute(texture);
+    }
+
+    return 0;
+}
+
+int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
+{
+    return copy_texture(texture, src, dest);
+}
+#else
 int Graphics::set_render_target(SDL_Texture* texture)
 {
     const int result = SDL_SetRenderTarget(gameScreen.m_renderer, texture);
@@ -553,7 +728,6 @@ bool Graphics::substitute(SDL_Texture** texture)
 
     SDL_Texture* subst = NULL;
 
-    #ifndef __NDS__ // sprites aren't textures anymore. though sprite localization is a NDS_TODO
     if (*texture == grphx.im_sprites)
     {
         subst = grphx.im_sprites_translated;
@@ -562,7 +736,6 @@ bool Graphics::substitute(SDL_Texture** texture)
     {
         subst = grphx.im_flipsprites_translated;
     }
-    #endif
 
     if (subst == NULL)
     {
@@ -621,6 +794,7 @@ int Graphics::copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_
 
     return result;
 }
+#endif
 
 int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
 {
@@ -769,7 +943,7 @@ static void drawsprite(const int x, const int y, const int slot, const int t, co
         vlog_error("Tried to draw sprite id %d", slot);
         return;
     }
-    SPRITE_PALETTE[slot*16 + 1] = (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3);
+    SPRITE_PALETTE[slot*16 + 1] = VRAM_COLOR(r, g, b);
     const int SPRITE_SIZE_U16 = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4; // 32x32 at 4bpp, so 4 pixels per short
     oamSet(
         &oamMain,
@@ -830,6 +1004,11 @@ void Graphics::clear_sprites(void)
 {
     clear_sprites(false);
 }
+
+void Graphics::scroll_texture(Bitmap* texture, Bitmap* temp, const int x, const int y)
+{
+    // NDS_TODO
+}
 #else
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
 {
@@ -845,7 +1024,6 @@ void Graphics::draw_flipsprite(const int x, const int y, const int t, const SDL_
 {
     draw_grid_tile(grphx.im_flipsprites, t, x, y, sprites_rect.w, sprites_rect.h, color);
 }
-#endif // __NDS__
 
 void Graphics::scroll_texture(SDL_Texture* texture, SDL_Texture* temp, const int x, const int y)
 {
@@ -862,6 +1040,7 @@ void Graphics::scroll_texture(SDL_Texture* texture, SDL_Texture* temp, const int
     set_render_target(target);
     copy_texture(temp, &src, &src);
 }
+#endif // __NDS__
 
 bool Graphics::shouldrecoloroneway(const int tilenum, const bool mounted)
 {
@@ -1268,6 +1447,131 @@ void Graphics::drawpartimage(const int t, const int xp, const int yp, const int 
     draw_texture_part(images[t], xp, yp, 0, 0, wp, hp, 1, 1);
 }
 
+#ifdef __NDS__
+void Graphics::draw_texture(Bitmap* image, const int x, const int y)
+{
+    int w, h;
+
+    if (query_texture(image, NULL, NULL, &w, &h) != 0)
+    {
+        return;
+    }
+
+    const SDL_Rect dstrect = {x, y, w, h};
+
+    copy_texture(image, NULL, &dstrect);
+}
+
+void Graphics::draw_texture_part(Bitmap* image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)
+{
+    const SDL_Rect srcrect = {x2, y2, w, h};
+
+    int flip = SDL_FLIP_NONE;
+
+    if (scalex < 0)
+    {
+        flip |= SDL_FLIP_HORIZONTAL;
+    }
+    if (scaley < 0)
+    {
+        flip |= SDL_FLIP_VERTICAL;
+    }
+
+    const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
+
+    copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
+}
+
+void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
+    u16 *map = bgGetMapPtr(3);
+    int tileX = x/8, tileY = y/8;
+    map[tileX + tileY * 64] = tileset->map[t];
+}
+
+void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const int r, const int g, const int b) {
+    draw_grid_tile(tileset, t, x, y, width, height);
+}
+
+void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const SDL_Color color) {
+    draw_grid_tile(tileset, t, x, y, width, height, color.r, color.g, color.b);
+}
+
+void Graphics::draw_grid_tile(Bitmap* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
+{
+    int tex_width;
+
+    if (query_texture(texture, NULL, NULL, &tex_width, NULL) != 0)
+    {
+        return;
+    }
+
+    const int x2 = (t % (tex_width / width)) * width;
+    const int y2 = (t / (tex_width / width)) * height;
+    draw_texture_part(texture, x, y, x2, y2, width, height, scalex, scaley);
+}
+
+void Graphics::draw_grid_tile(
+    Bitmap* texture, const int t,
+    const int x, const int y, const int width, const int height
+) {
+    draw_grid_tile(texture, t, x, y, width, height, 1, 1);
+}
+
+void Graphics::draw_grid_tile(
+    Bitmap* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const int r, const int g, const int b, const int a,
+    const int scalex, const int scaley
+) {
+    set_texture_color_mod(texture, r, g, b);
+    set_texture_alpha_mod(texture, a);
+    draw_grid_tile(texture, t, x, y, width, height, scalex, scaley);
+    set_texture_color_mod(texture, 255, 255, 255);
+    set_texture_alpha_mod(texture, 255);
+}
+
+void Graphics::draw_grid_tile(
+    Bitmap* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const int r, const int g, const int b, const int a
+) {
+    draw_grid_tile(texture, t, x, y, width, height, r, g, b, a, 1, 1);
+}
+
+void Graphics::draw_grid_tile(
+    Bitmap* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const int r, const int g, const int b,
+    const int scalex, const int scaley
+) {
+    draw_grid_tile(texture, t, x, y, width, height, r, g, b, 255, scalex, scaley);
+}
+
+void Graphics::draw_grid_tile(
+    Bitmap* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const int r, const int g, const int b
+) {
+    draw_grid_tile(texture, t, x, y, width, height, r, g, b, 255);
+}
+
+void Graphics::draw_grid_tile(
+    Bitmap* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const SDL_Color color,
+    const int scalex, const int scaley
+) {
+    draw_grid_tile(texture, t, x, y, width, height, color.r, color.g, color.b, color.a, scalex, scaley);
+}
+
+void Graphics::draw_grid_tile(
+    Bitmap* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const SDL_Color color
+) {
+    draw_grid_tile(texture, t, x, y, width, height, color, 1, 1);
+}
+#else
 void Graphics::draw_texture(SDL_Texture* image, const int x, const int y)
 {
     int w, h;
@@ -1301,22 +1605,6 @@ void Graphics::draw_texture_part(SDL_Texture* image, const int x, const int y, c
 
     copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
 }
-
-#ifdef __NDS__
-void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
-    u16 *map = bgGetMapPtr(3);
-    int tileX = x/8, tileY = y/8;
-    map[tileX + tileY * 64] = tileset->map[t];
-}
-
-void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const int r, const int g, const int b) {
-    draw_grid_tile(tileset, t, x, y, width, height);
-}
-
-void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const SDL_Color color) {
-    draw_grid_tile(tileset, t, x, y, width, height, color.r, color.g, color.b);
-}
-#endif
 
 void Graphics::draw_grid_tile(SDL_Texture* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
 {
@@ -1393,6 +1681,7 @@ void Graphics::draw_grid_tile(
 ) {
     draw_grid_tile(texture, t, x, y, width, height, color, 1, 1);
 }
+#endif
 
 void Graphics::cutscenebars(void)
 {
@@ -2928,8 +3217,10 @@ void Graphics::updatebackground(int t)
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
+        #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
+        #endif
 
         if (backgrounddrawn)
         {
@@ -2962,7 +3253,9 @@ void Graphics::updatebackground(int t)
             }
             backgrounddrawn = true;
         }
+        #ifndef __NDS__
         set_render_target(target);
+        #endif
         break;
     }
     case 4: // Warp zone (vertical)
@@ -2971,8 +3264,10 @@ void Graphics::updatebackground(int t)
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
+        #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
+        #endif
 
         if (backgrounddrawn)
         {
@@ -3005,7 +3300,9 @@ void Graphics::updatebackground(int t)
             }
             backgrounddrawn = true;
         }
+        #ifndef __NDS__
         set_render_target(target);
+        #endif
         break;
     }
     case 5:
@@ -3038,8 +3335,6 @@ void Graphics::drawmap(void)
 {
     if (!foregrounddrawn)
     {
-        SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-
         #ifdef __NDS__
         u16 *bgMap = bgGetMapPtr(3);
         if (map.tileset != active_tileset) {
@@ -3049,6 +3344,8 @@ void Graphics::drawmap(void)
             active_tileset = map.tileset;
         }
         #else
+        SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
+
         set_render_target(foregroundTexture);
         set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
         clear(0, 0, 0, 0);
@@ -3094,7 +3391,9 @@ void Graphics::drawmap(void)
             }
         }
 
+        #ifndef __NDS__
         set_render_target(target);
+        #endif
         foregrounddrawn = true;
     }
 
@@ -3105,7 +3404,9 @@ void Graphics::drawfinalmap(void)
 {
     if (!foregrounddrawn)
     {
+        #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
+        #endif
 
         set_render_target(foregroundTexture);
         set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
@@ -3126,7 +3427,9 @@ void Graphics::drawfinalmap(void)
                 }
             }
         }
+        #ifndef __NDS__
         set_render_target(target);
+        #endif
         foregrounddrawn = true;
     }
 
@@ -3174,7 +3477,9 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 {
     if (bg_obj.bypos < 0) bg_obj.bypos += 120 * 8;
 
+    #ifndef __NDS__
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
+    #endif
     set_render_target(bg_obj.texture);
 
     if (bg_obj.tdrawback)
@@ -3222,7 +3527,9 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
             }
         }
     }
+    #ifndef __NDS__
     set_render_target(target);
+    #endif
 }
 
 #define GETCOL_RANDOM (game.noflashingmode ? 0.5 : fRandom())
@@ -3907,8 +4214,8 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     const int TELE_SPRITE_SIZE_U16 = 96*96 / 4; // 4bpp
     u16 * const TELE_SPRITE_RESERVED = SPRITE_GFX + 0xC000;
     memcpy(TELE_SPRITE_RESERVED, grphx.im_teleporter + TELE_SPRITE_SIZE_U16 * (t-1), TELE_SPRITE_SIZE_U16*sizeof(u16));
-    SPRITE_PALETTE[slot*16 + 1] = (1 << 15 | ((color.b) >> 3) << 10 | ((color.g) >> 3) << 5 | (color.r) >> 3);
-    SPRITE_PALETTE[slot*16 + 2] = (1 << 15 | ((16) >> 3) << 10 | ((16) >> 3) << 5 | (16) >> 3);
+    SPRITE_PALETTE[slot*16 + 1] = VRAM_COLOR(color.r, color.g, color.b);
+    SPRITE_PALETTE[slot*16 + 2] = VRAM_COLOR(16, 16, 16);
 
     oamSet(
         &oamMain,
@@ -4011,6 +4318,7 @@ bool Graphics::onscreen(int t)
     return (t >= -40 && t <= 280);
 }
 
+#ifndef __NDS__
 bool Graphics::checktexturesize(
     const char* filename, SDL_Texture* texture,
     const int tilewidth, const int tileheight
@@ -4061,6 +4369,7 @@ static void make_array(
         }
     }
 }
+#endif
 
 bool Graphics::reloadresources(void)
 {

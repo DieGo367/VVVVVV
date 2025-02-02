@@ -2,14 +2,6 @@
 #include "SDL_rect.h"
 #include "SDL_surface.h"
 
-typedef struct SDL_Texture {
-	uint16_t w, h;
-	uint8_t bpp;
-	uint8_t alphaMod;
-	uint16_t colorMod;
-	uint16_t *palette;
-	uint8_t *data;
-} SDL_Texture;
 typedef struct SDL_Renderer {} SDL_Renderer;
 
 typedef enum {
@@ -23,20 +15,9 @@ typedef enum {
 	SDL_ScaleModeBest
 } SDL_ScaleMode;
 
-SDL_Texture *SDL_CreateTexture(SDL_Renderer *rend, uint32_t format, int access, int w, int h);
-SDL_Texture *SDL_CreateTextureFromSurface(SDL_Renderer *rend, SDL_Surface *surf);
-int SDL_QueryTexture(SDL_Texture *tex, uint32_t *format, int *access, int *w, int *h);
 #define SDL_UpdateTexture(tex, rect, pixels, pitch) 0
-void SDL_DestroyTexture(SDL_Texture *tex);
 #define SDL_SetTextureScaleMode(tex, scaleMode) 0
 #define SDL_SetTextureBlendMode(tex, blendMode) 0
-int SDL_SetTextureColorMod(SDL_Texture *tex, uint8_t r, uint8_t g, uint8_t b);
-int SDL_SetTextureAlphaMod(SDL_Texture *tex, uint8_t a);
-int SDL_GetTextureColorMod(SDL_Texture *tex, uint8_t *r, uint8_t *g, uint8_t *b);
-int SDL_GetTextureAlphaMod(SDL_Texture *tex, uint8_t *alpha);
-
-SDL_Texture *SnDsL_CreateTextureFromGRFData(int w, int h, int bpp, void *data, void *palette, int palCount);
-SDL_Color SnDsL_ReadPixel(SDL_Texture *tex, int x, int y);
 
 typedef enum {
 	SDL_FLIP_NONE = 0,
@@ -60,7 +41,6 @@ int SDL_RenderDrawPoints(SDL_Renderer *rend, const SDL_Point *points, int count)
 int SDL_RenderDrawRect(SDL_Renderer *rend, const SDL_Rect *rect);
 int SDL_RenderFillRect(SDL_Renderer *rend, const SDL_Rect *rect);
 int SDL_RenderClear(SDL_Renderer *rend);
-int SDL_RenderCopy(SDL_Renderer *rend, SDL_Texture *tex, const SDL_Rect *clip, const SDL_Rect *dst);
 #define SDL_RenderCopyEx(rend, tex, srcRect, destRect, angle, center, flip) SDL_RenderCopy(rend, tex, srcRect, destRect)
 #define SDL_RenderPresent(rend)
 

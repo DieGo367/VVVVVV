@@ -34,7 +34,137 @@ extern "C"
     extern const char* lodepng_error_text(unsigned code);
 }
 
-#ifndef __NDS__
+#ifdef __NDS__
+#include <nds/arm9/grf.h>
+#include <nds/arm9/sprite.h>
+
+static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void **gfxDst, size_t *gfxSize, void **mapDst, size_t *mapSize, void **palDst, size_t *palSize)
+{
+    unsigned char* fileData;
+    size_t length;
+    FILESYSTEM_loadAssetToMemory(filename, &fileData, &length);
+
+    if (fileData == NULL) {
+        vlog_error("Image not found: %s", filename);
+        SDL_assert(0 && "Image file missing!");
+        return false;
+    }
+
+    GRFError error = grfLoadMem(fileData, header, gfxDst, gfxSize, mapDst, mapSize, palDst, palSize);
+    VVV_free(fileData);
+
+    if (error != GRF_NO_ERROR) {
+        vlog_error("Could not load %s. GRFError: %i", filename, error);
+        return false;
+    }
+
+    return true;
+}
+
+Bitmap* LoadImage(const char *filename, const TextureLoadType loadtype)
+{
+    GRFHeader header;
+    void *gfx = NULL, *palette = NULL;
+    size_t gfxSize, paletteSize;
+    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, &palette, &paletteSize);
+    if (!success) return NULL;
+
+    Bitmap *tex = (Bitmap *)malloc(sizeof(Bitmap));
+    if (!tex) {
+        VVV_free(gfx); VVV_free(palette);
+        vlog_error("Could not load %s: OOM", filename);
+        return NULL;
+    }
+
+    tex->w = header.gfxWidth;
+    tex->h = header.gfxHeight;
+    tex->bpp = header.gfxAttr;
+    tex->alphaMod = 255;
+    tex->colorMod = 0xFFFF;
+    tex->gfx = (u8 *)gfx;
+    tex->palette = (u16 *)palette;
+    if(tex->palette) {
+        tex->palette[0] = paletteSize / sizeof(u16);
+        if (loadtype == TEX_WHITE) {
+            for (int i = 1; i < tex->palette[0]; i++) {
+                tex->palette[i] = 0xFFFF;
+            }
+        }
+    }
+    return tex;
+}
+
+static Bitmap* LoadImage(const char* filename)
+{
+    return LoadImage(filename, TEX_COLOR);
+}
+
+void DestroyImage(Bitmap *bitmap)
+{
+    if (bitmap) {
+        if (bitmap->gfx) free(bitmap->gfx);
+        if (bitmap->palette) free(bitmap->palette);
+        free(bitmap);
+    }
+}
+
+static Tileset *LoadTileset(const char *filename)
+{
+    GRFHeader header;
+    void *gfx = NULL, *palette = NULL, *map = NULL;
+    size_t gfxSize, paletteSize, mapSize;
+    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, &map, &mapSize, &palette, &paletteSize);
+    if (!success) return NULL;
+
+    Tileset *tileset = (Tileset *)malloc(sizeof(Tileset));
+    tileset->gfx = gfx;
+    tileset->gfxSize = gfxSize;
+    tileset->palette = (u16 *)palette;
+    tileset->paletteSize = paletteSize;
+    tileset->map = (u16 *)map;
+    return tileset;
+}
+
+static void DestroyTileset(Tileset *tileset)
+{
+    if (tileset) {
+        if (tileset->gfx) free(tileset->gfx);
+        if (tileset->palette) free(tileset->palette);
+        if (tileset->map) free(tileset->map);
+        free(tileset);
+    }
+}
+
+static u16 *LoadSprites(const char *filename)
+{
+    GRFHeader header;
+    void *gfx = NULL;
+    size_t gfxSize;
+    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
+    if (!success) return NULL;
+
+    memcpy(SPRITE_GFX, gfx, gfxSize);
+    return (u16 *)gfx;
+}
+
+static u16 *LoadTeleporter(const char *filename)
+{
+    GRFHeader header;
+    void *gfx = NULL;
+    size_t gfxSize;
+    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
+    return success ? (u16 *)gfx : NULL;
+}
+
+static void LoadSpritesTranslation(
+    const char* filename,
+    tinyxml2::XMLDocument* mask,
+    SDL_Surface* surface_english,
+    Bitmap** texture
+) {
+    // NDS_TODO: implement
+}
+#else
 static SDL_Surface* LoadImageRaw(const char* filename, unsigned char** data)
 {
     *data = NULL;
@@ -177,60 +307,9 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
 
     return texture;
 }
-#else
-#include <nds/arm9/grf.h>
-static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void **gfxDst, size_t *gfxSize, void **mapDst, size_t *mapSize, void **palDst, size_t *palSize)
-{
-    unsigned char* fileData;
-    size_t length;
-    FILESYSTEM_loadAssetToMemory(filename, &fileData, &length);
-
-    if (fileData == NULL) {
-        vlog_error("Image not found: %s", filename);
-        SDL_assert(0 && "Image file missing!");
-        return false;
-    }
-
-    GRFError error = grfLoadMem(fileData, header, gfxDst, gfxSize, mapDst, mapSize, palDst, palSize);
-    VVV_free(fileData);
-
-    if (error != GRF_NO_ERROR) {
-        vlog_error("Could not load %s. GRFError: %i", filename, error);
-        return false;
-    }
-
-    return true;
-}
-#endif
 
 SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
 {
-    #ifdef __NDS__
-    GRFHeader header;
-    void *gfx = NULL, *palette = NULL;
-    size_t gfxSize, paletteSize;
-    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, &palette, &paletteSize);
-    if (!success) return NULL;
-
-    SDL_Texture *tex = SnDsL_CreateTextureFromGRFData(
-        header.gfxWidth, header.gfxHeight, header.gfxAttr,
-        gfx, palette, paletteSize / sizeof(uint16_t)
-    );
-    if (!tex) {
-        VVV_free(gfx); VVV_free(palette);
-        vlog_error("Could not load %s: OOM", filename);
-        return NULL;
-    }
-
-    if (loadtype == TEX_WHITE) {
-        for (int i = 1; i < tex->palette[0]; i++) {
-            tex->palette[i] = 0xFFFF;
-        }
-    }
-
-    return tex;
-    #else
-    
     unsigned char* data;
 
     SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
@@ -251,7 +330,6 @@ SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
     }
 
     return texture;
-    #endif // __NDS__
 }
 
 static SDL_Texture* LoadImage(const char* filename)
@@ -259,30 +337,6 @@ static SDL_Texture* LoadImage(const char* filename)
     return LoadImage(filename, TEX_COLOR);
 }
 
-#ifdef __NDS__
-static void LoadTileset(const char *filename, Tileset **tileset) {
-    GRFHeader header;
-    void *gfx = NULL, *palette = NULL, *map = NULL;
-    size_t gfxSize, paletteSize, mapSize;
-    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, &map, &mapSize, &palette, &paletteSize);
-    if (!success) return;
-
-    *tileset = (Tileset *)malloc(sizeof(Tileset));
-    (*tileset)->gfx = gfx;
-    (*tileset)->gfxSize = gfxSize;
-    (*tileset)->palette = (u16 *)palette;
-    (*tileset)->paletteSize = paletteSize;
-    (*tileset)->map = (u16 *)map;
-}
-static void DestroyTileset(Tileset *tileset) {
-    if (tileset) {
-        if (tileset->gfx) free(tileset->gfx);
-        if (tileset->palette) free(tileset->palette);
-        if (tileset->map) free(tileset->map);
-        free(tileset);
-    }
-}
-#else
 /* Any unneeded variants can be NULL */
 static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Texture** white, SDL_Texture** grayscale)
 {
@@ -326,37 +380,7 @@ static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Textur
 
     VVV_free(data);
 }
-#endif
 
-#ifdef __NDS__
-#include <nds/arm9/sprite.h>
-static void LoadSprites(const char *filename, Spritesheet **spritesheet) {
-    GRFHeader header;
-    void *gfx = NULL;
-    size_t gfxSize;
-    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
-    if (!success) return;
-
-    *spritesheet = (Spritesheet *)malloc(sizeof(Spritesheet));
-    (*spritesheet)->gfx = gfx;
-    memcpy(SPRITE_GFX, gfx, gfxSize);
-}
-static void DestroySpritesheet(Spritesheet *spritesheet) {
-    if (spritesheet) {
-        if (spritesheet->gfx) free(spritesheet->gfx);
-        free(spritesheet);
-    }
-}
-
-static void LoadTeleporter(const char *filename, u16 **teleporterGfx) {
-    GRFHeader header;
-    void *gfx = NULL;
-    size_t gfxSize;
-    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
-    if (!success) return;
-    *teleporterGfx = (u16 *)gfx;
-}
-#else
 /* The pointers `texture` and `surface` cannot be NULL */
 static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface** surface)
 {
@@ -384,7 +408,6 @@ static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface
 
     VVV_free(data);
 }
-#endif
 
 static void LoadSpritesTranslation(
     const char* filename,
@@ -395,9 +418,7 @@ static void LoadSpritesTranslation(
     /* Create a sprites texture for display in another language.
      * surface_english is used as a base. Parts of the translation (filename)
      * will replace parts of the base, as instructed in the mask XML. */
-    #ifdef __NDS__
-    return; // NDS_TODO: implement
-    #else
+
     if (surface_english == NULL)
     {
         vlog_error("LoadSpritesTranslation: English surface is NULL!");
@@ -458,13 +479,18 @@ static void LoadSpritesTranslation(
 
     VVV_freefunc(SDL_FreeSurface, translated);
     VVV_freefunc(SDL_FreeSurface, working);
-    #endif
 }
+#endif // __NDS__ else
 
 void GraphicsResources::init_translations(void)
 {
+    #ifdef __NDS__
+    VVV_freefunc(DestroyImage, im_sprites_translated);
+    VVV_freefunc(DestroyImage, im_flipsprites_translated);
+    #else
     VVV_freefunc(SDL_DestroyTexture, im_sprites_translated);
     VVV_freefunc(SDL_DestroyTexture, im_flipsprites_translated);
+    #endif
 
     if (loc::english_sprites)
     {
@@ -520,16 +546,16 @@ void GraphicsResources::init_translations(void)
 void GraphicsResources::init(void)
 {
     #ifdef __NDS__
-    LoadTileset("graphics/tiles.grf", &im_tiles);
-    LoadTileset("graphics/tiles2.grf", &im_tiles2);
-    LoadTileset("graphics/tiles3.grf", &im_tiles3);
+    im_tiles = LoadTileset("graphics/tiles.grf");
+    im_tiles2 = LoadTileset("graphics/tiles2.grf");
+    im_tiles3 = LoadTileset("graphics/tiles3.grf");
     // LoadVariants("graphics/entcolours.grf", &im_entcolours, NULL, &im_entcolours_tint);
 
-    LoadSprites("graphics/sprites.grf", &im_sprites);
+    im_sprites = LoadSprites("graphics/sprites.grf");
     im_flipsprites = im_sprites;
     im_flipsprites_surf = im_sprites_surf;
 
-    LoadTeleporter("graphics/teleporter.grf", &im_teleporter);
+    im_teleporter = LoadTeleporter("graphics/teleporter.grf");
 
     im_image0 = LoadImage("graphics/levelcomplete.grf");
     im_image5 = im_image0;
@@ -573,9 +599,9 @@ void GraphicsResources::init(void)
 
     init_translations();
 
+    #ifndef __NDS__
     im_image12 = SDL_CreateTexture(gameScreen.m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 240, 180);
 
-    #ifndef __NDS__
     if (im_image12 == NULL)
     {
         vlog_error("Failed to create minimap texture: %s", SDL_GetError());
@@ -588,28 +614,28 @@ void GraphicsResources::init(void)
 
 void GraphicsResources::destroy(void)
 {
-#define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
 #ifdef __NDS__
+#define CLEAR(img) VVV_freefunc(DestroyImage, img)
 #define CLEAR_TILES(tiles) VVV_freefunc(DestroyTileset, tiles)
     CLEAR_TILES(im_tiles);
     CLEAR_TILES(im_tiles2);
     CLEAR_TILES(im_tiles3);
+#undef CLEAR_TILES
+    CLEAR(im_entcolours);
+    CLEAR(im_entcolours_tint);
+    VVV_free(im_sprites);
+    VVV_free(im_flipsprites);
+    VVV_free(im_teleporter);
 #else
+#define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
     CLEAR(im_tiles);
     CLEAR(im_tiles_white);
     CLEAR(im_tiles_tint);
     CLEAR(im_tiles2);
     CLEAR(im_tiles2_tint);
     CLEAR(im_tiles3);
-#endif
     CLEAR(im_entcolours);
     CLEAR(im_entcolours_tint);
-#ifdef __NDS__
-#define CLEAR_SPRITES(sprites) VVV_freefunc(DestroySpritesheet, sprites)
-    CLEAR_SPRITES(im_sprites);
-    CLEAR_SPRITES(im_flipsprites);
-    VVV_freefunc(free, im_teleporter);
-#else
     CLEAR(im_sprites);
     CLEAR(im_flipsprites);
     CLEAR(im_teleporter);
@@ -632,10 +658,6 @@ void GraphicsResources::destroy(void)
     CLEAR(im_sprites_translated);
     CLEAR(im_flipsprites_translated);
 #undef CLEAR
-#ifdef __NDS__
-#undef CLEAR_TILES
-#undef CLEAR_SPRITES
-#endif
 
     VVV_freefunc(SDL_FreeSurface, im_sprites_surf);
     VVV_freefunc(SDL_FreeSurface, im_flipsprites_surf);

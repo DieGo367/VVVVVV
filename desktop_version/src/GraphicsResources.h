@@ -19,8 +19,13 @@ typedef struct {
     u16 *map;
 } Tileset;
 typedef struct {
-    void *gfx;
-} Spritesheet;
+	u16 w, h;
+	u8 bpp;
+	u8 alphaMod;
+	u16 colorMod;
+	u16 *palette;
+	u8 *gfx;
+} Bitmap;
 #endif
 
 class GraphicsResources
@@ -38,6 +43,27 @@ public:
     Tileset *im_tiles;
     Tileset *im_tiles2;
     Tileset *im_tiles3;
+    Bitmap* im_entcolours;
+    Bitmap* im_entcolours_tint;
+    u16 *im_sprites;
+    u16 *im_flipsprites;
+    u16 *im_teleporter;
+    Bitmap* im_image0;
+    Bitmap* im_image1;
+    Bitmap* im_image2;
+    Bitmap* im_image3;
+    Bitmap* im_image4;
+    Bitmap* im_image5;
+    Bitmap* im_image6;
+    Bitmap* im_image7;
+    Bitmap* im_image8;
+    Bitmap* im_image9;
+    Bitmap* im_image10;
+    Bitmap* im_image11;
+    Bitmap* im_image12;
+
+    Bitmap* im_sprites_translated;
+    Bitmap* im_flipsprites_translated;
     #else
     SDL_Texture* im_tiles;
     SDL_Texture* im_tiles_white;
@@ -45,18 +71,11 @@ public:
     SDL_Texture* im_tiles2;
     SDL_Texture* im_tiles2_tint;
     SDL_Texture* im_tiles3;
-    #endif
     SDL_Texture* im_entcolours;
     SDL_Texture* im_entcolours_tint;
-    #ifdef __NDS__
-    Spritesheet *im_sprites;
-    Spritesheet *im_flipsprites;
-    u16 *im_teleporter;
-    #else
     SDL_Texture* im_sprites;
     SDL_Texture* im_flipsprites;
     SDL_Texture* im_teleporter;
-    #endif
     SDL_Texture* im_image0;
     SDL_Texture* im_image1;
     SDL_Texture* im_image2;
@@ -73,10 +92,16 @@ public:
 
     SDL_Texture* im_sprites_translated;
     SDL_Texture* im_flipsprites_translated;
+    #endif
 };
 
 SDL_Surface* LoadImageSurface(const char* filename);
+#ifdef __NDS__
+Bitmap* LoadImage(const char *filename, TextureLoadType loadtype);
+void DestroyImage(Bitmap *image);
+#else
 SDL_Texture* LoadImage(const char *filename, TextureLoadType loadtype);
+#endif
 
 bool SaveImage(const SDL_Surface* surface, const char* filename);
 bool SaveScreenshot(void);

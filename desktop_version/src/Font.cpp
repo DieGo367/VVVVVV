@@ -55,7 +55,11 @@ struct Font
     uint8_t glyph_w;
     uint8_t glyph_h;
 
+    #ifdef __NDS__
+    Bitmap* image;
+    #else
     SDL_Texture* image;
+    #endif
 
     GlyphInfo* glyph_page[FONT_N_PAGES];
 
@@ -407,7 +411,6 @@ static uint8_t load_font(FontContainer* container, const char* name)
 
         #ifdef __NDS__
         #define temp_surface f->image
-        #define ReadPixel SnDsL_ReadPixel
         #else
         SDL_Surface* temp_surface = LoadImageSurface(name_png);
         #endif
@@ -430,11 +433,28 @@ static uint8_t load_font(FontContainer* container, const char* name)
                     {
                         for (int pixel_x = 0; pixel_x < f->glyph_w; pixel_x++)
                         {
+                            #ifdef __NDS__
+                            int texX = glyph_x+pixel_x, texY = glyph_y+pixel_y;
+                            if (texX >= 0 && texX < f->image->w && texY >= 0 && texY < f->image->h) {
+                                int pixelIdx = texY * f->image->w + texX;
+                                u16 color;
+                                if (f->image->bpp == 16) color = ((u16 *)f->image->gfx)[pixelIdx];
+                                else {
+                                    u8 value = f->image->gfx[pixelIdx * f->image->bpp / 8] >> pixelIdx % (8 / f->image->bpp) * f->image->bpp & ((1 << f->image->bpp) - 1);
+                                    color = value ? f->image->palette[value] : 0;
+                                }
+                                if (color & 1 << 15) {
+                                    found_pixel = true;
+                                    goto no_more_pixels;
+                                }
+                            }
+                            #else
                             if (ReadPixel(temp_surface, glyph_x+pixel_x, glyph_y+pixel_y).a > 0)
                             {
                                 found_pixel = true;
                                 goto no_more_pixels;
                             }
+                            #endif
                         }
                     }
                     no_more_pixels:
@@ -449,7 +469,6 @@ static uint8_t load_font(FontContainer* container, const char* name)
 
         #ifdef __NDS__
         #undef temp_surface
-        #undef ReadPixel
         #else
             VVV_freefunc(SDL_FreeSurface, temp_surface);
         #endif
@@ -724,7 +743,11 @@ void load_custom(const char* name)
 
 void unload_font(Font* f)
 {
+    #ifdef __NDS__
+    VVV_freefunc(DestroyImage, f->image);
+    #else
     VVV_freefunc(SDL_DestroyTexture, f->image);
+    #endif
 
     for (int i = 0; i < FONT_N_PAGES; i++)
     {

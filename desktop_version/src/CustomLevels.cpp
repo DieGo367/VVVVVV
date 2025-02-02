@@ -1716,7 +1716,9 @@ void customlevelclass::generatecustomminimap(void)
 
     // Start drawing the minimap
 
+    #ifndef __NDS__
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
+    #endif
     graphics.set_render_target(graphics.images[IMAGE_CUSTOMMINIMAP]);
     graphics.clear();
 
@@ -1785,7 +1787,9 @@ void customlevelclass::generatecustomminimap(void)
         }
     }
 
+    #ifndef __NDS__
     graphics.set_render_target(target);
+    #endif
 }
 
 // Return a graphics-ready color based off of the given tileset and tilecol
