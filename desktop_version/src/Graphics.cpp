@@ -1065,6 +1065,7 @@ void Graphics::clear_sprite(const int slot)
 void Graphics::clear_sprites(const bool forceUpdate)
 {
     oamClear(&oamMain, 0, 16); // I'm assuming that there are never more than 16 sprites in use
+    teleporter_slot = -1;
     if (forceUpdate) oamUpdate(&oamMain);
 }
 void Graphics::clear_sprites(void)
