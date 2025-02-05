@@ -20,7 +20,6 @@ extern "C" {
 #include "SDL_endian.h"
 #include "SDL_keyboard.h"
 #include "SDL_log.h"
-#include "SDL_rect.h"
 #include "SDL_rwops.h"
 #include "SDL_timer.h"
 
@@ -147,6 +146,21 @@ typedef struct SDL_Color
 	Uint8 a;
 } SDL_Color;
 #define SDL_Colour SDL_Color
+
+// rect.h
+
+typedef struct SDL_Point {
+	int x, y;
+} SDL_Point;
+typedef struct SDL_Rect {
+	int x, y;
+	int w, h;
+} SDL_Rect;
+
+inline SDL_bool SDL_PointInRect(const SDL_Point *p, const SDL_Rect *r) {
+	return ( (p->x >= r->x) && (p->x < (r->x + r->w)) &&
+			 (p->y >= r->y) && (p->y < (r->y + r->h)) ) ? SDL_TRUE : SDL_FALSE;
+}
 
 // render.h
 

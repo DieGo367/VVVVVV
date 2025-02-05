@@ -1004,6 +1004,7 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 }
 
 #ifdef __NDS__
+#define SPRITE_SIZE_U16 (SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4) // 32x32 at 4bpp, so 4 pixels per short
 static void drawsprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b, const SpriteSize size)
 {
     if (slot >= 16) {
@@ -1011,7 +1012,6 @@ static void drawsprite(const int x, const int y, const int slot, const int t, co
         return;
     }
     SPRITE_PALETTE[slot*16 + 1] = VRAM_COLOR(r, g, b);
-    const int SPRITE_SIZE_U16 = SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4; // 32x32 at 4bpp, so 4 pixels per short
     oamSet(
         &oamMain,
         slot,
@@ -2329,7 +2329,7 @@ void Graphics::drawcoloredtile(
 
 
 #ifdef __NDS__
-bool Graphics::Hitest(int frame1, SDL_Point p1, int frame2, SDL_Point p2, int size2)
+bool Graphics::Hitest(int frame1, SDL_Point p1, int frame2, SDL_Point p2)
 #else
 bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2, SDL_Point p2)
 #endif
@@ -2337,7 +2337,20 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
 
     //find rectangle where they intersect:
 
-    #ifndef __NDS__ // NDS_TODO: collision
+    #ifdef __NDS__
+    int r1_left = p1.x;
+    int r1_right = r1_left + 32;
+    int r2_left = p2.x;
+    int r2_right = r2_left + 32;
+
+    int r1_bottom = p1.y;
+    int r1_top = p1.y + 32;
+    int r2_bottom  = p2.y;
+    int r2_top = p2.y + 32;
+
+    SDL_Rect rect1 = {p1.x, p1.y, 32, 32};
+    SDL_Rect rect2 = {p2.x, p2.y, 32, 32};
+    #else
     int r1_left = p1.x;
     int r1_right = r1_left + surface1->w;
     int r2_left = p2.x;
@@ -2350,10 +2363,15 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
 
     SDL_Rect rect1 = {p1.x, p1.y, surface1->w, surface1->h};
     SDL_Rect rect2 = {p2.x, p2.y, surface2->w, surface2->h};
+    #endif
     bool intersection = help.intersects(rect1, rect2);
 
     if(intersection)
     {
+        #ifdef __NDS__
+        const u8 * const frame1Gfx = (u8 *)(grphx.im_sprites + frame1 * SPRITE_SIZE_U16);
+        const u8 * const frame2Gfx = (u8 *)(grphx.im_sprites + frame2 * SPRITE_SIZE_U16);
+        #endif
         int r3_left = SDL_max(r1_left, r2_left);
         int r3_top = SDL_min(r1_top, r2_top);
         int r3_right = SDL_min(r1_right, r2_right);
@@ -2362,8 +2380,26 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
         //for every pixel inside rectangle
         for(int x = r3_left; x < r3_right; x++)
         {
+            #ifdef __NDS__
+            const int px1 = x - p1.x;
+            const int px2 = x - p2.x;
+            const u8 tile1X = px1/8; 
+            const u8 tile2X = px2/8; 
+            #endif
             for(int y = r3_bottom; y < r3_top; y++)
             {
+                #ifdef __NDS__
+                const int py1 = y - p1.y;
+                const int py2 = y - p2.y;
+                const u8 tile1Y = py1/8;
+                const u8 tile2Y = py2/8;
+                const u8 tile1 = tile1Y * 4 + tile1X;
+                const u8 tile2 = tile2Y * 4 + tile2X;
+
+                u8 pixel1 = frame1Gfx[tile1 * 32 + (py1%8) * 16 + (px1%8)/2] & (px1%2 ? 0xF0 : 0x0F);
+                u8 pixel2 = frame2Gfx[tile2 * 32 + (py2%8) * 16 + (px2%8)/2] & (px2%2 ? 0xF0 : 0x0F);
+                if (pixel1 && pixel2) return true;
+                #else
                 const SDL_Color pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
                 const SDL_Color pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
                 /* INTENTIONAL BUG! In previous versions, the game mistakenly
@@ -2373,10 +2409,10 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
                 {
                     return true;
                 }
+                #endif
             }
         }
     }
-    #endif
     return false;
 
 }

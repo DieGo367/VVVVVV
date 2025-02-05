@@ -4815,7 +4815,7 @@ void entityclass::collisioncheck(int i, int j, bool scm /*= false*/)
                 int drawframe2 = entities[j].drawframe;
 
                 #ifdef __NDS__
-                if (graphics.Hitest(drawframe1, colpoint1, drawframe2, colpoint2, entities[j].size))
+                if (graphics.Hitest(drawframe1, colpoint1, drawframe2, colpoint2))
                 #else
                 std::vector<SDL_Surface*>& spritesvec = graphics.flipmode ? graphics.flipsprites_surf : graphics.sprites_surf;
                 if (INBOUNDS_VEC(drawframe1, spritesvec) && INBOUNDS_VEC(drawframe2, spritesvec)

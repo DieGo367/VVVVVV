@@ -327,7 +327,7 @@ public:
     void draw_screenshot_border(void);
 
     #ifdef __NDS__
-    bool Hitest(int frame1, SDL_Point p1, int frame2, SDL_Point p2, int size2);
+    bool Hitest(int frame1, SDL_Point p1, int frame2, SDL_Point p2);
     #else
     bool Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2, SDL_Point p2);
     #endif

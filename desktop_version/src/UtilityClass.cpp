@@ -216,7 +216,12 @@ std::string UtilityClass::number_words(int _t, const char* number_class)
 
 bool UtilityClass::intersects( SDL_Rect A, SDL_Rect B )
 {
+    #ifdef __NDS__
+    return (A.x + A.w > B.x && A.x < B.x + B.w
+        && A.y + A.h > B.y && A.y < B.y + B.h);
+    #else
     return (SDL_HasIntersection(&A, &B) == SDL_TRUE);
+    #endif
 }
 
 void UtilityClass::updateglow(void)
