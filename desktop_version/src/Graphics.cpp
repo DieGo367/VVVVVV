@@ -1005,18 +1005,35 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 
 #ifdef __NDS__
 #define SPRITE_SIZE_U16 (SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4) // 32x32 at 4bpp, so 4 pixels per short
-static void drawsprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b, const SpriteSize size)
+static void drawsprite(const int x, const int y, const int slot, const int t, const u16 vramColor, const SpriteSize size)
 {
     if (slot >= 16) {
         vlog_error("Tried to draw sprite id %d", slot);
         return;
     }
-    SPRITE_PALETTE[slot*16 + 1] = VRAM_COLOR(r, g, b);
+    SPRITE_PALETTE[slot*16 + 1] = vramColor;
+    int width, height;
+    switch (size) {
+        case SpriteSize_64x32: // wide
+            width = 64;
+            height = 32;
+            break;
+        case SpriteSize_64x64: // large
+            width = height = 64;
+            break;
+        case SpriteSize_32x8: // moving platforms
+            width = 32;
+            height = 8;
+            break;
+        case SpriteSize_32x32: // standard
+        default:
+            width = height = 32;
+    }
     oamSet(
         &oamMain,
         slot,
-        x * 4 / 5 - (size == SpriteSize_32x32 ? 3 : 6),
-        y * 4 / 5 - (size == SpriteSize_64x64 ? 6 : 3),
+        SPRITE_COORD_TRANSFORM(x, width),
+        SPRITE_COORD_TRANSFORM(y, height),
         0,
         slot,
         size,
@@ -1033,7 +1050,7 @@ static void drawsprite(const int x, const int y, const int slot, const int t, co
 
 void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b)
 {
-    drawsprite(x, y, slot, t, r, g, b, SpriteSize_32x32);
+    drawsprite(x, y, slot, t, VRAM_COLOR(r, g, b), SpriteSize_32x32);
 }
 void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
 {
@@ -1041,12 +1058,12 @@ void Graphics::draw_sprite(const int x, const int y, const int slot, const int t
 }
 void Graphics::draw_sprite_wide(const int x, const int y, const int slot, const int t, const SDL_Color color)
 {
-    drawsprite(x, y, slot, t, color.r, color.g, color.b, SpriteSize_64x32);
+    drawsprite(x, y, slot, t, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x32);
 }
 void Graphics::draw_sprite_large(const int x, const int y, const int slot, const int t, const SDL_Color color)
 {
     int trueTile = (t%4 > 1) ? t + 10 : t;
-    drawsprite(x, y, slot, trueTile, color.r, color.g, color.b, SpriteSize_64x64);
+    drawsprite(x, y, slot, trueTile, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x64);
 }
 
 void Graphics::draw_flipsprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
@@ -2749,6 +2766,14 @@ void Graphics::drawentity(const int i, const int yoff)
         {
             thiswidth = 8;
         }
+        #ifdef __NDS__
+        if (obj.entities[i].rule == 2 && obj.entities[i].animate == 100) { // if moving platform (not treadmill), render as a sprite
+            const u16 tileGfxIdx = tiles->map[obj.entities[i].tile] & 0x03FF;
+            const u8 firstPixel = ((u8 *)tiles->gfx)[tileGfxIdx * 64];
+            drawsprite(tpoint.x, tpoint.y, i, 191, BG_PALETTE[firstPixel], SpriteSize_32x8);
+            thiswidth = 0; // prevent placing tiles in the tilemap
+        }
+        #endif
         for (int ii = 0; ii < thiswidth; ii++)
         {
             drawRect = tiles_rect;
@@ -4332,7 +4357,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
 
     #ifdef __NDS__
     const int TELE_SPRITE_SIZE_U16 = 96*96 / 4; // 4bpp
-    u16 * const TELE_SPRITE_RESERVED = SPRITE_GFX + 0xC000;
+    u16 * const TELE_SPRITE_RESERVED = SPRITE_GFX + (0x18000/2);
     memcpy(TELE_SPRITE_RESERVED, grphx.im_teleporter + TELE_SPRITE_SIZE_U16 * (t-1), TELE_SPRITE_SIZE_U16*sizeof(u16));
     SPRITE_PALETTE[slot*16 + 1] = VRAM_COLOR(color.r, color.g, color.b);
     SPRITE_PALETTE[slot*16 + 2] = VRAM_COLOR(16, 16, 16);
@@ -4340,8 +4365,8 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     oamSet(
         &oamMain,
         slot,
-        x * 4 / 5 - 6,
-        y * 4 / 5 - 6,
+        SPRITE_COORD_TRANSFORM(x, 64),
+        SPRITE_COORD_TRANSFORM(y, 64),
         0,
         slot,
         SpriteSize_64x64,
@@ -4358,8 +4383,8 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     oamSet(
         &oamMain,
         13,
-        (x+64) * 4 / 5 - 3,
-        y * 4 / 5 - 6,
+        SPRITE_COORD_TRANSFORM(x + 64, 32),
+        SPRITE_COORD_TRANSFORM(y, 64),
         0,
         slot,
         SpriteSize_32x64,
@@ -4375,8 +4400,8 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     oamSet(
         &oamMain,
         14,
-        x * 4 / 5 - 6,
-        (y+64) * 4 / 5 - 3,
+        SPRITE_COORD_TRANSFORM(x, 64),
+        SPRITE_COORD_TRANSFORM(y + 64, 32),
         0,
         slot,
         SpriteSize_64x32,
@@ -4392,8 +4417,8 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     oamSet(
         &oamMain,
         15,
-        (x+64) * 4 / 5 - 3,
-        (y+64) * 4 / 5 - 3,
+        SPRITE_COORD_TRANSFORM(x + 64, 32),
+        SPRITE_COORD_TRANSFORM(y + 64, 32),
         0,
         slot,
         SpriteSize_32x32,

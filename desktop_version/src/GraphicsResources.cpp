@@ -558,6 +558,9 @@ void GraphicsResources::init(void)
     im_sprites = LoadSprites("graphics/sprites.grf");
     im_flipsprites = im_sprites;
 
+    // extra sprite for moving platforms
+    memset(SPRITE_GFX + (0x17E00/2), 0x11, 32*8/2);
+
     im_teleporter = LoadTeleporter("graphics/teleporter.grf");
 
     im_image0 = LoadImage("graphics/levelcomplete.grf");
