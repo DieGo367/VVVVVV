@@ -2604,11 +2604,16 @@ bool entityclass::updateentities( int i )
                 {
                     disableblockat(entities[i].xp, entities[i].yp);
                     entities[i].state = 3;// = false;
+                    #ifndef __NDS__
                     entities[i].invis = true;
+                    #endif
                 }
             }
             else if (entities[i].state == 3)
             {
+                #ifdef __NDS__
+                entities[i].invis = true;
+                #endif
                 //wait until recharged!
             }
             else if (entities[i].state == 4)
@@ -3689,6 +3694,10 @@ void entityclass::animateentities( int _i )
             }
             break;
         case 2: //Disappearing platforms
+            #ifdef __NDS__
+            if (entities[_i].state == 3) entities[_i].drawframe = 0;
+            else
+            #endif
             entities[_i].drawframe = entities[_i].tile + entities[_i].walkingframe;
             break;
         case 11:
