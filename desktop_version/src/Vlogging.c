@@ -23,8 +23,8 @@
 #define COLOR(EXPR) (color_enabled && color_supported ? EXPR : "")
 
 #ifdef __NDS__
-#define Color_RESET COLOR("\x1b[39m")
-#define Color_BOLD Color_RESET
+#define Color_RESET COLOR("\x1b[39;0m")
+#define Color_BOLD COLOR("\x1b[1m")
 #define Color_BOLD_YELLOW COLOR("\x1b[33;1m")
 #define Color_BOLD_RED COLOR("\x1b[31;1m")
 #define Color_BOLD_GRAY COLOR("\x1b[37m")
@@ -122,7 +122,7 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_debug(const char* text, ...)
 
     putchar('\n');
 #ifdef __NDS__
-    nocashf("[DEBUG] %s", msg);
+    nocashf("%s[DEBUG]%s %s", Color_BOLD_GRAY, Color_RESET, msg);
 #endif
 #endif
 }
@@ -158,7 +158,7 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_info(const char* text, ...)
 
     putchar('\n');
 #ifdef __NDS__
-    nocashf("[INFO] %s", msg);
+    nocashf("%s[INFO]%s %s", Color_BOLD, Color_RESET, msg);
 #endif
 #endif
 }
@@ -194,7 +194,7 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_warn(const char* text, ...)
 
     fputc('\n', stderr);
 #ifdef __NDS__
-    nocashf("[WARN] %s", msg);
+    nocashf("%s[WARN]%s %s", Color_BOLD_YELLOW, Color_RESET, msg);
 #endif
 #endif
 }
@@ -230,7 +230,7 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_error(const char* text, ...)
 
     fputc('\n', stderr);
 #ifdef __NDS__
-    nocashf("[ERROR] %s", msg);
+    nocashf("%s[ERROR]%s %s", Color_BOLD_RED, Color_RESET, msg);
 #endif
 #endif
 }
