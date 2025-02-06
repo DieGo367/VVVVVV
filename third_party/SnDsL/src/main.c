@@ -1,5 +1,3 @@
-#include "SDL.h"
-
 #include <nds/timers.h>
 #include <nds/bios.h>
 #include <ndsabi.h>
@@ -27,13 +25,6 @@ void SDL_Delay(uint32_t ms) {
 	swiDelay(ms);
 }
 
-int SDL_InitSubSystem(uint32_t flags) {
-	return 0;
-}
-void SDL_QuitSubSystem(uint32_t flags) {}
-
-int SDL_Init(uint32_t flags) {
+void initTimer(void) {
 	timerStart(1, ClockDivider_1024, TIMER_FREQ_1024(1000), timerCallback);
-	return 0;
 }
-void SDL_Quit(void) {}

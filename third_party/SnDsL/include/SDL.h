@@ -29,11 +29,9 @@ extern "C" {
 #define SDL_INIT_JOYSTICK		0
 #define SDL_INIT_GAMECONTROLLER	0
 
-int SDL_InitSubSystem(uint32_t flags);
-void SDL_QuitSubSystem(uint32_t flags);
-
-int SDL_Init(uint32_t flags);
-void SDL_Quit(void);
+#define SDL_InitSubSystem(flags) 0
+#define SDL_QuitSubSystem(flags)
+#define SDL_Quit()
 
 // version.h
 
@@ -46,14 +44,6 @@ void SDL_Quit(void);
 	(SDL_MAJOR_VERSION == major && SDL_MINOR_VERSION > minor) || \
 	(SDL_MAJOR_VERSION == major && SDL_MINOR_VERSION == minor && SDL_PATCHLEVEL >= patch) \
 )
-
-// begin_code.h
-
-#define SDLCALL
-#define SDL_INLINE inline
-#define SDL_FORCE_INLINE __attribute__((always_inline)) static inline
-#define SDL_NORETURN __attribute__((noreturn))
-#define SDL_FALLTHROUGH __attribute__((__fallthrough__))
 
 // error.h
 

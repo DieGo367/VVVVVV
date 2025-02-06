@@ -620,6 +620,9 @@ int main(int argc, char *argv[])
         VVV_exit(1);
     }
 
+    #ifdef __NDS__
+    initTimer();
+    #else
     SDL_Init(
         SDL_INIT_VIDEO |
         SDL_INIT_AUDIO |
@@ -632,6 +635,7 @@ int main(int argc, char *argv[])
     }
 
     NETWORK_init();
+    #endif
 
     vlog_info("\t\t");
     vlog_info("\t\t");

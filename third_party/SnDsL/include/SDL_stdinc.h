@@ -81,3 +81,11 @@ void memset16(uint16_t *dst, uint16_t src, size_t count);
 #define SDL_PRINTF_VARARG_FUNC(argnum)
 #define SDL_COMPILE_TIME_ASSERT(name, x) static_assert(x, #x)
 #define _SDL_HAS_BUILTIN(x) __has_builtin(x)
+
+// begin_code.h
+
+#define SDLCALL
+#define SDL_INLINE inline
+#define SDL_FORCE_INLINE __attribute__((always_inline)) static inline
+#define SDL_NORETURN __attribute__((noreturn))
+#define SDL_FALLTHROUGH __attribute__((__fallthrough__))
