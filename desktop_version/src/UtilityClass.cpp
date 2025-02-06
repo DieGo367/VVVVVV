@@ -217,7 +217,8 @@ std::string UtilityClass::number_words(int _t, const char* number_class)
 bool UtilityClass::intersects( SDL_Rect A, SDL_Rect B )
 {
     #ifdef __NDS__
-    return (A.x + A.w > B.x && A.x < B.x + B.w
+    return (A.w > 0 && A.h > 0 && B.w > 0 && B.h > 0
+        && A.x + A.w > B.x && A.x < B.x + B.w
         && A.y + A.h > B.y && A.y < B.y + B.h);
     #else
     return (SDL_HasIntersection(&A, &B) == SDL_TRUE);
