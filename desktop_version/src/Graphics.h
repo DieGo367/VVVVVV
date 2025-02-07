@@ -170,14 +170,6 @@ public:
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height);
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, SDL_Color color);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int scalex, int scaley);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a, int scalex, int scaley);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b, int scalex, int scaley);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, int r, int g, int b);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, SDL_Color color, int scalex, int scaley);
-    void draw_grid_tile(Bitmap* texture, int t, int x, int y, int width, int height, SDL_Color color);
     #else
     void draw_texture(SDL_Texture* image, int x, int y);
 
