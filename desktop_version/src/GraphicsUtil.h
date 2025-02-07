@@ -11,7 +11,12 @@
 
 void setRect(SDL_Rect& _r, int x, int y, int w, int h);
 
-#ifndef __NDS__
+#ifdef __NDS__
+u8 ReadPixel1BPP(u8 *gfx, int pxIdx);
+u8 ReadPixel2BPP(u8 *gfx, int pxIdx);
+u8 ReadPixel4BPP(u8 *gfx, int pxIdx);
+u8 ReadPixel8BPP(u8 *gfx, int pxIdx);
+#else
 SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, int height );
 
 void DrawPixel(SDL_Surface* surface, int x, int y, SDL_Color color);

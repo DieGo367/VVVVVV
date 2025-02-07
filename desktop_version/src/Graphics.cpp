@@ -550,25 +550,11 @@ void Graphics::post_substitute(Bitmap* subst)
     set_texture_alpha_mod(subst, 255);
 }
 
-static inline u16 colorMult(u16 target, u16 value) {
-	u8 r = (target & 0b11111) * (value & 0b11111) / 0b11111;
-	u8 g = (target >> 5 & 0b11111) * (value >> 5 & 0b11111) / 0b11111;
-	u8 b = (target >> 10 & 0b11111) * (value >> 10 & 0b11111) / 0b11111;
-	return 1 << 15 | b << 10 | g << 5 | r;
-}
-
-static inline u16 colorBlend(u16 base, u8 alpha, u16 top) {
-	u8 r = ((base & 0b11111) * (255 - alpha) + (top & 0b11111) * alpha) / 255;
-	u8 g = ((base >> 5 & 0b11111) * (255 - alpha) + (top >> 5 & 0b11111) * alpha) / 255;
-	u8 b = ((base >> 10 & 0b11111) * (255 - alpha) + (top >> 10 & 0b11111) * alpha) / 255;
-	return 1 << 15 | b << 10 | g << 5 | r;
-}
-
 int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest)
 {
     bool is_substituted = substitute(&texture);
 
-    if (!texture) {
+    if (!texture || !texture->palette) {
         WHINE_ONCE("Could not copy texture");
         return -1;
     }
@@ -589,25 +575,46 @@ int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect*
 	int rendW = (destW > SCREEN_WIDTH + offsX ? SCREEN_WIDTH + offsX : destW) + offsX;
 	int rendH = (destH > SCREEN_HEIGHT + offsY ? SCREEN_HEIGHT + offsY : destH) + offsY;
 
-	uint16_t *gfx = bgGetGfxPtr(2);
+    u8 (*ReadPixel)(u8 *gfx, int pxIdx);
+    switch (texture->bpp) {
+        case 1:
+            ReadPixel = ReadPixel1BPP;
+            break;
+        case 2:
+            ReadPixel = ReadPixel2BPP;
+            break;
+        case 4:
+            ReadPixel = ReadPixel4BPP;
+            break;
+        case 8:
+            ReadPixel = ReadPixel8BPP;
+            break;
+        default:
+            WHINE_ONCE_ARGS(("Can't draw image with bitdepth %d", texture->bpp));
+            return 0;
+    }
+
+    u16 *pal = texture->palette;
+    if (texture->palette && texture->colorMod != 0xFFFF) {
+        pal = SDL_stack_alloc(u16, texture->palette[0]);
+        for (int i = 1; i < texture->palette[0]; i++) {
+            u8 r = (texture->palette[i] & 0b11111) * (texture->colorMod & 0b11111) / 0b11111;
+            u8 g = (texture->palette[i] >> 5 & 0b11111) * (texture->colorMod >> 5 & 0b11111) / 0b11111;
+            u8 b = (texture->palette[i] >> 10 & 0b11111) * (texture->colorMod >> 10 & 0b11111) / 0b11111;
+            pal[i] = 1 << 15 | b << 10 | g << 5 | r;
+        }
+    }
+
+	u16 *gfx = bgGetGfxPtr(2);
 	for (int y = offsY; y < rendH; y++) {
 		int ty = y * clipH / destH + clipY;
 		for (int x = offsX; x < rendW; x++) {
 			int tx = x * clipW / destW + clipX;
 			int pixelIdx = ty * texture->w + tx;
-			u16 color;
-			if (texture->bpp == 16) {
-				color = ((u16 *)texture->gfx)[pixelIdx];
-				if ((color & BIT(15)) == 0) continue;
-			} else {
-				u8 value = texture->gfx[pixelIdx * texture->bpp / 8] >> pixelIdx % (8 / texture->bpp) * texture->bpp & ((1 << texture->bpp) - 1);
-				if (value == 0) continue;
-				color = texture->palette[value];
-			}
-			color = colorMult(color, texture->colorMod);
-			uint16_t *px = gfx + (destY + y) * SCREEN_WIDTH + (destX + x);
-			if (texture->alphaMod != 255) *px = colorBlend(*px, texture->alphaMod, color);
-			else *px = color;
+            u8 value = ReadPixel(texture->gfx, pixelIdx);
+            if (value == 0) continue;
+			u16 *px = gfx + (destY + y) * SCREEN_WIDTH + (destX + x);
+			*px = pal[value];
 		}
 	}
 

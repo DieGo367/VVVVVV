@@ -90,6 +90,9 @@ Bitmap* LoadImage(const char *filename, const TextureLoadType loadtype)
                 tex->palette[i] = 0xFFFF;
             }
         }
+        else for (int i = 1; i < tex->palette[0]; i++) {
+            tex->palette[i] |= 1 << 15;
+        }
     }
     return tex;
 }
