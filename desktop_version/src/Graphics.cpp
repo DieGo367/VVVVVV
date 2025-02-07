@@ -1013,14 +1013,15 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 #ifdef __NDS__
 void Graphics::print_char_1BPP(u8 *fontGfx, u16 vramColor, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale) {
     u16 *out = bgGetGfxPtr(2);
-    u8 *glyphGfx = fontGfx + (glyphIdx/16) * (2*w*h) + (glyphIdx%16) * (w/8);
+    u8 wSize = w <= 8 ? 1 : 2;
+    u8 *glyphGfx = fontGfx + glyphIdx * wSize*h;
     if (scale == 1) for (u8 row = 0; row < h; row++) {
         /* I'm deliberately leaving out row from RENDER_SCALE,
         since at this scale it looks nicer not to squish vertically
         */
         int yOffset = (RENDER_SCALE(y) + row) * SCREEN_WIDTH;
         for (u8 col = 0; col < w; col += 8) {
-            u8 bits = glyphGfx[row * 16 * (w/8) + col];
+            u8 bits = glyphGfx[row * wSize + (col ? 1 : 0)];
             int offset = yOffset + RENDER_SCALE(x);
             if (bits      & 1) out[offset + RENDER_SCALE((col    ))] = vramColor;
             if (bits >> 1 & 1) out[offset + RENDER_SCALE((col + 1))] = vramColor;
@@ -1035,7 +1036,7 @@ void Graphics::print_char_1BPP(u8 *fontGfx, u16 vramColor, u16 glyphIdx, int x, 
     else for (u8 row = 0; row < h; row++) for (int i = 0; i < scale; i++) {
         int yOffset = (RENDER_SCALE(y + (row*scale) + i)) * SCREEN_WIDTH;
         for (u8 col = 0; col < w; col += 8) {
-            u8 bits = glyphGfx[row * 16 * (w/8) + col];
+            u8 bits = glyphGfx[row * wSize + (col ? 1 : 0)];
             int offset = yOffset + RENDER_SCALE(x);
             if (bits      & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col    ) * scale + j))] = vramColor;
             if (bits >> 1 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 1) * scale + j))] = vramColor;
@@ -1050,12 +1051,12 @@ void Graphics::print_char_1BPP(u8 *fontGfx, u16 vramColor, u16 glyphIdx, int x, 
 }
 void Graphics::print_char_8BPP(u8 *fontGfx, u16 *fontPalette, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale) {
     u16 *out = bgGetGfxPtr(2);
-    u8 *glyphGfx = fontGfx + (glyphIdx/16) * (16*w*h) + (glyphIdx%16) * w;
+    u8 *glyphGfx = fontGfx + glyphIdx * w*h;
     if (scale == 1) for (u8 row = 0; row < h; row++) {
         // row outside of RENDER_SCALE again, see comment for 1bpp version
         int yOffset = (RENDER_SCALE(y) + row) * SCREEN_WIDTH;
         for (u8 col = 0; col < w; col ++) {
-            u8 value = glyphGfx[row * 16 * w + col];
+            u8 value = glyphGfx[row * w + col];
             if (value) {
                 out[yOffset + RENDER_SCALE(x) + RENDER_SCALE(col)] = fontPalette ? fontPalette[value] : 0x8000;
             }
@@ -1064,7 +1065,7 @@ void Graphics::print_char_8BPP(u8 *fontGfx, u16 *fontPalette, u16 glyphIdx, int 
     else for (u8 row = 0; row < h; row++) for (int i = 0; i < scale; i++) {
         int yOffset = RENDER_SCALE(y + row + i) * SCREEN_WIDTH;
         for (u8 col = 0; col < w; col ++) {
-            u8 value = glyphGfx[row * 16 * w + col];
+            u8 value = glyphGfx[row * w + col];
             if (value) for (int j = 0; j < scale; j++) {
                 out[yOffset + RENDER_SCALE(x) + RENDER_SCALE(col * scale + j)] = fontPalette ? fontPalette[value] : 0x8000;
             }
