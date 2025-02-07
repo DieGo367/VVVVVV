@@ -198,6 +198,9 @@ public:
     void drawgui(void);
 
     #ifdef __NDS__
+    void print_char_1BPP(u8 *fontGfx, u16 vramColor, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale);
+    void print_char_8BPP(u8 *fontGfx, u16 *fontPalette, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale);
+
     void draw_sprite(int x, int y, int slot, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int slot, int t, SDL_Color color);
     void draw_sprite_wide(int x, int y, int slot, int t, SDL_Color color);

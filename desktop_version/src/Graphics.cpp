@@ -1011,6 +1011,67 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 }
 
 #ifdef __NDS__
+void Graphics::print_char_1BPP(u8 *fontGfx, u16 vramColor, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale) {
+    u16 *out = bgGetGfxPtr(2);
+    u8 *glyphGfx = fontGfx + (glyphIdx/16) * (2*w*h) + (glyphIdx%16) * (w/8);
+    if (scale == 1) for (u8 row = 0; row < h; row++) {
+        /* I'm deliberately leaving out row from RENDER_SCALE,
+        since at this scale it looks nicer not to squish vertically
+        */
+        int yOffset = (RENDER_SCALE(y) + row) * SCREEN_WIDTH;
+        for (u8 col = 0; col < w; col += 8) {
+            u8 bits = glyphGfx[row * 16 * (w/8) + col];
+            int offset = yOffset + RENDER_SCALE(x);
+            if (bits      & 1) out[offset + RENDER_SCALE((col    ))] = vramColor;
+            if (bits >> 1 & 1) out[offset + RENDER_SCALE((col + 1))] = vramColor;
+            if (bits >> 2 & 1) out[offset + RENDER_SCALE((col + 2))] = vramColor;
+            if (bits >> 3 & 1) out[offset + RENDER_SCALE((col + 3))] = vramColor;
+            if (bits >> 4 & 1) out[offset + RENDER_SCALE((col + 4))] = vramColor;
+            if (bits >> 5 & 1) out[offset + RENDER_SCALE((col + 5))] = vramColor;
+            if (bits >> 6 & 1) out[offset + RENDER_SCALE((col + 6))] = vramColor;
+            if (bits >> 7 & 1) out[offset + RENDER_SCALE((col + 7))] = vramColor;
+        }
+    }
+    else for (u8 row = 0; row < h; row++) for (int i = 0; i < scale; i++) {
+        int yOffset = (RENDER_SCALE(y + (row*scale) + i)) * SCREEN_WIDTH;
+        for (u8 col = 0; col < w; col += 8) {
+            u8 bits = glyphGfx[row * 16 * (w/8) + col];
+            int offset = yOffset + RENDER_SCALE(x);
+            if (bits      & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col    ) * scale + j))] = vramColor;
+            if (bits >> 1 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 1) * scale + j))] = vramColor;
+            if (bits >> 2 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 2) * scale + j))] = vramColor;
+            if (bits >> 3 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 3) * scale + j))] = vramColor;
+            if (bits >> 4 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 4) * scale + j))] = vramColor;
+            if (bits >> 5 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 5) * scale + j))] = vramColor;
+            if (bits >> 6 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 6) * scale + j))] = vramColor;
+            if (bits >> 7 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 7) * scale + j))] = vramColor;
+        }
+    }
+}
+void Graphics::print_char_8BPP(u8 *fontGfx, u16 *fontPalette, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale) {
+    u16 *out = bgGetGfxPtr(2);
+    u8 *glyphGfx = fontGfx + (glyphIdx/16) * (16*w*h) + (glyphIdx%16) * w;
+    if (scale == 1) for (u8 row = 0; row < h; row++) {
+        // row outside of RENDER_SCALE again, see comment for 1bpp version
+        int yOffset = (RENDER_SCALE(y) + row) * SCREEN_WIDTH;
+        for (u8 col = 0; col < w; col ++) {
+            u8 value = glyphGfx[row * 16 * w + col];
+            if (value) {
+                out[yOffset + RENDER_SCALE(x) + RENDER_SCALE(col)] = fontPalette ? fontPalette[value] : 0x8000;
+            }
+        }
+    }
+    else for (u8 row = 0; row < h; row++) for (int i = 0; i < scale; i++) {
+        int yOffset = RENDER_SCALE(y + row + i) * SCREEN_WIDTH;
+        for (u8 col = 0; col < w; col ++) {
+            u8 value = glyphGfx[row * 16 * w + col];
+            if (value) for (int j = 0; j < scale; j++) {
+                out[yOffset + RENDER_SCALE(x) + RENDER_SCALE(col * scale + j)] = fontPalette ? fontPalette[value] : 0x8000;
+            }
+        }
+    }
+}
+
 #define SPRITE_SIZE_U16 (SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4) // 32x32 at 4bpp, so 4 pixels per short
 static void drawsprite(const int x, const int y, const int slot, const int t, const u16 vramColor, const SpriteSize size)
 {

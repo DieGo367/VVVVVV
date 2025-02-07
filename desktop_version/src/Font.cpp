@@ -1177,6 +1177,26 @@ static int print_char(
         y += (f->glyph_h - f_glyph->glyph_h) / 2;
     }
 
+    #ifdef __NDS__
+    if (f_glyph->image->bpp == 1) graphics.print_char_1BPP(
+        f_glyph->image->gfx,
+        VRAM_COLOR(r, g, b),
+        glyph->image_idx,
+        x, y,
+        f_glyph->glyph_w,
+        f_glyph->glyph_h,
+        scale
+    );
+    else if (f_glyph->image->bpp == 8) graphics.print_char_8BPP(
+        f_glyph->image->gfx,
+        (r || g || b) ? f_glyph->image->palette : NULL,
+        glyph->image_idx,
+        x, y,
+        f_glyph->glyph_w,
+        f_glyph->glyph_h,
+        scale
+    );
+    #else
     graphics.draw_grid_tile(
         f_glyph->image,
         glyph->image_idx,
@@ -1188,6 +1208,7 @@ static int print_char(
         scale,
         scale * (graphics.flipmode ? -1 : 1)
     );
+    #endif
 
     return get_advance_ff(f, f_glyph, glyph) * scale;
 }
