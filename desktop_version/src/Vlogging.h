@@ -17,9 +17,9 @@ void vlog_open_console(void);
 #ifdef __NDS__
 #include <nds/debug.h>
 #define nocashf(fmt, ...) do { \
-	char message[120]; \
-	int amt = snprintf(message, 120, fmt, __VA_ARGS__); \
-	nocashWrite(message, amt); \
+    char message[120]; \
+    int amt = snprintf(message, 120, fmt, __VA_ARGS__); \
+    nocashWrite(message, amt); \
 } while(0)
 #endif
 

@@ -19,12 +19,12 @@ typedef struct {
     u16 *map;
 } Tileset;
 typedef struct {
-	u16 w, h;
-	u8 bpp;
-	u8 alphaMod;
-	u16 colorMod;
-	u16 *palette;
-	u8 *gfx;
+    u16 w, h;
+    u8 bpp;
+    u8 alphaMod;
+    u16 colorMod;
+    u16 *palette;
+    u8 *gfx;
 } Bitmap;
 #endif
 

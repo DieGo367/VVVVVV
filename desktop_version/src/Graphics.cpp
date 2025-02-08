@@ -522,7 +522,7 @@ int Graphics::set_blendmode(Bitmap* texture, const SDL_BlendMode blendmode)
 int Graphics::clear(const int r, const int g, const int b, const int a)
 {
     set_color(r, g, b, a);
-	// more performant just to ignore this for now
+    // more performant just to ignore this for now
     return 0;
 }
 
@@ -808,21 +808,21 @@ int Graphics::fill_rect(const SDL_Rect* rect)
 {
     #ifdef __NDS__
     uint16_t *gfx = bgGetGfxPtr(2);
-	int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
-	if (rect) {
-		rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
-		if (rx < 0) rw += rx, rx = 0;
-		if (ry < 0) rh += ry, ry = 0;
-		if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
-		if (ry + rh > SCREEN_HEIGHT) rh = SCREEN_HEIGHT - ry;
-	}
-	if (rw == SCREEN_WIDTH) { // faster fill!
-		memset16(gfx + ry * SCREEN_WIDTH, draw_color, rw * rh);
-	}
-	else for (int y = 0; y < rh; y++) {
-		memset16(gfx + ((ry + y) * SCREEN_WIDTH + rx), draw_color, rw);
-	}
-	return 0;
+    int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
+    if (rect) {
+        rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
+        if (rx < 0) rw += rx, rx = 0;
+        if (ry < 0) rh += ry, ry = 0;
+        if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
+        if (ry + rh > SCREEN_HEIGHT) rh = SCREEN_HEIGHT - ry;
+    }
+    if (rw == SCREEN_WIDTH) { // faster fill!
+        memset16(gfx + ry * SCREEN_WIDTH, draw_color, rw * rh);
+    }
+    else for (int y = 0; y < rh; y++) {
+        memset16(gfx + ((ry + y) * SCREEN_WIDTH + rx), draw_color, rw);
+    }
+    return 0;
     #else
     const int result = SDL_RenderFillRect(gameScreen.m_renderer, rect);
     if (result != 0)
@@ -879,30 +879,30 @@ int Graphics::draw_rect(const SDL_Rect* rect)
 {
     #ifdef __NDS__
     uint16_t *gfx = bgGetGfxPtr(2);
-	int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
-	if (rect) {
-		rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y);
+    int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
+    if (rect) {
+        rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y);
         rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
-	}
+    }
 
-	for (int y = 1; y < rh - 1; y++) {
-		if (ry + y < 0 || ry + y >= SCREEN_HEIGHT) continue;
+    for (int y = 1; y < rh - 1; y++) {
+        if (ry + y < 0 || ry + y >= SCREEN_HEIGHT) continue;
 
-		if (rx >= 0 && rx < SCREEN_WIDTH) {
-			gfx[(ry + y) * SCREEN_WIDTH + rx] = draw_color;
-		}
-		if (rx + rw - 1 >= 0 && rx + rw - 1 < SCREEN_WIDTH) {
-			gfx[(ry + y) * SCREEN_WIDTH + rx + rw - 1] = draw_color;
-		}
-	}
+        if (rx >= 0 && rx < SCREEN_WIDTH) {
+            gfx[(ry + y) * SCREEN_WIDTH + rx] = draw_color;
+        }
+        if (rx + rw - 1 >= 0 && rx + rw - 1 < SCREEN_WIDTH) {
+            gfx[(ry + y) * SCREEN_WIDTH + rx + rw - 1] = draw_color;
+        }
+    }
 
-	if (rx < 0) rw += rx, rx = 0;
-	if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
+    if (rx < 0) rw += rx, rx = 0;
+    if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
 
-	if (ry >= 0 && ry < SCREEN_HEIGHT) memset16(gfx + ry * SCREEN_WIDTH + rx, draw_color, rw);
-	if (ry + rh - 1 >= 0 && ry + rh - 1 < SCREEN_HEIGHT) memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH + rx, draw_color, rw);
+    if (ry >= 0 && ry < SCREEN_HEIGHT) memset16(gfx + ry * SCREEN_WIDTH + rx, draw_color, rw);
+    if (ry + rh - 1 >= 0 && ry + rh - 1 < SCREEN_HEIGHT) memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH + rx, draw_color, rw);
 
-	return 0;
+    return 0;
     #else
     const int result = SDL_RenderDrawRect(gameScreen.m_renderer, rect);
     if (result != 0)
@@ -949,21 +949,21 @@ int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
 {
     #ifdef __NDS__
     uint16_t *gfx = bgGetGfxPtr(2);
-	int dx = RENDER_SCALE(x2) - RENDER_SCALE(x), dy = RENDER_SCALE(y2) - RENDER_SCALE(y);
-	if (abs(dx) > abs(dy)) {
-		for (int ix = RENDER_SCALE(x); ix != RENDER_SCALE(x2); ix < RENDER_SCALE(x2) ? ix++ : ix--) {
-			int iy = ix * dy / dx;
-			if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
-			gfx[iy * SCREEN_WIDTH + ix] = draw_color;
-		}
-	} else {
-		for (int iy = RENDER_SCALE(y); iy != RENDER_SCALE(y2); iy < RENDER_SCALE(y2) ? iy++ : iy--) {
-			int ix = iy * dx / dy;
-			if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
-			gfx[iy * SCREEN_WIDTH + ix] = draw_color;
-		}
-	}
-	return 0;
+    int dx = RENDER_SCALE(x2) - RENDER_SCALE(x), dy = RENDER_SCALE(y2) - RENDER_SCALE(y);
+    if (abs(dx) > abs(dy)) {
+        for (int ix = RENDER_SCALE(x); ix != RENDER_SCALE(x2); ix < RENDER_SCALE(x2) ? ix++ : ix--) {
+            int iy = ix * dy / dx;
+            if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
+            gfx[iy * SCREEN_WIDTH + ix] = draw_color;
+        }
+    } else {
+        for (int iy = RENDER_SCALE(y); iy != RENDER_SCALE(y2); iy < RENDER_SCALE(y2) ? iy++ : iy--) {
+            int ix = iy * dx / dy;
+            if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
+            gfx[iy * SCREEN_WIDTH + ix] = draw_color;
+        }
+    }
+    return 0;
     #else
     const int result = SDL_RenderDrawLine(gameScreen.m_renderer, x, y, x2, y2);
     if (result != 0)
@@ -978,12 +978,12 @@ int Graphics::draw_points(const SDL_Point* points, const int count)
 {
     #ifdef __NDS__
     uint16_t *gfx = bgGetGfxPtr(2);
-	for (int i = 0; i < count; i++) {
-		int x = RENDER_SCALE(points[i].x), y = RENDER_SCALE(points[i].y);
-		if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT) continue;
-		gfx[y * SCREEN_WIDTH + x] = draw_color;
-	}
-	return 0;
+    for (int i = 0; i < count; i++) {
+        int x = RENDER_SCALE(points[i].x), y = RENDER_SCALE(points[i].y);
+        if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT) continue;
+        gfx[y * SCREEN_WIDTH + x] = draw_color;
+    }
+    return 0;
     #else
     const int result = SDL_RenderDrawPoints(gameScreen.m_renderer, points, count);
     if (result != 0)
