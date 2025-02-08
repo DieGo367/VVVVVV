@@ -1924,6 +1924,59 @@ void Graphics::drawpixeltextbox(
     const int g,
     const int b
 ) {
+    #ifdef __NDS__
+    u16 *gfx = bgGetGfxPtr(2);
+    u16 color = VRAM_COLOR(r, g, b);
+    u16 darker = VRAM_COLOR(r/6, g/6, b/6);
+    int rx = RENDER_SCALE(x), ry = RENDER_SCALE(y), rw = RENDER_SCALE(w);
+    int rh = RENDER_SCALE(h) + 1; // looks better plus 1'd with the oddly squarshed font
+
+    if (x < 0) {
+        // special case for map menu
+        memset16(gfx + ry * SCREEN_WIDTH, darker, SCREEN_WIDTH);
+        memset16(gfx + (ry + 1) * SCREEN_WIDTH, color, 2 * SCREEN_WIDTH);
+        memset16(gfx + (ry + 3) * SCREEN_WIDTH, darker, SCREEN_WIDTH);
+        memset16(gfx + (ry + 4) * SCREEN_WIDTH, color, SCREEN_WIDTH);
+
+        memset16(gfx + (ry + 5) * SCREEN_WIDTH, darker, (rh - 10) * SCREEN_WIDTH);
+
+        memset16(gfx + (ry + rh - 5) * SCREEN_WIDTH, color, SCREEN_WIDTH);
+        memset16(gfx + (ry + rh - 4) * SCREEN_WIDTH, darker, SCREEN_WIDTH);
+        memset16(gfx + (ry + rh - 3) * SCREEN_WIDTH, color, 2 * SCREEN_WIDTH);
+        memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH, darker, SCREEN_WIDTH);
+        return;
+    }
+
+    memset16(gfx + ry * SCREEN_WIDTH + rx, darker, rw);
+    memset16(gfx + (ry + 1) * SCREEN_WIDTH + rx + 3, color, rw - 6);
+    memset16(gfx + (ry + 2) * SCREEN_WIDTH + rx + 3, color, rw - 6);
+    memset16(gfx + (ry + 3) * SCREEN_WIDTH + rx + 3, darker, rw - 6);
+    memset16(gfx + (ry + 4) * SCREEN_WIDTH + rx + 5, color, rw - 10);
+
+    memset16(gfx + (ry + rh - 5) * SCREEN_WIDTH + rx + 5, color, rw - 10);
+    memset16(gfx + (ry + rh - 4) * SCREEN_WIDTH + rx + 3, darker, rw - 6);
+    memset16(gfx + (ry + rh - 3) * SCREEN_WIDTH + rx + 3, color, rw - 6);
+    memset16(gfx + (ry + rh - 2) * SCREEN_WIDTH + rx + 3, color, rw - 6);
+    memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH + rx, darker, rw);
+
+    for (int row = 1; row < rh - 1; row++) {
+        gfx[(ry + row) * SCREEN_WIDTH + rx] = darker;
+        gfx[(ry + row) * SCREEN_WIDTH + rx + 1] = color;
+        gfx[(ry + row) * SCREEN_WIDTH + rx + 2] = color;
+        if (row > 3 && row < rh - 4) {
+            gfx[(ry + row) * SCREEN_WIDTH + rx + 3] = darker;
+            gfx[(ry + row) * SCREEN_WIDTH + rx + 4] = color;
+            if (row > 4 && row < rh - 5) {
+                memset16(gfx + (ry + row) * SCREEN_WIDTH + rx + 5, darker, rw - 10);
+            }
+            gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 5] = color;
+            gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 4] = darker;
+        }
+        gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 3] = color;
+        gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 2] = color;
+        gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 1] = darker;
+    }
+    #else
     int k;
 
     fill_rect(x, y, w, h, r / 6, g / 6, b / 6);
@@ -1961,6 +2014,7 @@ void Graphics::drawpixeltextbox(
     drawcoloredtile(x + w - 8, y, 42, r, g, b);
     drawcoloredtile(x, y + h - 8, 45, r, g, b);
     drawcoloredtile(x + w - 8, y + h - 8, 47, r, g, b);
+    #endif
 }
 
 void Graphics::textboxactive(void)
