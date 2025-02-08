@@ -1107,7 +1107,7 @@ static void drawsprite(const int x, const int y, const int slot, const int t, co
         slot,
         size,
         SpriteColorFormat_16Color,
-        SPRITE_GFX + (t*SPRITE_SIZE_U16),
+        SPRITE_GFX + (0x20000/sizeof(u16)) + (t*SPRITE_SIZE_U16),
         1,
         false,
         false,
@@ -4403,9 +4403,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     if (t < 1) t = 1;
 
     #ifdef __NDS__
-    const int TELE_SPRITE_SIZE_U16 = 96*96 / 4; // 4bpp
-    u16 * const TELE_SPRITE_RESERVED = SPRITE_GFX + (0x18000/2);
-    memcpy(TELE_SPRITE_RESERVED, grphx.im_teleporter + TELE_SPRITE_SIZE_U16 * (t-1), TELE_SPRITE_SIZE_U16*sizeof(u16));
+    u16 *frameOffset = SPRITE_GFX + 96*96 / 4 * (t - 1); // 4bpp
     SPRITE_PALETTE[slot*16 + 1] = VRAM_COLOR(color.r, color.g, color.b);
     SPRITE_PALETTE[slot*16 + 2] = VRAM_COLOR(16, 16, 16);
 
@@ -4418,7 +4416,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         slot,
         SpriteSize_64x64,
         SpriteColorFormat_16Color,
-        TELE_SPRITE_RESERVED,
+        frameOffset,
         1,
         false,
         false,
@@ -4436,7 +4434,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         slot,
         SpriteSize_32x64,
         SpriteColorFormat_16Color,
-        TELE_SPRITE_RESERVED + (64*64)/4,
+        frameOffset + (64*64)/4,
         1,
         false,
         false,
@@ -4453,7 +4451,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         slot,
         SpriteSize_64x32,
         SpriteColorFormat_16Color,
-        TELE_SPRITE_RESERVED + (96*64)/4,
+        frameOffset + (96*64)/4,
         1,
         false,
         false,
@@ -4470,7 +4468,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         slot,
         SpriteSize_32x32,
         SpriteColorFormat_16Color,
-        TELE_SPRITE_RESERVED + (96*96 - 32*32)/4,
+        frameOffset + (96*96 - 32*32)/4,
         1,
         false,
         false,

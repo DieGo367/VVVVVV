@@ -146,17 +146,17 @@ static u16 *LoadSprites(const char *filename)
     bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
     if (!success) return NULL;
 
-    memcpy(SPRITE_GFX, gfx, gfxSize);
+    memcpy((u8 *)SPRITE_GFX + 0x20000, gfx, gfxSize);
     return (u16 *)gfx;
 }
 
-static u16 *LoadTeleporter(const char *filename)
+static void LoadTeleporter(const char *filename)
 {
     GRFHeader header;
     void *gfx = NULL;
     size_t gfxSize;
     bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
-    return success ? (u16 *)gfx : NULL;
+    if (success) memcpy(SPRITE_GFX, gfx, gfxSize);
 }
 
 static void LoadSpritesTranslation(
@@ -562,9 +562,8 @@ void GraphicsResources::init(void)
     im_flipsprites = im_sprites;
 
     // extra sprite for moving platforms
-    memset(SPRITE_GFX + (0x17E00/2), 0x11, 32*8/2);
-
-    im_teleporter = LoadTeleporter("graphics/teleporter.grf");
+    memset(SPRITE_GFX + (0x37E00/sizeof(u16)), 0x11, 32*8/2);
+    LoadTeleporter("graphics/teleporter.grf");
 
     im_image0 = LoadImage("graphics/levelcomplete.grf");
     im_image5 = im_image0;
@@ -634,7 +633,6 @@ void GraphicsResources::destroy(void)
     CLEAR(im_entcolours_tint);
     VVV_free(im_sprites);
     VVV_free(im_flipsprites);
-    VVV_free(im_teleporter);
 #else
 #define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
     CLEAR(im_tiles);

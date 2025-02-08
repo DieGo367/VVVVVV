@@ -50,7 +50,8 @@ void Screen::init(const struct ScreenSettings* settings) {
 	bgSetScale(3, (5 << 8) / 4, (5 << 8) / 4);
 	bgUpdate();
 
-	vramSetBankB(VRAM_B_MAIN_SPRITE);
+    vramSetBankE(VRAM_E_MAIN_SPRITE);
+	vramSetBankB(VRAM_B_MAIN_SPRITE_0x06420000);
 	oamInit(&oamMain, SpriteMapping_1D_256, false);
     oamRotateScale(&oamMain, 1, 0, (((5 << 8) - 31) / 4), (((5 << 8) - 31) / 4));
 }

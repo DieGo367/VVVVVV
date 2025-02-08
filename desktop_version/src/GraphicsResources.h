@@ -44,7 +44,6 @@ public:
     Bitmap* im_entcolours_tint;
     u16 *im_sprites;
     u16 *im_flipsprites;
-    u16 *im_teleporter;
     Bitmap* im_image0;
     Bitmap* im_image1;
     Bitmap* im_image2;
