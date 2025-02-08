@@ -552,28 +552,11 @@ void Graphics::post_substitute(Bitmap* subst)
 
 int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest)
 {
-    bool is_substituted = substitute(&texture);
-
     if (!texture || !texture->palette) {
         WHINE_ONCE("Could not copy texture");
         return -1;
     }
-	if (texture->alphaMod == 0) return 0;
-	
-	int clipX = 0, clipY = 0, clipW = texture->w, clipH = texture->h;
-	if (src) {
-		clipX = src->x, clipY = src->y, clipW = src->w, clipH = src->h;
-	}
-	int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
-	if (dest) {
-		destX = RENDER_SCALE(dest->x), destY = RENDER_SCALE(dest->y);
-        destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
-	}
-
-	int offsX = destX < 0 ? -destX : 0;
-	int offsY = destY < 0 ? -destY : 0;
-	int rendW = (destW > SCREEN_WIDTH + offsX ? SCREEN_WIDTH + offsX : destW) + offsX;
-	int rendH = (destH > SCREEN_HEIGHT + offsY ? SCREEN_HEIGHT + offsY : destH) + offsY;
+    if (texture->alphaMod == 0) return 0;
 
     u8 (*ReadPixel)(u8 *gfx, int pxIdx);
     switch (texture->bpp) {
@@ -591,7 +574,7 @@ int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect*
             break;
         default:
             WHINE_ONCE_ARGS(("Can't draw image with bitdepth %d", texture->bpp));
-            return 0;
+            return 1;
     }
 
     u16 *pal = texture->palette;
@@ -604,23 +587,30 @@ int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect*
             pal[i] = 1 << 15 | b << 10 | g << 5 | r;
         }
     }
+    
+    int clipX = 0, clipY = 0, clipW = texture->w, clipH = texture->h;
+    if (src) {
+        clipX = src->x, clipY = src->y, clipW = src->w, clipH = src->h;
+    }
+    int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
+    if (dest) {
+        destX = RENDER_SCALE(dest->x), destY = RENDER_SCALE(dest->y);
+        destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
+    }
 
-	u16 *gfx = bgGetGfxPtr(2);
-	for (int y = offsY; y < rendH; y++) {
-		int ty = y * clipH / destH + clipY;
-		for (int x = offsX; x < rendW; x++) {
-			int tx = x * clipW / destW + clipX;
-			int pixelIdx = ty * texture->w + tx;
+    u16 *gfx = bgGetGfxPtr(2);
+    for (int row = destY < 0 ? -destY : 0; row < destH; row++) {
+        int y = destY + row;
+        if (y >= SCREEN_HEIGHT) break;
+        int ty = clipY + (row * clipH / destH);
+        for (int col = destX < 0 ? -destX : 0; col < destW; col++) {
+            int x = destX + col;
+            if (x >= SCREEN_WIDTH) break;
+            int tx = clipX + (col * clipW / destW);
+            int pixelIdx = ty * texture->w + tx;
             u8 value = ReadPixel(texture->gfx, pixelIdx);
-            if (value == 0) continue;
-			u16 *px = gfx + (destY + y) * SCREEN_WIDTH + (destX + x);
-			*px = pal[value];
-		}
-	}
-
-    if (is_substituted)
-    {
-        post_substitute(texture);
+            if (value) gfx[y * SCREEN_WIDTH + x] = pal[value];
+        }
     }
 
     return 0;
