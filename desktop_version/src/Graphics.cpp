@@ -587,29 +587,65 @@ int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect*
             pal[i] = 1 << 15 | b << 10 | g << 5 | r;
         }
     }
-    
-    int clipX = 0, clipY = 0, clipW = texture->w, clipH = texture->h;
-    if (src) {
-        clipX = src->x, clipY = src->y, clipW = src->w, clipH = src->h;
-    }
+
     int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
     if (dest) {
         destX = RENDER_SCALE(dest->x), destY = RENDER_SCALE(dest->y);
         destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
     }
-
+    
     u16 *gfx = bgGetGfxPtr(2);
-    for (int row = destY < 0 ? -destY : 0; row < destH; row++) {
-        int y = destY + row;
-        if (y >= SCREEN_HEIGHT) break;
-        int ty = clipY + (row * clipH / destH);
-        for (int col = destX < 0 ? -destX : 0; col < destW; col++) {
-            int x = destX + col;
-            if (x >= SCREEN_WIDTH) break;
-            int tx = clipX + (col * clipW / destW);
-            int pixelIdx = ty * texture->w + tx;
-            u8 value = ReadPixel(texture->gfx, pixelIdx);
-            if (value) gfx[y * SCREEN_WIDTH + x] = pal[value];
+    if (src) {
+        int clipX = src->x, clipY = src->y, clipW = src->w, clipH = src->h;
+        for (int row = destY < 0 ? -destY : 0; row < destH; row++) {
+            int y = destY + row;
+            if (y >= SCREEN_HEIGHT) break;
+            int ty = clipY + (row * clipH / destH);
+            for (int col = destX < 0 ? -destX : 0; col < destW; col++) {
+                int x = destX + col;
+                if (x >= SCREEN_WIDTH) break;
+                int tx = clipX + (col * clipW / destW);
+                int pixelIdx = ty * texture->w + tx;
+                u8 value = ReadPixel(texture->gfx, pixelIdx);
+                if (value) gfx[y * SCREEN_WIDTH + x] = pal[value];
+            }
+        }
+    }
+    else if (texture->bpp == 1 && dest->w == texture->w && dest->h == texture->h) {
+        // 1bpp no crop simple scale version
+        int rowSize = texture->w / 8;
+        int limitX = (dest->x + texture->w > SCREEN_WIDTH_PIXELS) ? SCREEN_WIDTH_PIXELS - dest->x : texture->w;
+        int limitY = (dest->y + texture->h > SCREEN_HEIGHT_PIXELS) ? SCREEN_HEIGHT_PIXELS - dest->y : texture->h;
+        
+        for (int row = dest->y < 0 ? -dest->y : 0; row < limitY; row++) {
+            int yOffset = RENDER_SCALE(dest->y + row) * SCREEN_WIDTH;
+            for (int col = dest->x < 0 ? -dest->x : 0; col < limitX; col += 8) {
+                u8 bits = texture->gfx[row * rowSize + (col/8)];
+                int offset = yOffset;
+                if (bits      & 1) gfx[offset + RENDER_SCALE(dest->x + col    )] = pal[1];
+                if (bits >> 1 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 1)] = pal[1];
+                if (bits >> 2 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 2)] = pal[1];
+                if (bits >> 3 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 3)] = pal[1];
+                if (bits >> 4 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 4)] = pal[1];
+                if (bits >> 5 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 5)] = pal[1];
+                if (bits >> 6 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 6)] = pal[1];
+                if (bits >> 7 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 7)] = pal[1];
+            }
+        }
+    }
+    else { // no crop version
+        for (int row = destY < 0 ? -destY : 0; row < destH; row++) {
+            int y = destY + row;
+            if (y >= SCREEN_HEIGHT) break;
+            int ty = (row * texture->h / destH);
+            for (int col = destX < 0 ? -destX : 0; col < destW; col++) {
+                int x = destX + col;
+                if (x >= SCREEN_WIDTH) break;
+                int tx = (col * texture->w / destW);
+                int pixelIdx = ty * texture->w + tx;
+                u8 value = ReadPixel(texture->gfx, pixelIdx);
+                if (value) gfx[y * SCREEN_WIDTH + x] = pal[value];
+            }
         }
     }
 
