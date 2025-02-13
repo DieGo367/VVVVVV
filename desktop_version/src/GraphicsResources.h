@@ -19,13 +19,13 @@ typedef struct {
     u16 *map;
 } Tileset;
 typedef struct {
-    u16 w, h;
+    int id;
+    int width;
+    int height;
     u8 bpp;
-    u8 alphaMod;
+    u8 alphaMod; // NDS_TODO: use this
     u16 colorMod;
-    u16 *palette;
-    u8 *gfx;
-} Bitmap;
+} GLTexture;
 #endif
 
 class GraphicsResources
@@ -40,26 +40,24 @@ public:
     Tileset *im_tiles;
     Tileset *im_tiles2;
     Tileset *im_tiles3;
-    Bitmap* im_entcolours;
-    Bitmap* im_entcolours_tint;
     u16 *im_sprites;
     u16 *im_flipsprites;
-    Bitmap* im_image0;
-    Bitmap* im_image1;
-    Bitmap* im_image2;
-    Bitmap* im_image3;
-    Bitmap* im_image4;
-    Bitmap* im_image5;
-    Bitmap* im_image6;
-    Bitmap* im_image7;
-    Bitmap* im_image8;
-    Bitmap* im_image9;
-    Bitmap* im_image10;
-    Bitmap* im_image11;
-    Bitmap* im_image12;
+    GLTexture *im_image0;
+    GLTexture *im_image1;
+    GLTexture *im_image2;
+    GLTexture *im_image3;
+    GLTexture *im_image4;
+    GLTexture *im_image5;
+    GLTexture *im_image6;
+    GLTexture *im_image7;
+    GLTexture *im_image8;
+    GLTexture *im_image9;
+    GLTexture *im_image10;
+    GLTexture *im_image11;
+    GLTexture *im_image12;
 
-    Bitmap* im_sprites_translated;
-    Bitmap* im_flipsprites_translated;
+    u16 *im_sprites_translated;
+    u16 *im_flipsprites_translated;
     #else
     SDL_Surface* im_sprites_surf;
     SDL_Surface* im_flipsprites_surf;
@@ -95,8 +93,8 @@ public:
 };
 
 #ifdef __NDS__
-Bitmap* LoadImage(const char *filename, TextureLoadType loadtype);
-void DestroyImage(Bitmap *image);
+GLTexture *LoadImage(const char *filename, TextureLoadType loadtype);
+void DestroyImage(GLTexture *image);
 #else
 SDL_Surface* LoadImageSurface(const char* filename);
 SDL_Texture* LoadImage(const char *filename, TextureLoadType loadtype);

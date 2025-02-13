@@ -20,6 +20,7 @@
 #ifdef __NDS__
 #include <nds/arm9/background.h>
 #include <nds/arm9/sprite.h>
+#include <gl2d.h>
 void ScreenSettings_default(struct ScreenSettings* _this)
 {
     _this->windowDisplay = 0;
@@ -41,10 +42,8 @@ void Screen::init(const struct ScreenSettings* settings) {
     badSignalEffect = settings->badSignal;
     vsync = settings->useVsync;
 
-	videoSetMode(MODE_5_2D);
+	videoSetMode(MODE_5_3D);
     vramSetBankA(VRAM_A_MAIN_BG);
-	vramSetBankD(VRAM_D_MAIN_BG_0x06020000);
-	bgInit(2, BgType_Bmp16, BgSize_B16_256x256, 8, 0);
 	bgInit(3, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
 	bgSetCenter(3, 0, 0);
 	bgSetScale(3, (5 << 8) / 4, (5 << 8) / 4);
@@ -54,6 +53,12 @@ void Screen::init(const struct ScreenSettings* settings) {
 	vramSetBankB(VRAM_B_MAIN_SPRITE_0x06420000);
 	oamInit(&oamMain, SpriteMapping_1D_256, false);
     oamRotateScale(&oamMain, 1, 0, (((5 << 8) - 31) / 4), (((5 << 8) - 31) / 4));
+
+    vramSetBankD(VRAM_D_TEXTURE);
+    vramSetBankF(VRAM_F_TEX_PALETTE);
+    glScreen2D();
+    glClearColor(0, 0, 0, 0);
+    glBegin2D();
 }
 void Screen::destroy(void) {}
 
@@ -71,6 +76,9 @@ void Screen::GetScreenSize(int* x, int* y) {
 
 void Screen::RenderPresent(void) {
     oamUpdate(&oamMain);
+    glEnd2D();
+    glFlush(0);
+    glBegin2D();
 }
 
 void Screen::toggleFullScreen(void) {}

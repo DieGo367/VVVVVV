@@ -449,7 +449,9 @@ if(NINTENDO_DS)
         OUTPUT nitro/graphics
         COMMAND ${CMAKE_COMMAND} -E make_directory nitro/graphics
     )
-    set(IMG_1BIT
+    set(TILES tiles tiles2 tiles3)
+    set(SPRITES sprites teleporter)
+    set(TEXTURES_2BIT
         elephant
         gamecomplete
         levelcomplete
@@ -457,28 +459,15 @@ if(NINTENDO_DS)
         site2
         site3
         site4
+        covered
     )
-    set(IMG_2BIT covered)
-    set(IMG_4BIT ending)
-    set(IMG_8BIT entcolours minimap)
-    set(TILES tiles tiles2 tiles3)
-    set(SPRITES sprites teleporter)
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
-    foreach(IMAGE ${IMG_1BIT} ${IMG_2BIT} ${IMG_4BIT} ${IMG_8BIT} ${TILES} ${SPRITES} ${FONTS_WHITE} ${FONTS_COLOR})
+    foreach(IMAGE ${TILES} ${SPRITES} ${TEXTURES_2BIT} minimap ending ${FONTS_WHITE} ${FONTS_COLOR})
         set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
         set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
 
-        if(IMAGE IN_LIST IMG_1BIT)
-            set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB1 -pn2)
-        elseif(IMAGE IN_LIST IMG_2BIT)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn4)
-        elseif(IMAGE IN_LIST IMG_4BIT)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB4 -pn16)
-        elseif(IMAGE IN_LIST IMG_8BIT)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn206)
-        elseif(IMAGE IN_LIST TILES)
+        if(IMAGE IN_LIST TILES)
             set(GRIT_FLAGS -ftr -fh! -gt -gB8 -m)
         elseif(IMAGE IN_LIST SPRITES)
             if(IMAGE STREQUAL teleporter)
@@ -511,14 +500,22 @@ if(NINTENDO_DS)
                 )
             endif()
             set(GRIT_FLAGS ${GRIT_FLAGS} -gt -gB4 -pn3)
+        elseif(IMAGE IN_LIST TEXTURES_2BIT)
+            set(MAGICK_FLAGS ${MAGICK_FLAGS} -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn2)
+        elseif(IMAGE STREQUAL minimap)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn206)
+        elseif(IMAGE STREQUAL ending)
+            set(MAGICK_FLAGS ${MAGICK_FLAGS} -filter point -resize 256x192 -extent 256x256)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gx -gb -gB4 -pn16)
         elseif(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
             if(IMAGE IN_LIST FONTS_WHITE)
                 set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
-                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB1 -pn2)
+                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn2)
             else()
                 set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn25)
             endif()
-            set(MAGICK_FLAGS ${MAGICK_FLAGS} -crop 8x8 -append)
+            set(MAGICK_FLAGS ${MAGICK_FLAGS} -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
         endif()
 
         if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)

@@ -27,6 +27,7 @@
 #ifdef __NDS__
 #include <nds/arm9/background.h>
 #include <nds/arm9/sprite.h>
+#include <gl2d.h>
 #endif
 
 void Graphics::init(void)
@@ -479,25 +480,25 @@ void Graphics::print_level_creator(
 }
 
 #ifdef __NDS__
-int Graphics::set_texture_color_mod(Bitmap* texture, const Uint8 r, const Uint8 g, const Uint8 b)
+int Graphics::set_texture_color_mod(GLTexture *texture, const Uint8 r, const Uint8 g, const Uint8 b)
 {
     if (texture) texture->colorMod = VRAM_COLOR(r, g, b);
     return 0;
 }
 
-int Graphics::set_texture_alpha_mod(Bitmap* texture, const Uint8 alpha)
+int Graphics::set_texture_alpha_mod(GLTexture *texture, const Uint8 alpha)
 {
     if (texture) texture->alphaMod = alpha;
     return 0;
 }
 
-int Graphics::query_texture(Bitmap* texture, Uint32* format, int* access, int* w, int* h)
+int Graphics::query_texture(GLTexture *texture, Uint32* format, int* access, int* w, int* h)
 {
     if (texture) {
         if (format) *format = texture->bpp;
         if (access) *access = SDL_TEXTUREACCESS_STATIC;
-        if (w) *w = texture->w;
-        if (h) *h = texture->h;
+        if (w) *w = texture->width;
+        if (h) *h = texture->height;
         return 0;
     }
     WHINE_ONCE("Could not query texture");
@@ -509,7 +510,7 @@ int Graphics::set_blendmode(const SDL_BlendMode blendmode)
     return 0; // NDS_TODO
 }
 
-int Graphics::set_blendmode(Bitmap* texture, const SDL_BlendMode blendmode)
+int Graphics::set_blendmode(GLTexture *texture, const SDL_BlendMode blendmode)
 {
     const int result = SDL_SetTextureBlendMode(texture, blendmode);
     if (result != 0)
@@ -531,7 +532,7 @@ int Graphics::clear(void)
     return clear(0, 0, 0, 255);
 }
 
-bool Graphics::substitute(Bitmap** texture)
+bool Graphics::substitute(GLTexture **texture)
 {
     /* Either keep the given texture the same and return false,
      * or substitute it for a translation and return true. */
@@ -544,115 +545,43 @@ bool Graphics::substitute(Bitmap** texture)
     return false;
 }
 
-void Graphics::post_substitute(Bitmap* subst)
+void Graphics::post_substitute(GLTexture *subst)
 {
     set_texture_color_mod(subst, 255, 255, 255);
     set_texture_alpha_mod(subst, 255);
 }
 
-int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest)
+int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest)
 {
-    if (!texture || !texture->palette) {
+    if (!texture) {
         WHINE_ONCE("Could not copy texture");
         return -1;
     }
-    if (texture->alphaMod == 0) return 0;
 
-    u8 (*ReadPixel)(u8 *gfx, int pxIdx);
-    switch (texture->bpp) {
-        case 1:
-            ReadPixel = ReadPixel1BPP;
-            break;
-        case 2:
-            ReadPixel = ReadPixel2BPP;
-            break;
-        case 4:
-            ReadPixel = ReadPixel4BPP;
-            break;
-        case 8:
-            ReadPixel = ReadPixel8BPP;
-            break;
-        default:
-            WHINE_ONCE_ARGS(("Can't draw image with bitdepth %d", texture->bpp));
-            return 1;
+    int srcX = 0, srcY = 0, srcW = texture->width, srcH = texture->height;
+    if (src) {
+        srcX = src->x, srcY = src->y, srcW = src->w, srcH = src->h;
     }
 
-    u16 *pal = texture->palette;
-    if (texture->palette && texture->colorMod != 0xFFFF) {
-        pal = SDL_stack_alloc(u16, texture->palette[0]);
-        for (int i = 1; i < texture->palette[0]; i++) {
-            u8 r = (texture->palette[i] & 0b11111) * (texture->colorMod & 0b11111) / 0b11111;
-            u8 g = (texture->palette[i] >> 5 & 0b11111) * (texture->colorMod >> 5 & 0b11111) / 0b11111;
-            u8 b = (texture->palette[i] >> 10 & 0b11111) * (texture->colorMod >> 10 & 0b11111) / 0b11111;
-            pal[i] = 1 << 15 | b << 10 | g << 5 | r;
-        }
-    }
-
-    int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
+    int destX = 0, destY = 0, destW = SCREEN_WIDTH_PIXELS, destH = SCREEN_HEIGHT_PIXELS;
     if (dest) {
         destX = RENDER_SCALE(dest->x), destY = RENDER_SCALE(dest->y);
         destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
     }
-    
-    u16 *gfx = bgGetGfxPtr(2);
-    if (src) {
-        int clipX = src->x, clipY = src->y, clipW = src->w, clipH = src->h;
-        for (int row = destY < 0 ? -destY : 0; row < destH; row++) {
-            int y = destY + row;
-            if (y >= SCREEN_HEIGHT) break;
-            int ty = clipY + (row * clipH / destH);
-            for (int col = destX < 0 ? -destX : 0; col < destW; col++) {
-                int x = destX + col;
-                if (x >= SCREEN_WIDTH) break;
-                int tx = clipX + (col * clipW / destW);
-                int pixelIdx = ty * texture->w + tx;
-                u8 value = ReadPixel(texture->gfx, pixelIdx);
-                if (value) gfx[y * SCREEN_WIDTH + x] = pal[value];
-            }
-        }
-    }
-    else if (texture->bpp == 1 && dest->w == texture->w && dest->h == texture->h) {
-        // 1bpp no crop simple scale version
-        int rowSize = texture->w / 8;
-        int limitX = (dest->x + texture->w > SCREEN_WIDTH_PIXELS) ? SCREEN_WIDTH_PIXELS - dest->x : texture->w;
-        int limitY = (dest->y + texture->h > SCREEN_HEIGHT_PIXELS) ? SCREEN_HEIGHT_PIXELS - dest->y : texture->h;
-        
-        for (int row = dest->y < 0 ? -dest->y : 0; row < limitY; row++) {
-            int yOffset = RENDER_SCALE(dest->y + row) * SCREEN_WIDTH;
-            for (int col = dest->x < 0 ? -dest->x : 0; col < limitX; col += 8) {
-                u8 bits = texture->gfx[row * rowSize + (col/8)];
-                int offset = yOffset;
-                if (bits      & 1) gfx[offset + RENDER_SCALE(dest->x + col    )] = pal[1];
-                if (bits >> 1 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 1)] = pal[1];
-                if (bits >> 2 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 2)] = pal[1];
-                if (bits >> 3 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 3)] = pal[1];
-                if (bits >> 4 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 4)] = pal[1];
-                if (bits >> 5 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 5)] = pal[1];
-                if (bits >> 6 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 6)] = pal[1];
-                if (bits >> 7 & 1) gfx[offset + RENDER_SCALE(dest->x + col + 7)] = pal[1];
-            }
-        }
-    }
-    else { // no crop version
-        for (int row = destY < 0 ? -destY : 0; row < destH; row++) {
-            int y = destY + row;
-            if (y >= SCREEN_HEIGHT) break;
-            int ty = (row * texture->h / destH);
-            for (int col = destX < 0 ? -destX : 0; col < destW; col++) {
-                int x = destX + col;
-                if (x >= SCREEN_WIDTH) break;
-                int tx = (col * texture->w / destW);
-                int pixelIdx = ty * texture->w + tx;
-                u8 value = ReadPixel(texture->gfx, pixelIdx);
-                if (value) gfx[y * SCREEN_WIDTH + x] = pal[value];
-            }
-        }
-    }
+
+    glImage glImg = {
+        srcW,
+        srcH,
+        srcX, srcY,
+        texture->id
+    };
+    glColor(texture->colorMod);
+    glSpriteScaleXY(destX, destY, floattof32(1.0 * destW / srcW), floattof32(1.0 * destH / srcH), GL_FLIP_NONE, &glImg);
 
     return 0;
 }
 
-int Graphics::copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
+int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
 {
     return copy_texture(texture, src, dest);
 }
@@ -843,21 +772,11 @@ int Graphics::set_color(const SDL_Color color)
 int Graphics::fill_rect(const SDL_Rect* rect)
 {
     #ifdef __NDS__
-    uint16_t *gfx = bgGetGfxPtr(2);
     int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
     if (rect) {
         rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
-        if (rx < 0) rw += rx, rx = 0;
-        if (ry < 0) rh += ry, ry = 0;
-        if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
-        if (ry + rh > SCREEN_HEIGHT) rh = SCREEN_HEIGHT - ry;
     }
-    if (rw == SCREEN_WIDTH) { // faster fill!
-        memset16(gfx + ry * SCREEN_WIDTH, draw_color, rw * rh);
-    }
-    else for (int y = 0; y < rh; y++) {
-        memset16(gfx + ((ry + y) * SCREEN_WIDTH + rx), draw_color, rw);
-    }
+    glBoxFilled(rx, ry, rx + rw - 1, ry + rh - 1, draw_color);
     return 0;
     #else
     const int result = SDL_RenderFillRect(gameScreen.m_renderer, rect);
@@ -914,30 +833,11 @@ int Graphics::fill_rect(const int x, const int y, const int w, const int h, cons
 int Graphics::draw_rect(const SDL_Rect* rect)
 {
     #ifdef __NDS__
-    uint16_t *gfx = bgGetGfxPtr(2);
     int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
     if (rect) {
-        rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y);
-        rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
+        rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
     }
-
-    for (int y = 1; y < rh - 1; y++) {
-        if (ry + y < 0 || ry + y >= SCREEN_HEIGHT) continue;
-
-        if (rx >= 0 && rx < SCREEN_WIDTH) {
-            gfx[(ry + y) * SCREEN_WIDTH + rx] = draw_color;
-        }
-        if (rx + rw - 1 >= 0 && rx + rw - 1 < SCREEN_WIDTH) {
-            gfx[(ry + y) * SCREEN_WIDTH + rx + rw - 1] = draw_color;
-        }
-    }
-
-    if (rx < 0) rw += rx, rx = 0;
-    if (rx + rw > SCREEN_WIDTH) rw = SCREEN_WIDTH - rx;
-
-    if (ry >= 0 && ry < SCREEN_HEIGHT) memset16(gfx + ry * SCREEN_WIDTH + rx, draw_color, rw);
-    if (ry + rh - 1 >= 0 && ry + rh - 1 < SCREEN_HEIGHT) memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH + rx, draw_color, rw);
-
+    glBox(rx, ry, rx + rw - 1, ry + rh - 1, draw_color);
     return 0;
     #else
     const int result = SDL_RenderDrawRect(gameScreen.m_renderer, rect);
@@ -984,21 +884,7 @@ int Graphics::draw_rect(const int x, const int y, const int w, const int h, cons
 int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
 {
     #ifdef __NDS__
-    uint16_t *gfx = bgGetGfxPtr(2);
-    int dx = RENDER_SCALE(x2) - RENDER_SCALE(x), dy = RENDER_SCALE(y2) - RENDER_SCALE(y);
-    if (abs(dx) > abs(dy)) {
-        for (int ix = RENDER_SCALE(x); ix != RENDER_SCALE(x2); ix < RENDER_SCALE(x2) ? ix++ : ix--) {
-            int iy = ix * dy / dx;
-            if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
-            gfx[iy * SCREEN_WIDTH + ix] = draw_color;
-        }
-    } else {
-        for (int iy = RENDER_SCALE(y); iy != RENDER_SCALE(y2); iy < RENDER_SCALE(y2) ? iy++ : iy--) {
-            int ix = iy * dx / dy;
-            if (ix < 0 || ix >= SCREEN_WIDTH || iy < 0 || iy >= SCREEN_HEIGHT) continue;
-            gfx[iy * SCREEN_WIDTH + ix] = draw_color;
-        }
-    }
+    glLine(RENDER_SCALE(x), RENDER_SCALE(y), RENDER_SCALE(x2), RENDER_SCALE(y2), draw_color);
     return 0;
     #else
     const int result = SDL_RenderDrawLine(gameScreen.m_renderer, x, y, x2, y2);
@@ -1013,11 +899,8 @@ int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
 int Graphics::draw_points(const SDL_Point* points, const int count)
 {
     #ifdef __NDS__
-    uint16_t *gfx = bgGetGfxPtr(2);
     for (int i = 0; i < count; i++) {
-        int x = RENDER_SCALE(points[i].x), y = RENDER_SCALE(points[i].y);
-        if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT) continue;
-        gfx[y * SCREEN_WIDTH + x] = draw_color;
+        glPutPixel(RENDER_SCALE(points[i].x), RENDER_SCALE(points[i].y), draw_color);
     }
     return 0;
     #else
@@ -1037,68 +920,6 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 }
 
 #ifdef __NDS__
-void Graphics::print_char_1BPP(u8 *fontGfx, u16 vramColor, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale) {
-    u16 *out = bgGetGfxPtr(2);
-    u8 wSize = w <= 8 ? 1 : 2;
-    u8 *glyphGfx = fontGfx + glyphIdx * wSize*h;
-    if (scale == 1) for (u8 row = 0; row < h; row++) {
-        /* I'm deliberately leaving out row from RENDER_SCALE,
-        since at this scale it looks nicer not to squish vertically
-        */
-        int yOffset = (RENDER_SCALE(y) + row) * SCREEN_WIDTH;
-        for (u8 col = 0; col < w; col += 8) {
-            u8 bits = glyphGfx[row * wSize + (col ? 1 : 0)];
-            int offset = yOffset + RENDER_SCALE(x);
-            if (bits      & 1) out[offset + RENDER_SCALE((col    ))] = vramColor;
-            if (bits >> 1 & 1) out[offset + RENDER_SCALE((col + 1))] = vramColor;
-            if (bits >> 2 & 1) out[offset + RENDER_SCALE((col + 2))] = vramColor;
-            if (bits >> 3 & 1) out[offset + RENDER_SCALE((col + 3))] = vramColor;
-            if (bits >> 4 & 1) out[offset + RENDER_SCALE((col + 4))] = vramColor;
-            if (bits >> 5 & 1) out[offset + RENDER_SCALE((col + 5))] = vramColor;
-            if (bits >> 6 & 1) out[offset + RENDER_SCALE((col + 6))] = vramColor;
-            if (bits >> 7 & 1) out[offset + RENDER_SCALE((col + 7))] = vramColor;
-        }
-    }
-    else for (u8 row = 0; row < h; row++) for (int i = 0; i < scale; i++) {
-        int yOffset = (RENDER_SCALE(y + (row*scale) + i)) * SCREEN_WIDTH;
-        for (u8 col = 0; col < w; col += 8) {
-            u8 bits = glyphGfx[row * wSize + (col ? 1 : 0)];
-            int offset = yOffset + RENDER_SCALE(x);
-            if (bits      & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col    ) * scale + j))] = vramColor;
-            if (bits >> 1 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 1) * scale + j))] = vramColor;
-            if (bits >> 2 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 2) * scale + j))] = vramColor;
-            if (bits >> 3 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 3) * scale + j))] = vramColor;
-            if (bits >> 4 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 4) * scale + j))] = vramColor;
-            if (bits >> 5 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 5) * scale + j))] = vramColor;
-            if (bits >> 6 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 6) * scale + j))] = vramColor;
-            if (bits >> 7 & 1) for (int j = 0; j < scale; j++) out[offset + RENDER_SCALE(((col + 7) * scale + j))] = vramColor;
-        }
-    }
-}
-void Graphics::print_char_8BPP(u8 *fontGfx, u16 *fontPalette, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale) {
-    u16 *out = bgGetGfxPtr(2);
-    u8 *glyphGfx = fontGfx + glyphIdx * w*h;
-    if (scale == 1) for (u8 row = 0; row < h; row++) {
-        // row outside of RENDER_SCALE again, see comment for 1bpp version
-        int yOffset = (RENDER_SCALE(y) + row) * SCREEN_WIDTH;
-        for (u8 col = 0; col < w; col ++) {
-            u8 value = glyphGfx[row * w + col];
-            if (value) {
-                out[yOffset + RENDER_SCALE(x) + RENDER_SCALE(col)] = fontPalette ? fontPalette[value] : 0x8000;
-            }
-        }
-    }
-    else for (u8 row = 0; row < h; row++) for (int i = 0; i < scale; i++) {
-        int yOffset = RENDER_SCALE(y + row + i) * SCREEN_WIDTH;
-        for (u8 col = 0; col < w; col ++) {
-            u8 value = glyphGfx[row * w + col];
-            if (value) for (int j = 0; j < scale; j++) {
-                out[yOffset + RENDER_SCALE(x) + RENDER_SCALE(col * scale + j)] = fontPalette ? fontPalette[value] : 0x8000;
-            }
-        }
-    }
-}
-
 #define SPRITE_SIZE_U16 (SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4) // 32x32 at 4bpp, so 4 pixels per short
 static void drawsprite(const int x, const int y, const int slot, const int t, const u16 vramColor, const SpriteSize size)
 {
@@ -1185,7 +1006,7 @@ void Graphics::clear_sprites(void)
     clear_sprites(false);
 }
 
-void Graphics::scroll_texture(Bitmap* texture, Bitmap* temp, const int x, const int y)
+void Graphics::scroll_texture(GLTexture *texture, GLTexture *temp, const int x, const int y)
 {
     // NDS_TODO
 }
@@ -1628,7 +1449,7 @@ void Graphics::drawpartimage(const int t, const int xp, const int yp, const int 
 }
 
 #ifdef __NDS__
-void Graphics::draw_texture(Bitmap* image, const int x, const int y)
+void Graphics::draw_texture(GLTexture *image, const int x, const int y)
 {
     int w, h;
 
@@ -1642,7 +1463,7 @@ void Graphics::draw_texture(Bitmap* image, const int x, const int y)
     copy_texture(image, NULL, &dstrect);
 }
 
-void Graphics::draw_texture_part(Bitmap* image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)
+void Graphics::draw_texture_part(GLTexture *image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)
 {
     const SDL_Rect srcrect = {x2, y2, w, h};
 
@@ -1951,57 +1772,16 @@ void Graphics::drawpixeltextbox(
     const int b
 ) {
     #ifdef __NDS__
-    u16 *gfx = bgGetGfxPtr(2);
     u16 color = VRAM_COLOR(r, g, b);
     u16 darker = VRAM_COLOR(r/6, g/6, b/6);
-    int rx = RENDER_SCALE(x), ry = RENDER_SCALE(y), rw = RENDER_SCALE(w);
-    int rh = RENDER_SCALE(h) + 1; // looks better plus 1'd with the oddly squarshed font
 
-    if (x < 0) {
-        // special case for map menu
-        memset16(gfx + ry * SCREEN_WIDTH, darker, SCREEN_WIDTH);
-        memset16(gfx + (ry + 1) * SCREEN_WIDTH, color, 2 * SCREEN_WIDTH);
-        memset16(gfx + (ry + 3) * SCREEN_WIDTH, darker, SCREEN_WIDTH);
-        memset16(gfx + (ry + 4) * SCREEN_WIDTH, color, SCREEN_WIDTH);
+    int rx = RENDER_SCALE(x), ry = RENDER_SCALE(y), rw = RENDER_SCALE(w), rh = RENDER_SCALE(h);
 
-        memset16(gfx + (ry + 5) * SCREEN_WIDTH, darker, (rh - 10) * SCREEN_WIDTH);
-
-        memset16(gfx + (ry + rh - 5) * SCREEN_WIDTH, color, SCREEN_WIDTH);
-        memset16(gfx + (ry + rh - 4) * SCREEN_WIDTH, darker, SCREEN_WIDTH);
-        memset16(gfx + (ry + rh - 3) * SCREEN_WIDTH, color, 2 * SCREEN_WIDTH);
-        memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH, darker, SCREEN_WIDTH);
-        return;
-    }
-
-    memset16(gfx + ry * SCREEN_WIDTH + rx, darker, rw);
-    memset16(gfx + (ry + 1) * SCREEN_WIDTH + rx + 3, color, rw - 6);
-    memset16(gfx + (ry + 2) * SCREEN_WIDTH + rx + 3, color, rw - 6);
-    memset16(gfx + (ry + 3) * SCREEN_WIDTH + rx + 3, darker, rw - 6);
-    memset16(gfx + (ry + 4) * SCREEN_WIDTH + rx + 5, color, rw - 10);
-
-    memset16(gfx + (ry + rh - 5) * SCREEN_WIDTH + rx + 5, color, rw - 10);
-    memset16(gfx + (ry + rh - 4) * SCREEN_WIDTH + rx + 3, darker, rw - 6);
-    memset16(gfx + (ry + rh - 3) * SCREEN_WIDTH + rx + 3, color, rw - 6);
-    memset16(gfx + (ry + rh - 2) * SCREEN_WIDTH + rx + 3, color, rw - 6);
-    memset16(gfx + (ry + rh - 1) * SCREEN_WIDTH + rx, darker, rw);
-
-    for (int row = 1; row < rh - 1; row++) {
-        gfx[(ry + row) * SCREEN_WIDTH + rx] = darker;
-        gfx[(ry + row) * SCREEN_WIDTH + rx + 1] = color;
-        gfx[(ry + row) * SCREEN_WIDTH + rx + 2] = color;
-        if (row > 3 && row < rh - 4) {
-            gfx[(ry + row) * SCREEN_WIDTH + rx + 3] = darker;
-            gfx[(ry + row) * SCREEN_WIDTH + rx + 4] = color;
-            if (row > 4 && row < rh - 5) {
-                memset16(gfx + (ry + row) * SCREEN_WIDTH + rx + 5, darker, rw - 10);
-            }
-            gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 5] = color;
-            gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 4] = darker;
-        }
-        gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 3] = color;
-        gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 2] = color;
-        gfx[(ry + row) * SCREEN_WIDTH + rx + rw - 1] = darker;
-    }
+    glBoxFilled(rx,     ry,     rx + rw,     ry + rh,     darker);
+    glBoxFilled(rx + 1, ry + 1, rx + rw - 1, ry + rh - 1, color);
+    glBoxFilled(rx + 3, ry + 3, rx + rw - 3, ry + rh - 3, darker);
+    glBoxFilled(rx + 5, ry + 5, rx + rw - 5, ry + rh - 5, color);
+    glBoxFilled(rx + 6, ry + 6, rx + rw - 6, ry + rh - 6, darker);
     #else
     int k;
 
@@ -3055,9 +2835,6 @@ void Graphics::drawentity(const int i, const int yoff)
 
 void Graphics::drawbackground( int t )
 {
-    #ifdef __NDS__
-    fill_rect(NULL, 0, 0, 0, 0);
-    #endif
     switch(t)
     {
     case 1:

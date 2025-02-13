@@ -16,6 +16,10 @@
 #include "Vlogging.h"
 #include "XMLUtils.h"
 
+#ifdef __NDS__
+#include <gl2d.h>
+#endif
+
 extern "C"
 {
 #include <c-hashmap/map.h>
@@ -56,7 +60,7 @@ struct Font
     uint8_t glyph_h;
 
     #ifdef __NDS__
-    Bitmap* image;
+    GLTexture *image;
     #else
     SDL_Texture* image;
     #endif
@@ -410,14 +414,21 @@ static uint8_t load_font(FontContainer* container, const char* name)
          * "all unicode from 0 to however much is in the image"... */
 
         #ifdef __NDS__
-        #define temp_surface f->image
+        if (f->image != NULL)
         #else
         SDL_Surface* temp_surface = LoadImageSurface(name_png);
-        #endif
         if (temp_surface != NULL)
+        #endif
         {
+            #ifdef __NDS__
+            u8 *texGfx = (u8 *)glGetTexturePointer(f->image->id);
+            u16 *texPal = (u16 *)glGetColorTablePointer(f->image->id);
+            const uint32_t chars_per_line = f->image->width / f->glyph_w;
+            const uint32_t max_codepoint = (f->image->height / f->glyph_h) * chars_per_line;
+            #else
             const uint32_t chars_per_line = temp_surface->w / f->glyph_w;
             const uint32_t max_codepoint = (temp_surface->h / f->glyph_h) * chars_per_line;
+            #endif
 
             for (uint32_t codepoint = 0x00; codepoint < max_codepoint; codepoint++)
             {
@@ -435,13 +446,13 @@ static uint8_t load_font(FontContainer* container, const char* name)
                         {
                             #ifdef __NDS__
                             int texX = glyph_x+pixel_x, texY = glyph_y+pixel_y;
-                            if (texX >= 0 && texX < f->image->w && texY >= 0 && texY < f->image->h) {
-                                int pixelIdx = texY * f->image->w + texX;
+                            if (texX >= 0 && texX < f->image->width && texY >= 0 && texY < f->image->height) {
+                                int pixelIdx = texY * f->image->width + texX;
                                 u16 color;
-                                if (f->image->bpp == 16) color = ((u16 *)f->image->gfx)[pixelIdx];
+                                if (f->image->bpp == 16) color = ((u16 *)texGfx)[pixelIdx];
                                 else {
-                                    u8 value = f->image->gfx[pixelIdx * f->image->bpp / 8] >> pixelIdx % (8 / f->image->bpp) * f->image->bpp & ((1 << f->image->bpp) - 1);
-                                    color = value ? f->image->palette[value] : 0;
+                                    u8 value = texGfx[pixelIdx * f->image->bpp / 8] >> pixelIdx % (8 / f->image->bpp) * f->image->bpp & ((1 << f->image->bpp) - 1);
+                                    color = value ? texPal[value] : 0;
                                 }
                                 if (color & 1 << 15) {
                                     found_pixel = true;
@@ -467,9 +478,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
                 add_glyphinfo(f, codepoint, codepoint);
             }
 
-        #ifdef __NDS__
-        #undef temp_surface
-        #else
+        #ifndef __NDS__
             VVV_freefunc(SDL_FreeSurface, temp_surface);
         #endif
         }
@@ -1178,24 +1187,19 @@ static int print_char(
     }
 
     #ifdef __NDS__
-    if (f_glyph->image->bpp == 1) graphics.print_char_1BPP(
-        f_glyph->image->gfx,
-        VRAM_COLOR(r, g, b),
-        glyph->image_idx,
-        x, y,
+    graphics.set_texture_color_mod(f_glyph->image, r, g, b);
+    graphics.draw_texture_part(
+        f_glyph->image,
+        x,
+        y,
+        (glyph->image_idx % (f_glyph->image->width / f_glyph->glyph_w)) * f_glyph->glyph_w,
+        (glyph->image_idx / (f_glyph->image->width / f_glyph->glyph_w)) * f_glyph->glyph_h,
         f_glyph->glyph_w,
         f_glyph->glyph_h,
-        scale
+        scale,
+        scale * (graphics.flipmode ? -1 : 1)
     );
-    else if (f_glyph->image->bpp == 8) graphics.print_char_8BPP(
-        f_glyph->image->gfx,
-        (r || g || b) ? f_glyph->image->palette : NULL,
-        glyph->image_idx,
-        x, y,
-        f_glyph->glyph_w,
-        f_glyph->glyph_h,
-        scale
-    );
+    graphics.set_texture_color_mod(f_glyph->image, 255, 255, 255);
     #else
     graphics.draw_grid_tile(
         f_glyph->image,

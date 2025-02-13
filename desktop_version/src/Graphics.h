@@ -164,8 +164,8 @@ public:
     void drawimagecol(int t, int xp, int yp, SDL_Color ct, bool cent= false);
 
     #ifdef __NDS__
-    void draw_texture(Bitmap* image, int x, int y);
-    void draw_texture_part(Bitmap* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
+    void draw_texture(GLTexture *image, int x, int y);
+    void draw_texture_part(GLTexture *image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
 
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height);
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
@@ -190,9 +190,6 @@ public:
     void drawgui(void);
 
     #ifdef __NDS__
-    void print_char_1BPP(u8 *fontGfx, u16 vramColor, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale);
-    void print_char_8BPP(u8 *fontGfx, u16 *fontPalette, u16 glyphIdx, int x, int y, u8 w, u8 h, int scale);
-
     void draw_sprite(int x, int y, int slot, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int slot, int t, SDL_Color color);
     void draw_sprite_wide(int x, int y, int slot, int t, SDL_Color color);
@@ -202,7 +199,7 @@ public:
     void clear_sprites(void);
     void clear_sprites(bool forceUpdate);
 
-    void scroll_texture(Bitmap* texture, Bitmap* temp, int x, int y);
+    void scroll_texture(GLTexture *texture, GLTexture *temp, int x, int y);
     #else
     void draw_sprite(int x, int y, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int t, SDL_Color color);
@@ -227,14 +224,14 @@ public:
     );
 
     #ifdef __NDS__
-    int set_texture_color_mod(Bitmap* texture, Uint8 r, Uint8 g, Uint8 b);
+    int set_texture_color_mod(GLTexture *texture, Uint8 r, Uint8 g, Uint8 b);
 
-    int set_texture_alpha_mod(Bitmap* texture, Uint8 alpha);
+    int set_texture_alpha_mod(GLTexture *texture, Uint8 alpha);
 
-    int query_texture(Bitmap* texture, Uint32* format, int* access, int* w, int* h);
+    int query_texture(GLTexture *texture, Uint32* format, int* access, int* w, int* h);
 
     int set_blendmode(SDL_BlendMode blendmode);
-    int set_blendmode(Bitmap* texture, SDL_BlendMode blendmode);
+    int set_blendmode(GLTexture *texture, SDL_BlendMode blendmode);
     #else
     int set_render_target(SDL_Texture* texture);
 
@@ -252,11 +249,11 @@ public:
     int clear(void);
 
     #ifdef __NDS__
-    bool substitute(Bitmap** texture);
-    void post_substitute(Bitmap* subst);
+    bool substitute(GLTexture **texture);
+    void post_substitute(GLTexture *subst);
 
-    int copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest);
-    int copy_texture(Bitmap* texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
+    int copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest);
+    int copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
     #else
     bool substitute(SDL_Texture** texture);
     void post_substitute(SDL_Texture* subst);
@@ -400,7 +397,7 @@ public:
     #endif
 
     #ifdef __NDS__
-    Bitmap* images[NUM_IMAGES];
+    GLTexture *images[NUM_IMAGES];
     #else
     SDL_Texture* images[NUM_IMAGES];
     #endif
@@ -410,14 +407,14 @@ public:
     bool notextoutline;
 
     #ifdef __NDS__
-    Bitmap* gameTexture;
-    Bitmap* tempShakeTexture;
-    Bitmap* gameplayTexture;
-    Bitmap* menuTexture;
-    Bitmap* ghostTexture;
-    Bitmap* backgroundTexture;
-    Bitmap* foregroundTexture;
-    Bitmap* tempScrollingTexture;
+    GLTexture *gameTexture;
+    GLTexture *tempShakeTexture;
+    GLTexture *gameplayTexture;
+    GLTexture *menuTexture;
+    GLTexture *ghostTexture;
+    GLTexture *backgroundTexture;
+    GLTexture *foregroundTexture;
+    GLTexture *tempScrollingTexture;
     #else
     SDL_Texture* gameTexture;
     SDL_Texture* tempShakeTexture;

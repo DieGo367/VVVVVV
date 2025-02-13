@@ -9,7 +9,7 @@
 struct TowerBG
 {
     #ifdef __NDS__
-    Bitmap* texture;
+    GLTexture *texture;
     #else
     SDL_Texture* texture;
     #endif

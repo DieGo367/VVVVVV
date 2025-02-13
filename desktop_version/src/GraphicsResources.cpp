@@ -37,6 +37,7 @@ extern "C"
 #ifdef __NDS__
 #include <nds/arm9/grf.h>
 #include <nds/arm9/sprite.h>
+#include <gl2d.h>
 
 static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void **gfxDst, size_t *gfxSize, void **mapDst, size_t *mapSize, void **palDst, size_t *palSize)
 {
@@ -61,53 +62,63 @@ static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void 
     return true;
 }
 
-Bitmap* LoadImage(const char *filename, const TextureLoadType loadtype)
+GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype)
 {
     GRFHeader header;
     void *gfx = NULL, *palette = NULL;
-    size_t gfxSize, paletteSize;
-    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, &palette, &paletteSize);
-    if (!success) return NULL;
+    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, NULL, NULL, NULL, &palette, NULL);
+    if (!success) return 0;
 
-    Bitmap *tex = (Bitmap *)malloc(sizeof(Bitmap));
-    if (!tex) {
-        VVV_free(gfx); VVV_free(palette);
-        vlog_error("Could not load %s: OOM", filename);
-        return NULL;
+    GLTexture *tex = (GLTexture *)malloc(sizeof(GLTexture));
+    if (tex == NULL) {
+        vlog_error("Could not load %s: Failed to allocate GLTexture", filename);
+        goto fail;
     }
-
-    tex->w = header.gfxWidth;
-    tex->h = header.gfxHeight;
     tex->bpp = header.gfxAttr;
-    tex->alphaMod = 255;
+    tex->width = header.gfxWidth;
+    tex->height = header.gfxHeight;
     tex->colorMod = 0xFFFF;
-    tex->gfx = (u8 *)gfx;
-    tex->palette = (u16 *)palette;
-    if(tex->palette) {
-        tex->palette[0] = paletteSize / sizeof(u16);
-        if (loadtype == TEX_WHITE) {
-            for (int i = 1; i < tex->palette[0]; i++) {
-                tex->palette[i] = 0xFFFF;
-            }
-        }
-        else for (int i = 1; i < tex->palette[0]; i++) {
-            tex->palette[i] |= 1 << 15;
-        }
+    if (header.palAttr > 0 && loadtype == TEX_WHITE) {
+        memset16((u16 *)palette + 1, 0xFFFF, (header.palAttr - 1) * sizeof(u16));
     }
+
+    glImage glImg;
+    tex->id = glLoadTileSet(
+        &glImg,
+        header.gfxWidth,
+        header.gfxHeight,
+        header.gfxWidth,
+        header.gfxHeight,
+        header.gfxAttr == 2 ? GL_RGB4 : (header.gfxAttr == 4 ? GL_RGB16 : (header.gfxAttr == 8 ? GL_RGB256 : GL_RGBA)),
+        header.gfxWidth,
+        header.gfxHeight,
+        GL_TEXTURE_COLOR0_TRANSPARENT,
+        header.palAttr,
+        palette,
+        gfx
+    );
+    if (tex->id == -1) {
+        vlog_error("glLoadTileSet failed for %s", filename);
+        goto fail;
+    }
+
+    VVV_free(gfx); VVV_free(palette);
     return tex;
+fail:
+    VVV_free(tex); VVV_free(gfx); VVV_free(palette);
+    return 0;
 }
 
-static Bitmap* LoadImage(const char* filename)
+static GLTexture *LoadImage(const char* filename)
 {
     return LoadImage(filename, TEX_COLOR);
 }
 
-void DestroyImage(Bitmap *bitmap)
+void DestroyImage(GLTexture *texture)
 {
-    if (bitmap) {
-        if (bitmap->gfx) free(bitmap->gfx);
-        if (bitmap->palette) free(bitmap->palette);
-        free(bitmap);
+    if (texture && texture->id) {
+        glDeleteTextures(1, &texture->id);
+        free(texture);
     }
 }
 
@@ -163,7 +174,7 @@ static void LoadSpritesTranslation(
     const char* filename,
     tinyxml2::XMLDocument* mask,
     // SDL_Surface* surface_english,
-    Bitmap** texture
+    u16 **texture
 ) {
     // NDS_TODO: implement
 }
@@ -488,8 +499,8 @@ static void LoadSpritesTranslation(
 void GraphicsResources::init_translations(void)
 {
     #ifdef __NDS__
-    VVV_freefunc(DestroyImage, im_sprites_translated);
-    VVV_freefunc(DestroyImage, im_flipsprites_translated);
+    VVV_free(im_sprites_translated);
+    VVV_free(im_flipsprites_translated);
     #else
     VVV_freefunc(SDL_DestroyTexture, im_sprites_translated);
     VVV_freefunc(SDL_DestroyTexture, im_flipsprites_translated);
@@ -629,8 +640,6 @@ void GraphicsResources::destroy(void)
     CLEAR_TILES(im_tiles2);
     CLEAR_TILES(im_tiles3);
 #undef CLEAR_TILES
-    CLEAR(im_entcolours);
-    CLEAR(im_entcolours_tint);
     VVV_free(im_sprites);
     VVV_free(im_flipsprites);
 #else
@@ -662,8 +671,13 @@ void GraphicsResources::destroy(void)
     CLEAR(im_image11);
     CLEAR(im_image12);
 
+    #ifdef __NDS__
+    VVV_free(im_sprites_translated);
+    VVV_free(im_flipsprites_translated);
+    #else
     CLEAR(im_sprites_translated);
     CLEAR(im_flipsprites_translated);
+    #endif
 #undef CLEAR
 
     #ifndef __NDS__
