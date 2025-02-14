@@ -1483,6 +1483,15 @@ void Graphics::draw_texture_part(GLTexture *image, const int x, const int y, con
     copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
 }
 
+void Graphics::use_tileset(int tilesetID) {
+    if (tilesetID != active_tileset) {
+        Tileset *set = tilesetID == 2 ? grphx.im_tiles3 : tilesetID == 1 ? grphx.im_tiles2 : grphx.im_tiles;
+        memcpy(bgGetGfxPtr(3), set->gfx, set->gfxSize);
+        memcpy(BG_PALETTE + 1, set->palette + 1, set->paletteSize - sizeof(u16));
+        active_tileset = tilesetID;
+    }
+}
+
 void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
     u16 *map = bgGetMapPtr(3);
     int tileX = x/8, tileY = y/8;
@@ -3323,12 +3332,7 @@ void Graphics::drawmap(void)
     {
         #ifdef __NDS__
         u16 *bgMap = bgGetMapPtr(3);
-        if (map.tileset != active_tileset) {
-            Tileset *set = map.tileset == 0 ? grphx.im_tiles : map.tileset == 1 ? grphx.im_tiles2 : grphx.im_tiles3;
-            memcpy(bgGetGfxPtr(3), set->gfx, set->gfxSize);
-            memcpy(BG_PALETTE + 1, set->palette + 1, set->paletteSize - sizeof(u16));
-            active_tileset = map.tileset;
-        }
+        use_tileset(map.tileset);
         #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
@@ -3463,7 +3467,9 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 {
     if (bg_obj.bypos < 0) bg_obj.bypos += 120 * 8;
 
-    #ifndef __NDS__
+    #ifdef __NDS__
+    use_tileset(2);
+    #else
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
     set_render_target(bg_obj.texture);
     #endif
@@ -3700,6 +3706,7 @@ void Graphics::menuoffrender(void)
 {
     #ifdef __NDS__
     clear_sprites();
+    foregrounddrawn = false;
     #endif
     if (copy_texture(gameplayTexture, NULL, NULL) != 0)
     {

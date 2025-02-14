@@ -167,6 +167,8 @@ public:
     void draw_texture(GLTexture *image, int x, int y);
     void draw_texture_part(GLTexture *image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
 
+    void use_tileset(int tilesetID);
+
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height);
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
     void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, SDL_Color color);
