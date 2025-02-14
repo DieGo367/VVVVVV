@@ -2491,6 +2491,7 @@ void Graphics::drawentity(const int i, const int yoff)
 
     if (obj.entities[i].invis)
     {
+        if (oamMain.oamMemory[i].attribute[0] != ATTR0_DISABLED) oamClearSprite(&oamMain, i);
         return;
     }
 
