@@ -253,9 +253,9 @@ void Graphics::destroy_buffers(void)
 }
 
 #ifdef __NDS__
-void Graphics::drawspritesetcol(int x, int y, int slot, int t, int c)
+void Graphics::drawspritesetcol(int x, int y, int slot, bool inMenu, int t, int c)
 {
-    draw_sprite(x, y, slot, t, getcol(c));
+    draw_sprite(x, y, slot, inMenu, t, getcol(c));
 }
 #else
 void Graphics::drawspritesetcol(int x, int y, int t, int c)
@@ -921,7 +921,7 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 
 #ifdef __NDS__
 #define SPRITE_SIZE_U16 (SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4) // 32x32 at 4bpp, so 4 pixels per short
-static void drawsprite(const int x, const int y, const int slot, const int t, const u16 vramColor, const SpriteSize size)
+static void drawsprite(const int x, const int y, const int slot, bool inMenu, const int t, const u16 vramColor, const SpriteSize size)
 {
     if (slot >= 16) {
         vlog_error("Tried to draw sprite id %d", slot);
@@ -950,7 +950,7 @@ static void drawsprite(const int x, const int y, const int slot, const int t, co
         slot,
         SPRITE_COORD_TRANSFORM(x, width),
         SPRITE_COORD_TRANSFORM(y, height),
-        0,
+        inMenu ? 0 : 1,
         slot,
         size,
         SpriteColorFormat_16Color,
@@ -964,27 +964,27 @@ static void drawsprite(const int x, const int y, const int slot, const int t, co
     );
 }
 
-void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const int r, const int g, const int b)
+void Graphics::draw_sprite(const int x, const int y, const int slot, bool inMenu, const int t, const int r, const int g, const int b)
 {
-    drawsprite(x, y, slot, t, VRAM_COLOR(r, g, b), SpriteSize_32x32);
+    drawsprite(x, y, slot, inMenu, t, VRAM_COLOR(r, g, b), SpriteSize_32x32);
 }
-void Graphics::draw_sprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
+void Graphics::draw_sprite(const int x, const int y, const int slot, bool inMenu, const int t, const SDL_Color color)
 {
-    draw_sprite(x, y, slot, t, color.r, color.g, color.b);
+    draw_sprite(x, y, slot, inMenu, t, color.r, color.g, color.b);
 }
 void Graphics::draw_sprite_wide(const int x, const int y, const int slot, const int t, const SDL_Color color)
 {
-    drawsprite(x, y, slot, t, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x32);
+    drawsprite(x, y, slot, false, t, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x32);
 }
 void Graphics::draw_sprite_large(const int x, const int y, const int slot, const int t, const SDL_Color color)
 {
     int trueTile = (t%4 > 1) ? t + 10 : t;
-    drawsprite(x, y, slot, trueTile, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x64);
+    drawsprite(x, y, slot, false, trueTile, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x64);
 }
 
-void Graphics::draw_flipsprite(const int x, const int y, const int slot, const int t, const SDL_Color color)
+void Graphics::draw_flipsprite(const int x, const int y, const int slot, bool inMenu, const int t, const SDL_Color color)
 {
-    draw_sprite(x, y, slot, t, color);
+    draw_sprite(x, y, slot, inMenu, t, color);
 }
 
 void Graphics::clear_sprite(const int slot)
@@ -1647,7 +1647,7 @@ void Graphics::setbars(const int position)
 }
 
 #ifdef __NDS__
-void Graphics::drawcrewman(int x, int y, int slot, int t, bool act, bool noshift /*=false*/)
+void Graphics::drawcrewman(int x, int y, int slot, bool inMenu, int t, bool act, bool noshift /*=false*/)
 {
     if (!act)
     {
@@ -1655,22 +1655,22 @@ void Graphics::drawcrewman(int x, int y, int slot, int t, bool act, bool noshift
         {
             if (flipmode)
             {
-                draw_sprite(x, y, slot, 14, col_crewinactive);
+                draw_sprite(x, y, slot, inMenu, 14, col_crewinactive);
             }
             else
             {
-                draw_sprite(x, y, slot, 12, col_crewinactive);
+                draw_sprite(x, y, slot, inMenu, 12, col_crewinactive);
             }
         }
         else
         {
             if (flipmode)
             {
-                draw_sprite(x - 8, y, slot, 14, col_crewinactive);
+                draw_sprite(x - 8, y, slot, inMenu, 14, col_crewinactive);
             }
             else
             {
-                draw_sprite(x - 8, y, slot, 12, col_crewinactive);
+                draw_sprite(x - 8, y, slot, inMenu, 12, col_crewinactive);
             }
         }
     }
@@ -1681,22 +1681,22 @@ void Graphics::drawcrewman(int x, int y, int slot, int t, bool act, bool noshift
         switch(t)
         {
         case 0:
-            draw_sprite(x, y, slot, crewframe, col_crewcyan);
+            draw_sprite(x, y, slot, inMenu, crewframe, col_crewcyan);
             break;
         case 1:
-            draw_sprite(x, y, slot, crewframe, col_crewpurple);
+            draw_sprite(x, y, slot, inMenu, crewframe, col_crewpurple);
             break;
         case 2:
-            draw_sprite(x, y, slot, crewframe, col_crewyellow);
+            draw_sprite(x, y, slot, inMenu, crewframe, col_crewyellow);
             break;
         case 3:
-            draw_sprite(x, y, slot, crewframe, col_crewred);
+            draw_sprite(x, y, slot, inMenu, crewframe, col_crewred);
             break;
         case 4:
-            draw_sprite(x, y, slot, crewframe, col_crewgreen);
+            draw_sprite(x, y, slot, inMenu, crewframe, col_crewgreen);
             break;
         case 5:
-            draw_sprite(x, y, slot, crewframe, col_crewblue);
+            draw_sprite(x, y, slot, inMenu, crewframe, col_crewblue);
             break;
         }
 
@@ -2537,7 +2537,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         #ifdef __NDS__
-        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        draw_sprite(drawRect.x, drawRect.y, i, false, obj.entities[i].drawframe, ct);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         #endif
@@ -2623,7 +2623,7 @@ void Graphics::drawentity(const int i, const int yoff)
         if (obj.entities[i].rule == 2 && obj.entities[i].animate == 100) { // if moving platform (not treadmill), render as a sprite
             const u16 tileGfxIdx = tiles->map[obj.entities[i].tile] & 0x03FF;
             const u8 firstPixel = ((u8 *)tiles->gfx)[tileGfxIdx * 64];
-            drawsprite(tpoint.x, tpoint.y, i, 191, BG_PALETTE[firstPixel], SpriteSize_32x8);
+            drawsprite(tpoint.x, tpoint.y, i, false, 191, BG_PALETTE[firstPixel], SpriteSize_32x8);
             thiswidth = 0; // prevent placing tiles in the tilemap
         }
         #endif
@@ -2763,7 +2763,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         #ifdef __NDS__ // NDS_TODO: again, check wrapping behavior
-        draw_sprite(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        draw_sprite(drawRect.x, drawRect.y, i, false, obj.entities[i].drawframe, ct);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         #endif
@@ -4215,7 +4215,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         slot,
         SPRITE_COORD_TRANSFORM(x, 64),
         SPRITE_COORD_TRANSFORM(y, 64),
-        0,
+        1,
         slot,
         SpriteSize_64x64,
         SpriteColorFormat_16Color,
@@ -4233,7 +4233,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         13,
         SPRITE_COORD_TRANSFORM(x + 64, 32),
         SPRITE_COORD_TRANSFORM(y, 64),
-        0,
+        1,
         slot,
         SpriteSize_32x64,
         SpriteColorFormat_16Color,
@@ -4250,7 +4250,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         14,
         SPRITE_COORD_TRANSFORM(x, 64),
         SPRITE_COORD_TRANSFORM(y + 64, 32),
-        0,
+        1,
         slot,
         SpriteSize_64x32,
         SpriteColorFormat_16Color,
@@ -4267,7 +4267,7 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
         15,
         SPRITE_COORD_TRANSFORM(x + 64, 32),
         SPRITE_COORD_TRANSFORM(y + 64, 32),
-        0,
+        1,
         slot,
         SpriteSize_32x32,
         SpriteColorFormat_16Color,

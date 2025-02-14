@@ -47,7 +47,8 @@ void Screen::init(const struct ScreenSettings* settings) {
 	bgInit(3, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
 	bgSetCenter(3, 0, 0);
 	bgSetScale(3, (5 << 8) / 4, (5 << 8) / 4);
-	bgUpdate();
+    bgSetPriority(3, 2);
+    bgUpdate();
 
     vramSetBankE(VRAM_E_MAIN_SPRITE);
 	vramSetBankB(VRAM_B_MAIN_SPRITE_0x06420000);

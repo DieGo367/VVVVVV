@@ -206,12 +206,12 @@ static void menurender(void)
     {
         const int temp = 50;
         #ifdef __NDS__
-        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, true, 23, tr, tg, tb);
         #else
         graphics.draw_sprite((160 - 96) + 0 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 1 * 32, temp, 23, tr, tg, tb);
@@ -1348,7 +1348,11 @@ static void menurender(void)
             );
             for (int i = 0; i < 6; i++)
             {
-                graphics.drawcrewman(169-(3*42)+(i*42), 95-20, i, summary->crewstats[i], true);
+                #ifdef __NDS__
+                graphics.drawcrewman(169-(3*42)+(i*42), 95-20, i, true, summary->crewstats[i], true);
+                #else
+                graphics.drawcrewman(169-(3*42)+(i*42), 95-20, summary->crewstats[i], true);
+                #endif
             }
             font::print(
                 0, 59, 132-20,
@@ -1368,8 +1372,8 @@ static void menurender(void)
             font::print(PR_RIGHT, 262, 132-20, buffer, 255 - (help.glow / 2), 255 - (help.glow / 2), 255 - (help.glow / 2));
 
             #ifdef __NDS__
-            graphics.draw_sprite(34, 126-20, 0, 50, graphics.col_clock);
-            graphics.draw_sprite(270, 126-20, 1, 22, graphics.col_trinket);
+            graphics.draw_sprite(34, 126-20, 0, true, 50, graphics.col_clock);
+            graphics.draw_sprite(270, 126-20, 1, true, 22, graphics.col_trinket);
             #else
             graphics.draw_sprite(34, 126-20, 50, graphics.col_clock);
             graphics.draw_sprite(270, 126-20, 22, graphics.col_trinket);
@@ -1384,7 +1388,11 @@ static void menurender(void)
 
         for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
         {
-            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, game.ndmresultcrewstats[i], true);
+            #ifdef __NDS__
+            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, true, game.ndmresultcrewstats[i], true);
+            #else
+            graphics.drawcrewman(169-(3*42)+(i*42), 68, game.ndmresultcrewstats[i], true);
+            #endif
         }
         char buffer[2*SCREEN_WIDTH_CHARS + 1];
         loc::gettext_plural_fill(
@@ -1449,7 +1457,11 @@ static void menurender(void)
 
         for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
         {
-            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, game.ndmresultcrewstats[i], true);
+            #ifdef __NDS__
+            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, true, game.ndmresultcrewstats[i], true);
+            #else
+            graphics.drawcrewman(169-(3*42)+(i*42), 68, game.ndmresultcrewstats[i], true);
+            #endif
         }
         font::print(PR_CEN, -1, 100, loc::gettext("You rescued all the crewmates!"), tr, tg, tb);
 
@@ -1498,7 +1510,7 @@ static void menurender(void)
         }
 
         #ifdef __NDS__
-        graphics.drawspritesetcol(sprite_x_1, 80-15, 0, 50, 22);
+        graphics.drawspritesetcol(sprite_x_1, 80-15, 0, true, 50, 22);
         #else
         graphics.drawspritesetcol(sprite_x_1, 80-15, 50, 22);
         #endif
@@ -1511,7 +1523,7 @@ static void menurender(void)
 
         tempstring = help.String(game.timetrialresultdeaths);
         #ifdef __NDS__
-        graphics.drawspritesetcol(sprite_x_2, 80+20-4, 1, 12, 22);
+        graphics.drawspritesetcol(sprite_x_2, 80+20-4, 1, true, 12, 22);
         #else
         graphics.drawspritesetcol(sprite_x_2, 80+20-4, 12, 22);
         #endif
@@ -1530,7 +1542,7 @@ static void menurender(void)
             game.timetrialresulttrinkets, game.timetrialresultshinytarget
         );
         #ifdef __NDS__
-        graphics.drawspritesetcol(sprite_x_1, 80+55, 2, 22, 22);
+        graphics.drawspritesetcol(sprite_x_1, 80+55, 2, true, 22, 22);
         #else
         graphics.drawspritesetcol(sprite_x_1, 80+55, 22, 22);
         #endif
@@ -1886,12 +1898,12 @@ void titlerender(void)
 
         int temp = 50;
         #ifdef __NDS__
-        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, true, 23, tr, tg, tb);
         #else
         graphics.draw_sprite((160 - 96) + 0 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 1 * 32, temp, 23, tr, tg, tb);
@@ -1962,12 +1974,12 @@ void gamecompleterender(void)
     {
         int temp = 220 + position;
         #ifdef __NDS__
-        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, true, 23, tr, tg, tb);
+        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, true, 23, tr, tg, tb);
         #else
         graphics.draw_sprite((160 - 96) + 0 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 1 * 32, temp, 23, tr, tg, tb);
@@ -1983,7 +1995,7 @@ void gamecompleterender(void)
     if (graphics.onscreen(320 + position))
     {
         #ifdef __NDS__
-        graphics.drawcrewman(70, 320 + position, 6, 0, true);
+        graphics.drawcrewman(70, 320 + position, 6, true, 0, true);
         #else
         graphics.drawcrewman(70, 320 + position, 0, true);
         #endif
@@ -1992,7 +2004,7 @@ void gamecompleterender(void)
     if (graphics.onscreen(350 + position))
     {
         #ifdef __NDS__
-        graphics.drawcrewman(70, 350 + position, 7, 1, true);
+        graphics.drawcrewman(70, 350 + position, 7, true, 1, true);
         #else
         graphics.drawcrewman(70, 350 + position, 1, true);
         #endif
@@ -2001,7 +2013,7 @@ void gamecompleterender(void)
     if (graphics.onscreen(380 + position))
     {
         #ifdef __NDS__
-        graphics.drawcrewman(70, 380 + position, 8, 2, true);
+        graphics.drawcrewman(70, 380 + position, 8, true, 2, true);
         #else
         graphics.drawcrewman(70, 380 + position, 2, true);
         #endif
@@ -2010,7 +2022,7 @@ void gamecompleterender(void)
     if (graphics.onscreen(410 + position))
     {
         #ifdef __NDS__
-        graphics.drawcrewman(70, 410 + position, 9, 3, true);
+        graphics.drawcrewman(70, 410 + position, 9, true, 3, true);
         #else
         graphics.drawcrewman(70, 410 + position, 3, true);
         #endif
@@ -2019,7 +2031,7 @@ void gamecompleterender(void)
     if (graphics.onscreen(440 + position))
     {
         #ifdef __NDS__
-        graphics.drawcrewman(70, 440 + position, 10, 4, true);
+        graphics.drawcrewman(70, 440 + position, 10, true, 4, true);
         #else
         graphics.drawcrewman(70, 440 + position, 4, true);
         #endif
@@ -2028,7 +2040,7 @@ void gamecompleterender(void)
     if (graphics.onscreen(470 + position))
     {
         #ifdef __NDS__
-        graphics.drawcrewman(70, 470 + position, 11, 5, true);
+        graphics.drawcrewman(70, 470 + position, 11, true, 5, true);
         #else
         graphics.drawcrewman(70, 470 + position, 5, true);
         #endif
@@ -3204,7 +3216,7 @@ void maprender(void)
                 for (int i = 0; i < 3; i++)
                 {
                     #ifdef __NDS__
-                    graphics.drawcrewman(16, 32 + (i * 64), 2*i, 2-i, game.crewstats[2-i]);
+                    graphics.drawcrewman(16, 32 + (i * 64), 2*i, true, 2-i, game.crewstats[2-i]);
                     #else
                     graphics.drawcrewman(16, 32 + (i * 64), 2-i, game.crewstats[2-i]);
                     #endif
@@ -3219,7 +3231,7 @@ void maprender(void)
                     graphics.printcrewnamestatus(44, 32 + (i * 64)+4, 2-i, game.crewstats[(2-i)]);
 
                     #ifdef __NDS__
-                    graphics.drawcrewman(16+160, 32 + (i * 64), 2*i + 1, (2-i)+3, game.crewstats[(2-i)+3]);
+                    graphics.drawcrewman(16+160, 32 + (i * 64), 2*i + 1, true, (2-i)+3, game.crewstats[(2-i)+3]);
                     #else
                     graphics.drawcrewman(16+160, 32 + (i * 64), (2-i)+3, game.crewstats[(2-i)+3]);
                     #endif
@@ -3239,7 +3251,7 @@ void maprender(void)
                 for (int i = 0; i < 3; i++)
                 {
                     #ifdef __NDS__
-                    graphics.drawcrewman(16, 32 + (i * 64), 2*i, i, game.crewstats[i]);
+                    graphics.drawcrewman(16, 32 + (i * 64), 2*i, true, i, game.crewstats[i]);
                     #else
                     graphics.drawcrewman(16, 32 + (i * 64), i, game.crewstats[i]);
                     #endif
@@ -3254,7 +3266,7 @@ void maprender(void)
                     graphics.printcrewnamestatus(44, 32 + (i * 64)+4+10, i, game.crewstats[i]);
 
                     #ifdef __NDS__
-                    graphics.drawcrewman(16+160, 32 + (i * 64), 2*i + 1, i+3, game.crewstats[i+3]);
+                    graphics.drawcrewman(16+160, 32 + (i * 64), 2*i + 1, true, i+3, game.crewstats[i+3]);
                     #else
                     graphics.drawcrewman(16+160, 32 + (i * 64), i+3, game.crewstats[i+3]);
                     #endif
@@ -3392,7 +3404,11 @@ void maprender(void)
             {
                 /* Crewmates are annoying. Their height is 21 pixels, but to flip them,
                  * we also have to account for their 2-pixel y-offset (and multiply it by 2). */
-                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), i, game.crewstats[i], true);
+                #ifdef __NDS__
+                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), i, true, game.crewstats[i], true);
+                #else
+                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), game.crewstats[i], true);
+                #endif
             }
         }
 
@@ -3408,8 +3424,8 @@ void maprender(void)
         if (graphics.flipmode)
         {
             #ifdef __NDS__
-            graphics.draw_flipsprite(34, FLIP(126, 17), 0, 50, graphics.col_clock);
-            graphics.draw_flipsprite(270, FLIP(126, 17), 1, 22, graphics.col_trinket);
+            graphics.draw_flipsprite(34, FLIP(126, 17), 0, true, 50, graphics.col_clock);
+            graphics.draw_flipsprite(270, FLIP(126, 17), 1, true, 22, graphics.col_trinket);
             #else
             graphics.draw_flipsprite(34, FLIP(126, 17), 50, graphics.col_clock);
             graphics.draw_flipsprite(270, FLIP(126, 17), 22, graphics.col_trinket);
@@ -3418,8 +3434,8 @@ void maprender(void)
         else
         {
             #ifdef __NDS__
-            graphics.draw_sprite(34, FLIP(126, 17), 0, 50, graphics.col_clock);
-            graphics.draw_sprite(270, FLIP(126, 17), 1, 22, graphics.col_trinket);
+            graphics.draw_sprite(34, FLIP(126, 17), 0, true, 50, graphics.col_clock);
+            graphics.draw_sprite(270, FLIP(126, 17), 1, true, 22, graphics.col_trinket);
             #else
             graphics.draw_sprite(34, FLIP(126, 17), 50, graphics.col_clock);
             graphics.draw_sprite(270, FLIP(126, 17), 22, graphics.col_trinket);

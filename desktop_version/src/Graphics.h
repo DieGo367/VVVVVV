@@ -146,7 +146,7 @@ public:
     void drawpixeltextbox(int x, int y, int w, int h, int r, int g, int b);
 
     #ifdef __NDS__
-    void drawcrewman(int x, int y, int slot, int t, bool act, bool noshift =false);
+    void drawcrewman(int x, int y, int slot, bool inMenu, int t, bool act, bool noshift =false);
     #else
     void drawcrewman(int x, int y, int t, bool act, bool noshift =false);
     #endif
@@ -190,11 +190,11 @@ public:
     void drawgui(void);
 
     #ifdef __NDS__
-    void draw_sprite(int x, int y, int slot, int t, int r, int g, int b);
-    void draw_sprite(int x, int y, int slot, int t, SDL_Color color);
+    void draw_sprite(int x, int y, int slot, bool inMenu, int t, int r, int g, int b);
+    void draw_sprite(int x, int y, int slot, bool inMenu, int t, SDL_Color color);
     void draw_sprite_wide(int x, int y, int slot, int t, SDL_Color color);
     void draw_sprite_large(int x, int y, int slot, int t, SDL_Color color);
-    void draw_flipsprite(int x, int y, int slot, int t, SDL_Color color);
+    void draw_flipsprite(int x, int y, int slot, bool inMenu, int t, SDL_Color color);
     void clear_sprite(int slot);
     void clear_sprites(void);
     void clear_sprites(bool forceUpdate);
@@ -294,7 +294,7 @@ public:
     void map_option(int opt, int num_opts, const std::string& text, bool selected = false);
 
     #ifdef __NDS__
-    void drawspritesetcol(int x, int y, int slot, int t, int c);
+    void drawspritesetcol(int x, int y, int slot, bool inMenu, int t, int c);
     #else
     void drawspritesetcol(int x, int y, int t, int c);
     #endif
