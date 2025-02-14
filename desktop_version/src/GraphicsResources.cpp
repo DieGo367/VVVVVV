@@ -62,7 +62,7 @@ static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void 
     return true;
 }
 
-GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype)
+GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, int realWidth, int realHeight)
 {
     GRFHeader header;
     void *gfx = NULL, *palette = NULL;
@@ -75,8 +75,8 @@ GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype)
         goto fail;
     }
     tex->bpp = header.gfxAttr;
-    tex->width = header.gfxWidth;
-    tex->height = header.gfxHeight;
+    tex->width = realWidth ? realWidth : header.gfxWidth;
+    tex->height = realHeight ? realHeight : header.gfxHeight;
     tex->colorMod = 0xFFFF;
     if (header.palAttr > 0 && loadtype == TEX_WHITE) {
         memset16((u16 *)palette + 1, 0xFFFF, (header.palAttr - 1) * sizeof(u16));
@@ -85,10 +85,10 @@ GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype)
     glImage glImg;
     tex->id = glLoadTileSet(
         &glImg,
-        header.gfxWidth,
-        header.gfxHeight,
-        header.gfxWidth,
-        header.gfxHeight,
+        tex->width,
+        tex->height,
+        tex->width,
+        tex->height,
         header.gfxAttr == 2 ? GL_RGB4 : (header.gfxAttr == 4 ? GL_RGB16 : (header.gfxAttr == 8 ? GL_RGB256 : GL_RGBA)),
         header.gfxWidth,
         header.gfxHeight,
@@ -109,9 +109,9 @@ fail:
     return 0;
 }
 
-static GLTexture *LoadImage(const char* filename)
+static GLTexture *LoadImage(const char* filename, int realWidth = 0, int realHeight = 0)
 {
-    return LoadImage(filename, TEX_COLOR);
+    return LoadImage(filename, TEX_COLOR, realWidth, realHeight);
 }
 
 void DestroyImage(GLTexture *texture)
@@ -567,7 +567,6 @@ void GraphicsResources::init(void)
     im_tiles = LoadTileset("graphics/tiles.grf");
     im_tiles2 = LoadTileset("graphics/tiles2.grf");
     im_tiles3 = LoadTileset("graphics/tiles3.grf");
-    // LoadVariants("graphics/entcolours.grf", &im_entcolours, NULL, &im_entcolours_tint);
 
     im_sprites = LoadSprites("graphics/sprites.grf");
     im_flipsprites = im_sprites;
@@ -576,12 +575,12 @@ void GraphicsResources::init(void)
     memset(SPRITE_GFX + (0x37E00/sizeof(u16)), 0x11, 32*8/2);
     LoadTeleporter("graphics/teleporter.grf");
 
-    im_image0 = LoadImage("graphics/levelcomplete.grf");
+    im_image0 = LoadImage("graphics/levelcomplete.grf", 320, 48);
     im_image5 = im_image0;
     im_image1 = LoadImage("graphics/minimap.grf");
     im_image2 = LoadImage("graphics/covered.grf");
     im_image3 = LoadImage("graphics/elephant.grf", TEX_WHITE);
-    im_image4 = LoadImage("graphics/gamecomplete.grf");
+    im_image4 = LoadImage("graphics/gamecomplete.grf", 320, 48);
     im_image6 = im_image4;
     im_image7 = LoadImage("graphics/site.grf", TEX_WHITE);
     im_image8 = LoadImage("graphics/site2.grf", TEX_WHITE);

@@ -93,7 +93,7 @@ public:
 };
 
 #ifdef __NDS__
-GLTexture *LoadImage(const char *filename, TextureLoadType loadtype);
+GLTexture *LoadImage(const char *filename, TextureLoadType loadtype, int realWidth = 0, int realHeight = 0);
 void DestroyImage(GLTexture *image);
 #else
 SDL_Surface* LoadImageSurface(const char* filename);
