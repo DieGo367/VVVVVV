@@ -927,6 +927,7 @@ static void drawsprite(const int x, const int y, const int slot, bool inMenu, co
         vlog_error("Tried to draw sprite id %d", slot);
         return;
     }
+    if (y < -32 || y > SCREEN_HEIGHT_PIXELS + 32) return;
     SPRITE_PALETTE[slot*16 + 1] = vramColor;
     int width, height;
     switch (size) {
@@ -3434,6 +3435,9 @@ void Graphics::drawfinalmap(void)
                 for (int i = 0; i < 40; i++) {
                     if ((map.contents[TILE_IDX(i, j)]) > 0)
                         drawtile(i * 8, j * 8, map.finalat(i, j));
+                    #ifdef __NDS__
+                    else clear_tile(i * 8, j * 8, false);
+                    #endif
                 }
             }
         }
@@ -3442,6 +3446,9 @@ void Graphics::drawfinalmap(void)
                 for (int i = 0; i < 40; i++) {
                     if ((map.contents[TILE_IDX(i, j)]) > 0)
                         drawtile2(i * 8, j * 8, map.finalat(i, j));
+                    #ifdef __NDS__
+                    else clear_tile(i * 8, j * 8, false);
+                    #endif
                 }
             }
         }
@@ -3470,6 +3477,9 @@ void Graphics::drawtowermap(void)
                 drawtile3(i * 8, (j * 8) - (yoff % 8), temp, towerbg.colstate);
                 #endif
             }
+            #ifdef __NDS__
+            else clear_tile(i * 8, (j * 8) - (yoff % 8), false);
+            #endif
         }
     }
 }
