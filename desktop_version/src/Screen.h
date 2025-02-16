@@ -39,7 +39,10 @@ public:
     int scalingMode;
     bool vsync;
 
-    #ifndef __NDS__
+    #ifdef __NDS__
+    u16 *tilemapLevel;
+    u16 *tilemapBackdrop;
+    #else
     SDL_Window *m_window;
     SDL_Renderer *m_renderer;
     #endif

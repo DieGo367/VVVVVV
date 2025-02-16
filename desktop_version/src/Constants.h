@@ -17,4 +17,9 @@
 /* 4 bytes per char, for UTF-8 encoding. */
 #define SCREEN_WIDTH_CHARS (SCREEN_WIDTH_TILES * 4)
 
+#ifdef __NDS__
+#define BG_LAYER_LEVEL 2
+#define BG_LAYER_BACKDROP 3
+#endif
+
 #endif /* CONSTANTS_H */

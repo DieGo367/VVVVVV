@@ -1050,15 +1050,55 @@ bool Graphics::shouldrecoloroneway(const int tilenum, const bool mounted)
     || cl.onewaycol_override));
 }
 
+#ifdef __NDS__
+void Graphics::use_tileset(int tilesetID) {
+    if (tilesetID != active_tileset) {
+        Tileset *set = tilesetID == 2 ? grphx.im_tiles3 : tilesetID == 1 ? grphx.im_tiles2 : grphx.im_tiles;
+        memcpy(bgGetGfxPtr(BG_LAYER_LEVEL), set->gfx, set->gfxSize);
+        memcpy(BG_PALETTE + 1, set->palette + 1, set->paletteSize - sizeof(u16));
+        active_tileset = tilesetID;
+    }
+}
+// NDS_TODO: recolor oneway for drawtile and drawtile2
+void Graphics::drawtile(int x, int y, int t)
+{
+    int tileX = x/8, tileY = y/8;
+    gameScreen.tilemapLevel[tileX + tileY * 64] = grphx.im_tiles->map[t];
+}
+
+void Graphics::drawtile2(int x, int y, int t)
+{
+    int tileX = x/8, tileY = y/8;
+    gameScreen.tilemapLevel[tileX + tileY * 64] = grphx.im_tiles2->map[t];
+}
+
+void Graphics::drawtile3(int x, int y, int t, int off, bool background, int height_subtract /*= 0*/)
+{
+    t += off * 30;
+    int tileX = x/8, tileY = y/8;
+    u16 *map = (background ? gameScreen.tilemapBackdrop : gameScreen.tilemapLevel);
+    map[tileX + tileY * 64] = grphx.im_tiles3->map[t];
+}
+
+void Graphics::clear_tile(int x, int y, bool background)
+{
+    int tileX = x/8, tileY = y/8;
+    u16 *map = (background ? gameScreen.tilemapBackdrop : gameScreen.tilemapLevel);
+    map[tileX + tileY * 64] = 0;
+}
+
+void Graphics::clear_tile_layer(bool background) {
+    u16 *map = (background ? gameScreen.tilemapBackdrop : gameScreen.tilemapLevel);
+    for (int row = 0; row < SCREEN_HEIGHT_TILES; row++) {
+        memset(&map[row * 64], 0, SCREEN_WIDTH_TILES * sizeof(u16));
+    }
+}
+#else
 void Graphics::drawtile(int x, int y, int t)
 {
     if (shouldrecoloroneway(t, tiles1_mounted))
     {
-    #ifdef __NDS__
-        draw_grid_tile(grphx.im_tiles, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
-    #else
         draw_grid_tile(grphx.im_tiles_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
-    #endif
     }
     else
     {
@@ -1071,11 +1111,7 @@ void Graphics::drawtile2(int x, int y, int t)
 {
     if (shouldrecoloroneway(t, tiles2_mounted))
     {
-    #ifdef __NDS__
-        draw_grid_tile(grphx.im_tiles2, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
-    #else
         draw_grid_tile(grphx.im_tiles2_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
-    #endif
     }
     else
     {
@@ -1087,9 +1123,6 @@ void Graphics::drawtile3(int x, int y, int t, int off, int height_subtract /*= 0
 {
     t += off * 30;
 
-    #ifdef __NDS__ // ignore height_subtract for now
-    draw_grid_tile(grphx.im_tiles3, t, x, y, tiles_rect.w, tiles_rect.h);
-    #else
     // Can't use drawgridtile because we want to draw a slice of the tile,
     // so do the logic ourselves (except include height_subtract in the final call)
 
@@ -1101,8 +1134,8 @@ void Graphics::drawtile3(int x, int y, int t, int off, int height_subtract /*= 0
     const int x2 = (t % (width / 8)) * 8;
     const int y2 = (t / (width / 8)) * 8;
     draw_texture_part(grphx.im_tiles3, x, y, x2, y2, 8, 8 - height_subtract, 1, 1);
-    #endif
 }
+#endif
 
 const char* Graphics::textbox_line(
     char* buffer,
@@ -1481,29 +1514,6 @@ void Graphics::draw_texture_part(GLTexture *image, const int x, const int y, con
     const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
 
     copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
-}
-
-void Graphics::use_tileset(int tilesetID) {
-    if (tilesetID != active_tileset) {
-        Tileset *set = tilesetID == 2 ? grphx.im_tiles3 : tilesetID == 1 ? grphx.im_tiles2 : grphx.im_tiles;
-        memcpy(bgGetGfxPtr(3), set->gfx, set->gfxSize);
-        memcpy(BG_PALETTE + 1, set->palette + 1, set->paletteSize - sizeof(u16));
-        active_tileset = tilesetID;
-    }
-}
-
-void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height) {
-    u16 *map = bgGetMapPtr(3);
-    int tileX = x/8, tileY = y/8;
-    map[tileX + tileY * 64] = tileset->map[t];
-}
-
-void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const int r, const int g, const int b) {
-    draw_grid_tile(tileset, t, x, y, width, height);
-}
-
-void Graphics::draw_grid_tile(Tileset *tileset, const int t, const int x, const int y, const int width, const int height, const SDL_Color color) {
-    draw_grid_tile(tileset, t, x, y, width, height, color.r, color.g, color.b);
 }
 #else
 void Graphics::draw_texture(SDL_Texture* image, const int x, const int y)
@@ -2196,12 +2206,7 @@ void Graphics::drawcoloredtile(
     const int r, const int g, const int b
 ) {
     #ifdef __NDS__
-    if (active_tileset == 1) {
-        draw_grid_tile(grphx.im_tiles2, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
-    }
-    else {
-        draw_grid_tile(grphx.im_tiles, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
-    }
+    drawtile(x, y, t); // NDS_TODO: maybe use gl2d here?
     #else
     draw_grid_tile(grphx.im_tiles_white, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
     #endif
@@ -2521,10 +2526,7 @@ void Graphics::drawentity(const int i, const int yoff)
         custom_gray = false;
     }
 
-    #ifdef __NDS__
-    Tileset *tiles = grphx.im_tiles;
-    Tileset *tiles_tint = tiles;
-    #else
+    #ifndef __NDS__
     SDL_Texture* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
     SDL_Texture* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
     SDL_Texture* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
@@ -2615,7 +2617,11 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
+        #ifdef __NDS__
+        drawtile(drawRect.x, drawRect.y, obj.entities[i].drawframe);
+        #else
         draw_grid_tile(grphx.im_tiles, obj.entities[i].drawframe, drawRect.x, drawRect.y, 8, 8);
+        #endif
         break;
     case 2:
     case 8:
@@ -2631,8 +2637,8 @@ void Graphics::drawentity(const int i, const int yoff)
         }
         #ifdef __NDS__
         if (obj.entities[i].rule == 2 && obj.entities[i].animate == 100) { // if moving platform (not treadmill), render as a sprite
-            const u16 tileGfxIdx = tiles->map[obj.entities[i].tile] & 0x03FF;
-            const u8 firstPixel = ((u8 *)tiles->gfx)[tileGfxIdx * 64];
+            const u16 tileGfxIdx = grphx.im_tiles->map[obj.entities[i].tile] & 0x03FF;
+            const u8 firstPixel = ((u8 *)grphx.im_tiles->gfx)[tileGfxIdx * 64];
             drawsprite(tpoint.x, tpoint.y, i, false, 191, BG_PALETTE[firstPixel], SpriteSize_32x8);
             thiswidth = 0; // prevent placing tiles in the tilemap
         }
@@ -2643,6 +2649,9 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.x += tpoint.x;
             drawRect.y += tpoint.y;
             drawRect.x += 8 * ii;
+            #ifdef __NDS__
+            drawtile(drawRect.x, drawRect.y, obj.entities[i].drawframe);
+            #else
             if (custom_gray)
             {
                 draw_grid_tile(tiles_tint, obj.entities[i].drawframe, drawRect.x, drawRect.y, 8, 8);
@@ -2651,6 +2660,7 @@ void Graphics::drawentity(const int i, const int yoff)
             {
                 draw_grid_tile(tiles, obj.entities[i].drawframe, drawRect.x, drawRect.y, 8, 8);
             }
+            #endif
         }
         break;
     }
@@ -2799,7 +2809,7 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
 
             #ifdef __NDS__
-            draw_grid_tile(grphx.im_tiles, 1167, drawRect.x, drawRect.y, 8, 8, ct);
+            drawtile(drawRect.x, drawRect.y, 1167); // NDS_TODO: color
             #else
             draw_grid_tile(grphx.im_tiles_white, 1167, drawRect.x, drawRect.y, 8, 8, ct);
             #endif
@@ -2823,7 +2833,7 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
 
             #ifdef __NDS__
-            draw_grid_tile(grphx.im_tiles, 1166, drawRect.x, drawRect.y, 8, 8, ct);
+            drawtile(drawRect.x, drawRect.y, 1166); // NDS_TODO: color
             #else
             draw_grid_tile(grphx.im_tiles_white, 1166, drawRect.x, drawRect.y, 8, 8, ct);
             #endif
@@ -3120,7 +3130,11 @@ void Graphics::drawbackground( int t )
         {
             for (int i = 0; i < 40; i++)
             {
+                #ifdef __NDS__
+                drawtile3(i * 8, j * 8, map.tower.backat(i, j, 200), 15, true);
+                #else
                 drawtile3(i * 8, j * 8, map.tower.backat(i, j, 200), 15);
+                #endif
             }
         }
         break;
@@ -3130,7 +3144,11 @@ void Graphics::drawbackground( int t )
         {
             for (int i = 0; i < 40; i++)
             {
+                #ifdef __NDS__
+                drawtile3(i * 8, j * 8, map.tower.backat(i, j, 200), 10, true);
+                #else
                 drawtile3(i * 8, j * 8, map.tower.backat(i, j, 200), 10);
+                #endif
             }
         }
         break;
@@ -3140,7 +3158,11 @@ void Graphics::drawbackground( int t )
         {
             for (int i = 0; i < 40; i++)
             {
+                #ifdef __NDS__
+                drawtile3(i * 8, j * 8, map.tower.backat(i, j, 600), 0, true);
+                #else
                 drawtile3(i * 8, j * 8, map.tower.backat(i, j, 600), 0);
+                #endif
             }
         }
         break;
@@ -3152,6 +3174,9 @@ void Graphics::drawbackground( int t )
 
 void Graphics::updatebackground(int t)
 {
+    #ifdef __NDS__
+    if (!backgrounddrawn) clear_tile_layer(true);
+    #endif
     switch (t)
     {
     case 1:
@@ -3331,7 +3356,6 @@ void Graphics::drawmap(void)
     if (!foregrounddrawn)
     {
         #ifdef __NDS__
-        u16 *bgMap = bgGetMapPtr(3);
         use_tileset(map.tileset);
         #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
@@ -3372,11 +3396,15 @@ void Graphics::drawmap(void)
                     }
                     else if (tileset == 2)
                     {
+                        #ifdef __NDS__
+                        drawtile3(x * 8, y * 8, tile, map.rcol, false);
+                        #else
                         drawtile3(x * 8, y * 8, tile, map.rcol);
+                        #endif
                     }
                 }
                 #ifdef __NDS__
-                else bgMap[x + y * 64] = 0;
+                else clear_tile(x * 8, y * 8, false);
                 #endif
             }
         }
@@ -3436,7 +3464,11 @@ void Graphics::drawtowermap(void)
             const int temp = map.tower.at(i, j, yoff);
             if (temp > 0)
             {
+                #ifdef __NDS__
+                drawtile3(i * 8, (j * 8) - (yoff % 8), temp, towerbg.colstate, false);
+                #else
                 drawtile3(i * 8, (j * 8) - (yoff % 8), temp, towerbg.colstate);
+                #endif
             }
         }
     }
@@ -3448,8 +3480,13 @@ void Graphics::drawtowerspikes(void)
     int spikelevelbottom = lerp(map.oldspikelevelbottom, map.spikelevelbottom);
     for (int i = 0; i < 40; i++)
     {
+        #ifdef __NDS__ // NDS_TODO: these will have to be rendered by gl2d
+        drawtile3(i * 8, -8+spikeleveltop, 9, towerbg.colstate, false);
+        drawtile3(i * 8, 230-spikelevelbottom, 8, towerbg.colstate, false, 8 - spikelevelbottom);
+        #else
         drawtile3(i * 8, -8+spikeleveltop, 9, towerbg.colstate);
         drawtile3(i * 8, 230-spikelevelbottom, 8, towerbg.colstate, 8 - spikelevelbottom);
+        #endif
     }
 }
 
@@ -3484,7 +3521,11 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
             for (int i = 0; i < 40; i++)
             {
                 const int temp = map.tower.backat(i, j, bg_obj.bypos);
+                #ifdef __NDS__
+                drawtile3(i * 8, (j * 8) - (bg_obj.bypos % 8) - off, temp, bg_obj.colstate, true);
+                #else
                 drawtile3(i * 8, (j * 8) - (bg_obj.bypos % 8) - off, temp, bg_obj.colstate);
+                #endif
             }
         }
 
@@ -3499,9 +3540,15 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
             for (int i = 0; i < 40; i++)
             {
                 int temp = map.tower.backat(i, -1, bg_obj.bypos);
+                #ifdef __NDS__
+                drawtile3(i * 8, -1 * 8 - (bg_obj.bypos % 8), temp, bg_obj.colstate, true);
+                temp = map.tower.backat(i, 0, bg_obj.bypos);
+                drawtile3(i * 8, -(bg_obj.bypos % 8), temp, bg_obj.colstate, true);
+                #else
                 drawtile3(i * 8, -1 * 8 - (bg_obj.bypos % 8), temp, bg_obj.colstate);
                 temp = map.tower.backat(i, 0, bg_obj.bypos);
                 drawtile3(i * 8, -(bg_obj.bypos % 8), temp, bg_obj.colstate);
+                #endif
             }
         }
         else
@@ -3509,6 +3556,15 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
             for (int i = 0; i < 40; i++)
             {
                 int temp = map.tower.backat(i, 29, bg_obj.bypos);
+                #ifdef __NDS__
+                drawtile3(i * 8, 29 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
+                temp = map.tower.backat(i, 30, bg_obj.bypos);
+                drawtile3(i * 8, 30 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
+                temp = map.tower.backat(i, 31, bg_obj.bypos);
+                drawtile3(i * 8, 31 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
+                temp = map.tower.backat(i, 32, bg_obj.bypos);
+                drawtile3(i * 8, 32 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
+                #else
                 drawtile3(i * 8, 29 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
                 temp = map.tower.backat(i, 30, bg_obj.bypos);
                 drawtile3(i * 8, 30 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
@@ -3516,6 +3572,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
                 drawtile3(i * 8, 31 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
                 temp = map.tower.backat(i, 32, bg_obj.bypos);
                 drawtile3(i * 8, 32 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
+                #endif
             }
         }
     }
@@ -3706,7 +3763,7 @@ void Graphics::menuoffrender(void)
 {
     #ifdef __NDS__
     clear_sprites();
-    foregrounddrawn = false;
+    backgrounddrawn = false;
     #endif
     if (copy_texture(gameplayTexture, NULL, NULL) != 0)
     {

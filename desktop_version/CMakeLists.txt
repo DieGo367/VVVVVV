@@ -468,7 +468,7 @@ if(NINTENDO_DS)
         set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
 
         if(IMAGE IN_LIST TILES)
-            set(GRIT_FLAGS -ftr -fh! -gt -gB8 -m)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gt -gB8 -m)
         elseif(IMAGE IN_LIST SPRITES)
             if(IMAGE STREQUAL teleporter)
                 set(MAGICK_FLAGS -background "#FF00FF" -crop 96x96 +repage

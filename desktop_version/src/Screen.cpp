@@ -44,10 +44,16 @@ void Screen::init(const struct ScreenSettings* settings) {
 
 	videoSetMode(MODE_5_3D);
     vramSetBankA(VRAM_A_MAIN_BG);
-	bgInit(3, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
-	bgSetCenter(3, 0, 0);
-	bgSetScale(3, (5 << 8) / 4, (5 << 8) / 4);
-    bgSetPriority(3, 2);
+	bgInit(BG_LAYER_LEVEL, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
+	bgSetCenter(BG_LAYER_LEVEL, 0, 0);
+	bgSetScale(BG_LAYER_LEVEL, (5 << 8) / 4, (5 << 8) / 4);
+    bgSetPriority(BG_LAYER_LEVEL, 2);
+    tilemapLevel = bgGetMapPtr(BG_LAYER_LEVEL);
+	bgInit(BG_LAYER_BACKDROP, BgType_ExRotation, BgSize_ER_512x512, 4, 1);
+	bgSetCenter(BG_LAYER_BACKDROP, 0, 0);
+	bgSetScale(BG_LAYER_BACKDROP, (5 << 8) / 4, (5 << 8) / 4);
+    bgSetPriority(BG_LAYER_BACKDROP, 3);
+    tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
     bgUpdate();
 
     vramSetBankE(VRAM_E_MAIN_SPRITE);

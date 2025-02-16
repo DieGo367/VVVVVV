@@ -166,12 +166,6 @@ public:
     #ifdef __NDS__
     void draw_texture(GLTexture *image, int x, int y);
     void draw_texture_part(GLTexture *image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
-
-    void use_tileset(int tilesetID);
-
-    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height);
-    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, int r, int g, int b);
-    void draw_grid_tile(Tileset *tileset, int t, int x, int y, int width, int height, SDL_Color color);
     #else
     void draw_texture(SDL_Texture* image, int x, int y);
 
@@ -349,9 +343,18 @@ public:
 
     bool shouldrecoloroneway(const int tilenum, const bool mounted);
 
+    #ifdef __NDS__
+    void use_tileset(int tilesetID);
+    void drawtile3(int x, int y, int t, int off, bool background, int height_subtract = 0);
+    #else
     void drawtile3(int x, int y, int t, int off, int height_subtract = 0);
+    #endif
     void drawtile2(int x, int y, int t);
     void drawtile(int x, int y, int t);
+    #ifdef __NDS__
+    void clear_tile(int x, int y, bool background);
+    void clear_tile_layer(bool background);
+    #endif
 
     void drawmap(void);
 
