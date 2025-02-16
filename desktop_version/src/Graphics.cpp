@@ -923,12 +923,19 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 #define SPRITE_SIZE_U16 (SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4) // 32x32 at 4bpp, so 4 pixels per short
 static void drawsprite(const int x, const int y, const int slot, bool inMenu, const int t, const u16 vramColor, const SpriteSize size)
 {
-    if (slot >= 16) {
-        vlog_error("Tried to draw sprite id %d", slot);
-        return;
-    }
     if (y < -32 || y > SCREEN_HEIGHT_PIXELS + 32) return;
-    SPRITE_PALETTE[slot*16 + 1] = vramColor;
+    int colorSlot = slot;
+    if (colorSlot >= 16) {
+        /* We only have 16 palettes to work with. This is fine most of the time,
+        as most rooms only have a few sprites anyway. But in The Tower they're all
+        loaded at once, even if they're not all on screen. This little hack works
+        because even though the palette slots are shared, the sprites that do share
+        one are never on screen at the same time. The +1 prevents Viridian's color
+        from being overridden. */
+        colorSlot = colorSlot % 16 + 1;
+        vlog_warn("Overwrote sprite palette %d for sprite id %d", colorSlot, slot);
+    }
+    SPRITE_PALETTE[colorSlot*16 + 1] = vramColor;
     int width, height;
     switch (size) {
         case SpriteSize_64x32: // wide
@@ -952,7 +959,7 @@ static void drawsprite(const int x, const int y, const int slot, bool inMenu, co
         SPRITE_COORD_TRANSFORM(x, width),
         SPRITE_COORD_TRANSFORM(y, height),
         inMenu ? 0 : 1,
-        slot,
+        colorSlot,
         size,
         SpriteColorFormat_16Color,
         SPRITE_GFX + (0x20000/sizeof(u16)) + (t*SPRITE_SIZE_U16),
