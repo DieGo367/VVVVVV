@@ -3479,13 +3479,13 @@ void Graphics::drawtowermap(void)
             if (temp > 0)
             {
                 #ifdef __NDS__
-                drawtile3(i * 8, (j * 8) - (yoff % 8), temp, towerbg.colstate, false);
+                drawtile3(i * 8, j * 8, temp, towerbg.colstate, false);
                 #else
                 drawtile3(i * 8, (j * 8) - (yoff % 8), temp, towerbg.colstate);
                 #endif
             }
             #ifdef __NDS__
-            else clear_tile(i * 8, (j * 8) - (yoff % 8), false);
+            else clear_tile(i * 8, j * 8, false);
             #endif
         }
     }
