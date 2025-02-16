@@ -469,6 +469,25 @@ if(NINTENDO_DS)
 
         if(IMAGE IN_LIST TILES)
             set(GRIT_FLAGS ${GRIT_FLAGS} -gt -gB8 -m)
+            if (IMAGE STREQUAL tiles2)
+                set(MAGICK_FLAGS ${MAGICK_FLAGS}
+                    # some custom tiles for the warp zone central bg
+                    -fill "%[pixel:p{0,174}]" -draw "rectangle 0,176 7,183"
+                    -fill "%[pixel:p{0,175}]" -draw "rectangle 8,176 15,183"
+                    -fill "%[pixel:p{24,174}]" -draw "rectangle 24,176 31,183"
+                    -fill "%[pixel:p{24,175}]" -draw "rectangle 32,176 39,183"
+                    -fill "%[pixel:p{48,174}]" -draw "rectangle 48,176 55,183"
+                    -fill "%[pixel:p{48,175}]" -draw "rectangle 56,176 63,183"
+                    -fill "%[pixel:p{72,174}]" -draw "rectangle 72,176 79,183"
+                    -fill "%[pixel:p{72,175}]" -draw "rectangle 80,176 87,183"
+                    -fill "%[pixel:p{96,174}]" -draw "rectangle 96,176 103,183"
+                    -fill "%[pixel:p{96,175}]" -draw "rectangle 104,176 111,183"
+                    -fill "%[pixel:p{120,174}]" -draw "rectangle 120,176 127,183"
+                    -fill "%[pixel:p{120,175}]" -draw "rectangle 128,176 135,183"
+                    -fill "%[pixel:p{144,174}]" -draw "rectangle 144,176 151,183"
+                    -fill "%[pixel:p{144,175}]" -draw "rectangle 152,176 159,183"
+                )
+            endif()
         elseif(IMAGE IN_LIST SPRITES)
             if(IMAGE STREQUAL teleporter)
                 set(MAGICK_FLAGS -background "#FF00FF" -crop 96x96 +repage

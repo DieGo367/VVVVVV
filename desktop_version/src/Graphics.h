@@ -345,15 +345,15 @@ public:
 
     #ifdef __NDS__
     void use_tileset(int tilesetID);
-    void drawtile3(int x, int y, int t, int off, bool background, int height_subtract = 0);
-    #else
-    void drawtile3(int x, int y, int t, int off, int height_subtract = 0);
-    #endif
-    void drawtile2(int x, int y, int t);
     void drawtile(int x, int y, int t);
-    #ifdef __NDS__
+    void drawtile2(int x, int y, int t, bool background);
+    void drawtile3(int x, int y, int t, int off, bool background, int height_subtract = 0);
     void clear_tile(int x, int y, bool background);
     void clear_tile_layer(bool background);
+    #else
+    void drawtile3(int x, int y, int t, int off, int height_subtract = 0);
+    void drawtile2(int x, int y, int t);
+    void drawtile(int x, int y, int t);
     #endif
 
     void drawmap(void);

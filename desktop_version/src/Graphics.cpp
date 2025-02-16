@@ -1074,10 +1074,11 @@ void Graphics::drawtile(int x, int y, int t)
     gameScreen.tilemapLevel[tileX + tileY * 64] = grphx.im_tiles->map[t];
 }
 
-void Graphics::drawtile2(int x, int y, int t)
+void Graphics::drawtile2(int x, int y, int t, bool background)
 {
     int tileX = x/8, tileY = y/8;
-    gameScreen.tilemapLevel[tileX + tileY * 64] = grphx.im_tiles2->map[t];
+    u16 *map = (background ? gameScreen.tilemapBackdrop : gameScreen.tilemapLevel);
+    map[tileX + tileY * 64] = grphx.im_tiles2->map[t];
 }
 
 void Graphics::drawtile3(int x, int y, int t, int off, bool background, int height_subtract /*= 0*/)
@@ -3061,6 +3062,24 @@ void Graphics::drawbackground( int t )
     case 5:
     {
         // Warp zone, central
+        #ifdef __NDS__
+        // choppier, tile-based version of the background using some custom tiles
+        int warpbTile = 880 + 3*rcol;
+        int warpfTile = 881 + 3*rcol;
+
+        for (int y = 0; y < SCREEN_HEIGHT_TILES/2; y++) {
+            int distY = SCREEN_HEIGHT_TILES/2 - y;
+            for (int x = 0; x < SCREEN_WIDTH_TILES/2; x++) {
+                int distX = SCREEN_WIDTH_TILES/2 - x;
+                int dist = distY > distX ? distY : distX;
+                int tile = ((dist + (2 - backoffset/8) + warpskip*2) % 4 < 2) ? warpbTile : warpfTile;
+                drawtile2(x*8, y*8, tile, true);
+                drawtile2((SCREEN_WIDTH_TILES - x - 1)*8, y*8, tile, true);
+                drawtile2((SCREEN_WIDTH_TILES - x - 1)*8, (SCREEN_HEIGHT_TILES - y - 1)*8, tile, true);
+                drawtile2(x*8, (SCREEN_HEIGHT_TILES - y - 1)*8, tile, true);
+            }
+        }
+        #else
         SDL_Color warpbcol;
         SDL_Color warpfcol;
 
@@ -3113,6 +3132,7 @@ void Graphics::drawbackground( int t )
                 fill_rect(&warprect, warpfcol);
             }
         }
+        #endif
         break;
     }
     case 6:
@@ -3248,8 +3268,7 @@ void Graphics::updatebackground(int t)
         #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
-        #endif
-
+        
         if (backgrounddrawn)
         {
             scroll_texture(backgroundTexture, tempScrollingTexture, -3, 0);
@@ -3265,18 +3284,28 @@ void Graphics::updatebackground(int t)
             }
         }
         else
+        #endif
         {
             // draw the whole thing for the first time!
+            #ifndef __NDS__
             backoffset = 0;
             clear();
+            #endif
             for (int j = 0; j < 15; j++)
             {
                 for (int i = 0; i < 21; i++)
                 {
+                    #ifdef __NDS__
+                    drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40, true);
+                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41, true);
+                    drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80, true);
+                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81, true);
+                    #else
                     drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40);
                     drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41);
                     drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80);
                     drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81);
+                    #endif
                 }
             }
             backgrounddrawn = true;
@@ -3295,8 +3324,7 @@ void Graphics::updatebackground(int t)
         #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
-        #endif
-
+        
         if (backgrounddrawn)
         {
             scroll_texture(backgroundTexture, tempScrollingTexture, 0, -3);
@@ -3312,18 +3340,28 @@ void Graphics::updatebackground(int t)
             }
         }
         else
+        #endif
         {
             // draw the whole thing for the first time!
+            #ifndef __NDS__
             backoffset = 0;
             clear();
+            #endif
             for (int j = 0; j < 16; j++)
             {
                 for (int i = 0; i < 21; i++)
                 {
+                    #ifdef __NDS__
+                    drawtile2((i * 16), (j * 16) - backoffset - 3, temp + 40, true);
+                    drawtile2((i * 16) + 8, (j * 16) - backoffset - 3, temp + 41, true);
+                    drawtile2((i * 16), (j * 16) - backoffset + 8 - 3, temp + 80, true);
+                    drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 3, temp + 81, true);
+                    #else
                     drawtile2((i * 16), (j * 16) - backoffset - 3, temp + 40);
                     drawtile2((i * 16) + 8, (j * 16) - backoffset - 3, temp + 41);
                     drawtile2((i * 16), (j * 16) - backoffset + 8 - 3, temp + 80);
                     drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 3, temp + 81);
+                    #endif
                 }
             }
             backgrounddrawn = true;
@@ -3400,7 +3438,11 @@ void Graphics::drawmap(void)
                     }
                     else if (tileset == 1)
                     {
+                        #ifdef __NDS__
+                        drawtile2(x * 8, y * 8, tile, false);
+                        #else
                         drawtile2(x * 8, y * 8, tile);
+                        #endif
                     }
                     else if (tileset == 2)
                     {
@@ -3452,9 +3494,11 @@ void Graphics::drawfinalmap(void)
             for (int j = 0; j < 30; j++) {
                 for (int i = 0; i < 40; i++) {
                     if ((map.contents[TILE_IDX(i, j)]) > 0)
-                        drawtile2(i * 8, j * 8, map.finalat(i, j));
                     #ifdef __NDS__
+                        drawtile2(i * 8, j * 8, map.finalat(i, j), false);
                     else clear_tile(i * 8, j * 8, false);
+                    #else
+                        drawtile2(i * 8, j * 8, map.finalat(i, j));
                     #endif
                 }
             }
