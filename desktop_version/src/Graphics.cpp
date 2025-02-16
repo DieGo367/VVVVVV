@@ -933,7 +933,7 @@ static void drawsprite(const int x, const int y, const int slot, bool inMenu, co
         one are never on screen at the same time. The +1 prevents Viridian's color
         from being overridden. */
         colorSlot = colorSlot % 16 + 1;
-        vlog_warn("Overwrote sprite palette %d for sprite id %d", colorSlot, slot);
+        // vlog_warn("Overwrote sprite palette %d for sprite id %d", colorSlot, slot);
     }
     SPRITE_PALETTE[colorSlot*16 + 1] = vramColor;
     int width, height;
@@ -1005,7 +1005,7 @@ void Graphics::clear_sprite(const int slot)
 }
 void Graphics::clear_sprites(const bool forceUpdate)
 {
-    oamClear(&oamMain, 0, 16); // I'm assuming that there are never more than 16 sprites in use
+    oamClear(&oamMain, 0, 32); // I'm assuming that there are never more than 32 sprites in use
     teleporter_slot = -1;
     if (forceUpdate) oamUpdate(&oamMain);
 }
@@ -3489,6 +3489,9 @@ void Graphics::drawtowermap(void)
             #endif
         }
     }
+    #ifdef __NDS__
+    foregrounddrawn = true;
+    #endif
 }
 
 void Graphics::drawtowerspikes(void)
@@ -3528,12 +3531,18 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     set_render_target(bg_obj.texture);
     #endif
 
+    #ifndef __NDS__
     if (bg_obj.tdrawback)
+    #endif
     {
         int off = bg_obj.scrolldir == 0 ? 0 : bg_obj.bscroll;
         //Draw the whole thing; needed for every colour cycle!
         clear();
+        #ifdef __NDS__
+        for (int j = 0; j < 30; j++)
+        #else
         for (int j = -1; j < 32; j++)
+        #endif
         {
             for (int i = 0; i < 40; i++)
             {
@@ -3548,6 +3557,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 
         bg_obj.tdrawback = false;
     }
+    #ifndef __NDS__
     else
     {
         // just update the bottom
@@ -3593,7 +3603,6 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
             }
         }
     }
-    #ifndef __NDS__
     set_render_target(target);
     #endif
 }
