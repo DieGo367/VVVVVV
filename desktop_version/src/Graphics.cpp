@@ -2648,7 +2648,7 @@ void Graphics::drawentity(const int i, const int yoff)
         if (obj.entities[i].rule == 2 && obj.entities[i].animate == 100) { // if moving platform (not treadmill), render as a sprite
             const u16 tileGfxIdx = grphx.im_tiles->map[obj.entities[i].tile] & 0x03FF;
             const u8 firstPixel = ((u8 *)grphx.im_tiles->gfx)[tileGfxIdx * 64];
-            drawsprite(tpoint.x, tpoint.y, i, false, 191, BG_PALETTE[firstPixel], SpriteSize_32x8);
+            drawsprite(tpoint.x, tpoint.y, i, false, 191, grphx.im_tiles->palette[firstPixel], SpriteSize_32x8);
             thiswidth = 0; // prevent placing tiles in the tilemap
         }
         #endif
