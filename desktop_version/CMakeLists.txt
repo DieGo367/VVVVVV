@@ -470,22 +470,26 @@ if(NINTENDO_DS)
         if(IMAGE IN_LIST TILES)
             set(GRIT_FLAGS ${GRIT_FLAGS} -gt -gB8 -m)
             if (IMAGE STREQUAL tiles2)
+                # generate some custom tiles for the warp zone bgs
+                set(INSTRUCTIONS
+                    \( -clone 0 -crop 16x72+0+0
+                        -fill "%[pixel:p{0,0}]" -draw "rectangle 0,64 7,71"
+                        -fill "%[pixel:p{0,7}]" -draw "rectangle 8,64 15,71"
+                    \)
+                    \( -clone 0 -crop 4x16+0+0 -repage +12+32! \)
+                    \( -clone 0 -crop 12x16+4+0 -repage -4+32! \)
+                    \( -clone 0 -crop 16x4+0+16 -repage +0+44! \)
+                    \( -clone 0 -crop 16x12+0+20 -repage +0+28! \)
+                )
                 set(MAGICK_FLAGS ${MAGICK_FLAGS}
-                    # some custom tiles for the warp zone central bg
-                    -fill "%[pixel:p{0,174}]" -draw "rectangle 0,176 7,183"
-                    -fill "%[pixel:p{0,175}]" -draw "rectangle 8,176 15,183"
-                    -fill "%[pixel:p{24,174}]" -draw "rectangle 24,176 31,183"
-                    -fill "%[pixel:p{24,175}]" -draw "rectangle 32,176 39,183"
-                    -fill "%[pixel:p{48,174}]" -draw "rectangle 48,176 55,183"
-                    -fill "%[pixel:p{48,175}]" -draw "rectangle 56,176 63,183"
-                    -fill "%[pixel:p{72,174}]" -draw "rectangle 72,176 79,183"
-                    -fill "%[pixel:p{72,175}]" -draw "rectangle 80,176 87,183"
-                    -fill "%[pixel:p{96,174}]" -draw "rectangle 96,176 103,183"
-                    -fill "%[pixel:p{96,175}]" -draw "rectangle 104,176 111,183"
-                    -fill "%[pixel:p{120,174}]" -draw "rectangle 120,176 127,183"
-                    -fill "%[pixel:p{120,175}]" -draw "rectangle 128,176 135,183"
-                    -fill "%[pixel:p{144,174}]" -draw "rectangle 144,176 151,183"
-                    -fill "%[pixel:p{144,175}]" -draw "rectangle 152,176 159,183"
+                    -repage -0-144! ${INSTRUCTIONS} -repage +0+144!
+                    -repage -24-144! ${INSTRUCTIONS} -repage +24+144!
+                    -repage -48-144! ${INSTRUCTIONS} -repage +48+144!
+                    -repage -72-144! ${INSTRUCTIONS} -repage +72+144!
+                    -repage -96-144! ${INSTRUCTIONS} -repage +96+144!
+                    -repage -120-144! ${INSTRUCTIONS} -repage +120+144!
+                    -repage -144-144! ${INSTRUCTIONS} -repage +144+144!
+                    -flatten
                 )
             endif()
         elseif(IMAGE IN_LIST SPRITES)

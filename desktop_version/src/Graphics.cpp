@@ -3064,8 +3064,8 @@ void Graphics::drawbackground( int t )
         // Warp zone, central
         #ifdef __NDS__
         // choppier, tile-based version of the background using some custom tiles
-        int warpbTile = 880 + 3*rcol;
-        int warpfTile = 881 + 3*rcol;
+        int warpbTile = 1040 + 3*rcol;
+        int warpfTile = 1041 + 3*rcol;
 
         for (int y = 0; y < SCREEN_HEIGHT_TILES/2; y++) {
             int distY = SCREEN_HEIGHT_TILES/2 - y;
@@ -3265,7 +3265,9 @@ void Graphics::updatebackground(int t)
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
-        #ifndef __NDS__
+        #ifdef __NDS__
+        const int tileOffset = temp + (backoffset / 4 % 2 == 1 ? 160 : 0);
+        #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
         
@@ -3296,10 +3298,10 @@ void Graphics::updatebackground(int t)
                 for (int i = 0; i < 21; i++)
                 {
                     #ifdef __NDS__
-                    drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40, true);
-                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41, true);
-                    drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80, true);
-                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81, true);
+                    drawtile2((i * 16) - backoffset - 1, (j * 16), tileOffset + 40, true);
+                    drawtile2((i * 16) - backoffset + 8 - 1, (j * 16), tileOffset + 41, true);
+                    drawtile2((i * 16) - backoffset - 1, (j * 16) + 8, tileOffset + 80, true);
+                    drawtile2((i * 16) - backoffset + 8 - 1, (j * 16) + 8, tileOffset + 81, true);
                     #else
                     drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40);
                     drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41);
@@ -3321,7 +3323,9 @@ void Graphics::updatebackground(int t)
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
-        #ifndef __NDS__
+        #ifdef __NDS__
+        const int tileOffset = temp + (backoffset / 4 % 2 == 1 ? 160 : 0);
+        #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
         
@@ -3352,10 +3356,10 @@ void Graphics::updatebackground(int t)
                 for (int i = 0; i < 21; i++)
                 {
                     #ifdef __NDS__
-                    drawtile2((i * 16), (j * 16) - backoffset - 3, temp + 40, true);
-                    drawtile2((i * 16) + 8, (j * 16) - backoffset - 3, temp + 41, true);
-                    drawtile2((i * 16), (j * 16) - backoffset + 8 - 3, temp + 80, true);
-                    drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 3, temp + 81, true);
+                    drawtile2((i * 16), (j * 16) - backoffset - 1, tileOffset + 40, true);
+                    drawtile2((i * 16) + 8, (j * 16) - backoffset - 1, tileOffset + 41, true);
+                    drawtile2((i * 16), (j * 16) - backoffset + 8 - 1, tileOffset + 80, true);
+                    drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 1, tileOffset + 81, true);
                     #else
                     drawtile2((i * 16), (j * 16) - backoffset - 3, temp + 40);
                     drawtile2((i * 16) + 8, (j * 16) - backoffset - 3, temp + 41);
