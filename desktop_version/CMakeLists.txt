@@ -490,6 +490,16 @@ if(NINTENDO_DS)
                     -repage -120-144! ${INSTRUCTIONS} -repage +120+144!
                     -repage -144-144! ${INSTRUCTIONS} -repage +144+144!
                     -flatten
+                    # draw some custom tiles for the lab bg
+                    -fill "rgb(54,26,18)"
+                        -draw "rectangle 192,96 231,135"
+                    -fill none -stroke "rgb(215,157,141)" +antialias
+                        -draw "rectangle 196,100 227,131"
+                        -draw "rectangle 197,101 226,130"
+                        -draw "rectangle 200,100 223,131"
+                        -draw "rectangle 201,101 222,130"
+                        -draw "rectangle 196,104 227,127"
+                        -draw "rectangle 197,105 226,126"
                 )
             endif()
         elseif(IMAGE IN_LIST SPRITES)

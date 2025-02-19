@@ -2957,9 +2957,11 @@ void Graphics::drawbackground( int t )
             }
             break;
         }
+        #ifndef __NDS__
         fill_rect(bcol2);
 
         for (int i = 0; i < numbackboxes; i++)
+        #endif
         {
             switch (rcol)
             {
@@ -3026,6 +3028,7 @@ void Graphics::drawbackground( int t )
                 break;
             }
 
+            #ifndef __NDS__
             SDL_Rect backboxrect = backboxes[i];
             backboxrect.x = lerp(backboxes[i].x - backboxvx[i], backboxes[i].x);
             backboxrect.y = lerp(backboxes[i].y - backboxvy[i], backboxes[i].y);
@@ -3036,7 +3039,45 @@ void Graphics::drawbackground( int t )
             backboxrect.w -= 2;
             backboxrect.h -= 2;
             fill_rect(&backboxrect, bcol2);
+            #endif
         }
+        #ifdef __NDS__
+        const u16 tileGfxIdx = grphx.im_tiles2->map[546] & 0x03FF;
+        const u8 firstPixel = ((u8 *)grphx.im_tiles2->gfx)[tileGfxIdx * 64];
+        const u8 lastPixel = ((u8 *)grphx.im_tiles2->gfx)[(tileGfxIdx+1) * 64 - 1];
+        BG_PALETTE[firstPixel] = VRAM_COLOR(bcol.r, bcol.g, bcol.b);
+        BG_PALETTE[lastPixel] = VRAM_COLOR(bcol2.r, bcol2.g, bcol2.b);
+        
+        for (int y = 0; y < SCREEN_HEIGHT_TILES; y++) {
+            for (int x = 0; x < SCREEN_WIDTH_TILES; x++) {
+                drawtile2(x*8, y*8, 586, true);
+            }
+        }
+        for (int i = 0; i < numbackboxes; i++)
+        {
+            SDL_Rect backboxrect = backboxes[i];
+            backboxrect.x = lerp(backboxes[i].x - backboxvx[i], backboxes[i].x) / 4 * 4;
+            backboxrect.y = lerp(backboxes[i].y - backboxvy[i], backboxes[i].y) / 4 * 4;
+            bool xHalf = backboxrect.x % 8 > 3;
+            bool yHalf = backboxrect.y % 8 > 3;
+            int widthHalfTiles = backboxrect.w / 4;
+            int heightHalfTiles = backboxrect.h / 4;
+            bool x2Half = widthHalfTiles % 2 != xHalf;
+            bool y2Half = heightHalfTiles % 2 != yHalf;
+            drawtile2(backboxrect.x, backboxrect.y, 545 - xHalf - yHalf*40, true);
+            drawtile2(backboxrect.x + (widthHalfTiles - 1) * 4, backboxrect.y, 547 + x2Half - yHalf*40, true);
+            drawtile2(backboxrect.x, backboxrect.y + (heightHalfTiles - 1) * 4, 625 - xHalf + y2Half*40, true);
+            drawtile2(backboxrect.x + (widthHalfTiles - 1) * 4, backboxrect.y + (heightHalfTiles - 1) * 4, 627 + x2Half + y2Half*40, true);
+            for (int j = 1; j < (widthHalfTiles-1+xHalf)/2; j++) {
+                drawtile2(backboxrect.x + j*8, backboxrect.y, 546 - yHalf*40, true);
+                drawtile2(backboxrect.x + j*8, backboxrect.y + (heightHalfTiles - 1) * 4, 626 + y2Half*40, true);
+            }
+            for (int j = 1; j < (heightHalfTiles-1+yHalf)/2; j++) {
+                drawtile2(backboxrect.x, backboxrect.y + j*8, 585 - xHalf, true);
+                drawtile2(backboxrect.x + (widthHalfTiles - 1) * 4, backboxrect.y + j*8, 587 + x2Half, true);
+            }
+        }
+        #endif
         break;
     }
     case 3: //Warp zone (horizontal)
