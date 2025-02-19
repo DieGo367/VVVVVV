@@ -502,6 +502,42 @@ if(NINTENDO_DS)
                         -draw "rectangle 197,105 226,126"
                 )
             endif()
+            if (IMAGE STREQUAL tiles OR IMAGE STREQUAL tiles2)
+                # draw star gfx
+                set(INSTR_1
+                    \( +clone -crop 72x24+0+0
+                        -fill "#FF00FF" -stroke none
+                            -draw "rectangle 0,0 31,23"
+                            -draw "rectangle 40,16 71,23"
+                        )
+                        # splitting into 2 parts to set a new fill (see below)
+                        set(INSTR_2
+                            -draw "rectangle 0,0 1,1"
+                            -draw "rectangle 10,0 11,1"
+                            -draw "rectangle 20,0 21,1"
+                            -draw "rectangle 30,0 31,1"
+                            
+                            -draw "rectangle 0,10 1,11"
+                            -draw "rectangle 10,10 11,11"
+                            -draw "rectangle 20,10 21,11"
+                            -draw "rectangle 30,10 31,11"
+                            
+                            -draw "rectangle 0,20 1,21"
+                            -draw "rectangle 10,20 11,21"
+                            -draw "rectangle 20,20 21,21"
+                            -draw "rectangle 30,20 31,21"
+
+                            -draw "rectangle 40,22 41,23"
+                            -draw "rectangle 50,22 51,23"
+                            -draw "rectangle 60,22 61,23"
+                            -draw "rectangle 70,22 71,23"
+                    \)
+                )
+                set(MAGICK_FLAGS ${MAGICK_FLAGS}
+                    -repage -104-216 ${INSTR_1} -fill "#555555" ${INSTR_2} -repage +104+216! -flatten
+                    -repage -176-216 ${INSTR_1} -fill "#222222" ${INSTR_2} -repage +176+216! -flatten
+                )
+            endif()
         elseif(IMAGE IN_LIST SPRITES)
             if(IMAGE STREQUAL teleporter)
                 set(MAGICK_FLAGS -background "#FF00FF" -crop 96x96 +repage

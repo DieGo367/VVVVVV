@@ -345,7 +345,7 @@ public:
 
     #ifdef __NDS__
     void use_tileset(int tilesetID);
-    void drawtile(int x, int y, int t);
+    void drawtile(int x, int y, int t, bool background);
     void drawtile2(int x, int y, int t, bool background);
     void drawtile3(int x, int y, int t, int off, bool background, int height_subtract = 0);
     void clear_tile(int x, int y, bool background);

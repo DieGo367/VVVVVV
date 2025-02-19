@@ -1068,10 +1068,11 @@ void Graphics::use_tileset(int tilesetID) {
     }
 }
 // NDS_TODO: recolor oneway for drawtile and drawtile2
-void Graphics::drawtile(int x, int y, int t)
+void Graphics::drawtile(int x, int y, int t, bool background)
 {
     int tileX = x/8, tileY = y/8;
-    gameScreen.tilemapLevel[tileX + tileY * 64] = grphx.im_tiles->map[t];
+    u16 *map = (background ? gameScreen.tilemapBackdrop : gameScreen.tilemapLevel);
+    map[tileX + tileY * 64] = grphx.im_tiles->map[t];
 }
 
 void Graphics::drawtile2(int x, int y, int t, bool background)
@@ -2215,7 +2216,7 @@ void Graphics::drawcoloredtile(
     const int r, const int g, const int b
 ) {
     #ifdef __NDS__
-    drawtile(x, y, t); // NDS_TODO: maybe use gl2d here?
+    drawtile(x, y, t, false); // NDS_TODO: maybe use gl2d here?
     #else
     draw_grid_tile(grphx.im_tiles_white, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
     #endif
@@ -2627,7 +2628,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         #ifdef __NDS__
-        drawtile(drawRect.x, drawRect.y, obj.entities[i].drawframe);
+        drawtile(drawRect.x, drawRect.y, obj.entities[i].drawframe, false);
         #else
         draw_grid_tile(grphx.im_tiles, obj.entities[i].drawframe, drawRect.x, drawRect.y, 8, 8);
         #endif
@@ -2659,7 +2660,7 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
             drawRect.x += 8 * ii;
             #ifdef __NDS__
-            drawtile(drawRect.x, drawRect.y, obj.entities[i].drawframe);
+            drawtile(drawRect.x, drawRect.y, obj.entities[i].drawframe, false);
             #else
             if (custom_gray)
             {
@@ -2818,7 +2819,7 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
 
             #ifdef __NDS__
-            drawtile(drawRect.x, drawRect.y, 1167); // NDS_TODO: color
+            drawtile(drawRect.x, drawRect.y, 1167, false); // NDS_TODO: color
             #else
             draw_grid_tile(grphx.im_tiles_white, 1167, drawRect.x, drawRect.y, 8, 8, ct);
             #endif
@@ -2842,7 +2843,7 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
 
             #ifdef __NDS__
-            drawtile(drawRect.x, drawRect.y, 1166); // NDS_TODO: color
+            drawtile(drawRect.x, drawRect.y, 1166, false); // NDS_TODO: color
             #else
             draw_grid_tile(grphx.im_tiles_white, 1166, drawRect.x, drawRect.y, 8, 8, ct);
             #endif
@@ -2870,10 +2871,24 @@ void Graphics::drawbackground( int t )
         // Starfield
         #ifndef __NDS__
         fill_rect(0, 0, 0);
+        #endif
         for (int i = 0; i < numstars; i++)
         {
             SDL_Rect star_rect = stars[i];
             star_rect.x = lerp(star_rect.x + starsspeed[i], star_rect.x);
+            #ifdef __NDS__
+            if (star_rect.x < 0) continue;
+            int subX = star_rect.x % 8 / 2;
+            int subY = star_rect.y % 8 / 2;
+            int tile = 1093 + subX + subY * 40 + (subY == 3 ? -35 : 0);
+            if (starsspeed[i] <= 6) tile += 9;
+            if (active_tileset == 1) {
+                drawtile2(star_rect.x, star_rect.y, tile, true);
+            }
+            else {
+                drawtile(star_rect.x, star_rect.y, tile, true);
+            }
+            #else
             if (starsspeed[i] <= 6)
             {
                 fill_rect(&star_rect, getRGB(0x22,0x22,0x22));
@@ -2882,8 +2897,8 @@ void Graphics::drawbackground( int t )
             {
                 fill_rect(&star_rect, getRGB(0x55,0x55,0x55));
             }
+            #endif
         }
-        #endif
         break;
     case 2:
     {
@@ -3178,11 +3193,26 @@ void Graphics::drawbackground( int t )
     }
     case 6:
         // Final Starfield
+        #ifndef __NDS__
         fill_rect(0, 0, 0);
+        #endif
         for (int i = 0; i < numstars; i++)
         {
             SDL_Rect star_rect = stars[i];
             star_rect.y = lerp(star_rect.y + starsspeed[i], star_rect.y);
+            #ifdef __NDS__
+            if (star_rect.y < 0) continue;
+            int subX = star_rect.x % 8 / 2;
+            int subY = star_rect.y % 8 / 2;
+            int tile = 1093 + subX + subY * 40 + (subY == 3 ? -35 : 0);
+            if (starsspeed[i] <= 8) tile += 9;
+            if (active_tileset == 1) {
+                drawtile2(star_rect.x, star_rect.y, tile, true);
+            }
+            else {
+                drawtile(star_rect.x, star_rect.y, tile, true);
+            }
+            #else
             if (starsspeed[i] <= 8)
             {
                 fill_rect(&star_rect, getRGB(0x22, 0x22, 0x22));
@@ -3191,6 +3221,7 @@ void Graphics::drawbackground( int t )
             {
                 fill_rect(&star_rect, getRGB(0x55, 0x55, 0x55));
             }
+            #endif
         }
         break;
     case 7:
@@ -3236,7 +3267,9 @@ void Graphics::drawbackground( int t )
         }
         break;
     default:
+        #ifndef __NDS__
         fill_rect(0, 0, 0);
+        #endif
         break;
     }
 }
@@ -3479,7 +3512,11 @@ void Graphics::drawmap(void)
                 {
                     if (tileset == 0)
                     {
+                        #ifdef __NDS__
+                        drawtile(x * 8, y * 8, tile, false);
+                        #else
                         drawtile(x * 8, y * 8, tile);
+                        #endif
                     }
                     else if (tileset == 1)
                     {
@@ -3528,9 +3565,11 @@ void Graphics::drawfinalmap(void)
             for (int j = 0; j < 30; j++) {
                 for (int i = 0; i < 40; i++) {
                     if ((map.contents[TILE_IDX(i, j)]) > 0)
-                        drawtile(i * 8, j * 8, map.finalat(i, j));
                     #ifdef __NDS__
+                        drawtile(i * 8, j * 8, map.finalat(i, j), false);
                     else clear_tile(i * 8, j * 8, false);
+                    #else
+                        drawtile(i * 8, j * 8, map.finalat(i, j));
                     #endif
                 }
             }
