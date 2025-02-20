@@ -2671,9 +2671,12 @@ void Graphics::drawentity(const int i, const int yoff)
             const u16 srcTileGfxIdx = grphx.im_tiles->map[drawTile] & 0x03FF;
             const u8 srcFirstPixel = ((u8 *)grphx.im_tiles->gfx)[srcTileGfxIdx * 64];
             drawTile = drawTile % 40 - 33;
-            const u16 destTileGfxIdx = grphx.im_tiles2->map[drawTile] & 0x03FF;
-            const u8 destFirstPixel = ((u8 *)grphx.im_tiles2->gfx)[destTileGfxIdx * 64];
-            BG_PALETTE[destFirstPixel] = grphx.im_tiles->palette[srcFirstPixel];
+            if (drawTile > 5) drawTile = 0;
+            else {
+                const u16 destTileGfxIdx = grphx.im_tiles2->map[drawTile] & 0x03FF;
+                const u8 destFirstPixel = ((u8 *)grphx.im_tiles2->gfx)[destTileGfxIdx * 64];
+                BG_PALETTE[destFirstPixel] = grphx.im_tiles->palette[srcFirstPixel];
+            }
         }
         #endif
         for (int ii = 0; ii < thiswidth; ii++)
