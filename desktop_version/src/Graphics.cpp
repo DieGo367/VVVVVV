@@ -2646,11 +2646,34 @@ void Graphics::drawentity(const int i, const int yoff)
             thiswidth = 8;
         }
         #ifdef __NDS__
-        if (obj.entities[i].rule == 2 && obj.entities[i].animate == 100) { // if moving platform (not treadmill), render as a sprite
-            const u16 tileGfxIdx = grphx.im_tiles->map[obj.entities[i].tile] & 0x03FF;
-            const u8 firstPixel = ((u8 *)grphx.im_tiles->gfx)[tileGfxIdx * 64];
-            drawsprite(tpoint.x, tpoint.y, i, false, 191, grphx.im_tiles->palette[firstPixel], SpriteSize_32x8);
-            thiswidth = 0; // prevent placing tiles in the tilemap
+        int drawTile = obj.entities[i].drawframe;
+        if (obj.entities[i].rule == 2) {
+            if (obj.entities[i].animate == 100) { // if moving platform (not treadmill), render as a sprite
+                const u16 tileGfxIdx = grphx.im_tiles->map[drawTile] & 0x03FF;
+                const u8 firstPixel = ((u8 *)grphx.im_tiles->gfx)[tileGfxIdx * 64];
+                drawsprite(tpoint.x, tpoint.y, i, false, 191, grphx.im_tiles->palette[firstPixel], SpriteSize_32x8);
+                thiswidth = 0; // prevent placing tiles in the tilemap
+            }
+            else if (active_tileset == 1) { // treadmill in tiles2, redirect tile
+                const u16 srcTileGfxIdx = grphx.im_tiles->map[drawTile] & 0x03FF;
+                const u8 srcFirstPixel = ((u8 *)grphx.im_tiles->gfx)[srcTileGfxIdx * 64];
+                const u8 srcSecondPixel = ((u8 *)grphx.im_tiles->gfx)[srcTileGfxIdx * 64 + 1];
+                drawTile = drawTile % 80 + 9;
+                if (drawTile % 40 < 4) drawTile -= 4;
+                const u16 destTileGfxIdx = grphx.im_tiles2->map[drawTile] & 0x03FF;
+                const u8 destFirstPixel = ((u8 *)grphx.im_tiles2->gfx)[destTileGfxIdx * 64];
+                const u8 destSecondPixel = ((u8 *)grphx.im_tiles2->gfx)[destTileGfxIdx * 64 + 1];
+                BG_PALETTE[destFirstPixel] = grphx.im_tiles->palette[srcFirstPixel];
+                BG_PALETTE[destSecondPixel] = grphx.im_tiles->palette[srcSecondPixel];
+            }
+        }
+        else if (active_tileset == 1 && drawTile > 0) { // disappearing platforms in tiles2, redirect tile
+            const u16 srcTileGfxIdx = grphx.im_tiles->map[drawTile] & 0x03FF;
+            const u8 srcFirstPixel = ((u8 *)grphx.im_tiles->gfx)[srcTileGfxIdx * 64];
+            drawTile = drawTile % 40 - 33;
+            const u16 destTileGfxIdx = grphx.im_tiles2->map[drawTile] & 0x03FF;
+            const u8 destFirstPixel = ((u8 *)grphx.im_tiles2->gfx)[destTileGfxIdx * 64];
+            BG_PALETTE[destFirstPixel] = grphx.im_tiles->palette[srcFirstPixel];
         }
         #endif
         for (int ii = 0; ii < thiswidth; ii++)
@@ -2660,7 +2683,8 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
             drawRect.x += 8 * ii;
             #ifdef __NDS__
-            drawtile(drawRect.x, drawRect.y, obj.entities[i].drawframe, false);
+            if (active_tileset == 1) drawtile2(drawRect.x, drawRect.y, drawTile, false);
+            else drawtile(drawRect.x, drawRect.y, drawTile, false);
             #else
             if (custom_gray)
             {

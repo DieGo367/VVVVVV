@@ -500,6 +500,8 @@ if(NINTENDO_DS)
                         -draw "rectangle 201,101 222,130"
                         -draw "rectangle 196,104 227,127"
                         -draw "rectangle 197,105 226,126"
+                    # copy one of the treadmill platforms from the first tileset
+                    \( graphics/tiles.png -crop 32x16+288+0 \) -flatten
                 )
             endif()
             if (IMAGE STREQUAL tiles OR IMAGE STREQUAL tiles2)
