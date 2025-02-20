@@ -3578,7 +3578,9 @@ void Graphics::drawfinalmap(void)
 {
     if (!foregrounddrawn)
     {
-        #ifndef __NDS__
+        #ifdef __NDS__
+        use_tileset(map.tileset);
+        #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
         set_render_target(foregroundTexture);
