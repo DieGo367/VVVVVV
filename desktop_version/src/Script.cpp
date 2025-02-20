@@ -3205,6 +3205,9 @@ void scriptclass::hardreset(void)
     graphics.flipmode = false; //This will be reset if needs be elsewhere
     graphics.showcutscenebars = false;
     graphics.setbars(0);
+    #ifdef __NDS__
+    graphics.clear_sprites();
+    #endif
 
     //mapclass
     map.warpx = false;
