@@ -935,6 +935,10 @@ static void drawsprite(const int x, const int y, const int slot, bool inMenu, co
         colorSlot = colorSlot % 16 + 1;
         // vlog_warn("Overwrote sprite palette %d for sprite id %d", colorSlot, slot);
     }
+    if (game.roomx == 102 && game.roomy == 110 && t == 22) {
+        // trinkets on the ship should all use the same slot to avoid clashing with Victoria
+        colorSlot = 1;
+    }
     SPRITE_PALETTE[colorSlot*16 + 1] = vramColor;
     int width, height;
     switch (size) {
