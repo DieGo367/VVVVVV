@@ -1851,7 +1851,9 @@ static void menurender(void)
 
 void titlerender(void)
 {
+    #ifndef __NDS__
     graphics.clear();
+    #endif
     if (!game.menustart)
     {
         tr = graphics.col_tr;
@@ -1911,7 +1913,9 @@ void titlerender(void)
 
 void gamecompleterender(void)
 {
+    #ifndef __NDS__
     graphics.clear();
+    #endif
 
     if(!game.colourblindmode) graphics.drawtowerbackground(graphics.titlebg);
 
@@ -2161,7 +2165,9 @@ void gamecompleterender(void)
 
 void gamecompleterender2(void)
 {
+    #ifndef __NDS__
     graphics.clear();
+    #endif
 
     graphics.drawimage(IMAGE_ENDING, 0, 0);
 
@@ -2311,7 +2317,9 @@ void gamerender(void)
             }
             else
             {
+                #ifndef __NDS__
                 graphics.clear();
+                #endif
             }
             graphics.drawtowermap();
         }
@@ -2323,7 +2331,9 @@ void gamerender(void)
             }
             else
             {
+                #ifndef __NDS__
                 graphics.clear();
+                #endif
             }
             if ((map.finalmode || map.custommode) && map.final_colormode)
             {
@@ -2443,9 +2453,9 @@ void gamerender(void)
 
     #ifndef __NDS__
     graphics.set_render_target(graphics.gameTexture);
-    #endif
 
     graphics.copy_texture(graphics.gameplayTexture, NULL, NULL);
+    #endif
 
     if (game.advancetext)
     {
@@ -2922,8 +2932,8 @@ void maprender(void)
 {
     #ifndef __NDS__
     graphics.set_render_target(graphics.menuTexture);
-    #endif
     graphics.clear();
+    #endif
 
     draw_roomname_menu();
 
@@ -3444,7 +3454,9 @@ void maprender(void)
     }
     else
     {
+        #ifndef __NDS__
         graphics.copy_texture(graphics.menuTexture, NULL, NULL);
+        #endif
     }
 
     // We need to draw the black screen above the menu in order to disguise it
@@ -3470,8 +3482,8 @@ void teleporterrender(void)
 {
     #ifndef __NDS__
     graphics.set_render_target(graphics.menuTexture);
-    #endif
     graphics.clear();
+    #endif
 
     const int telex = map.teleporters[game.teleport_to_teleporter].x;
     const int teley = map.teleporters[game.teleport_to_teleporter].y;
@@ -3551,7 +3563,9 @@ void teleporterrender(void)
     }
     else
     {
+        #ifndef __NDS__
         graphics.copy_texture(graphics.menuTexture, NULL, NULL);
+        #endif
     }
 
     graphics.render();

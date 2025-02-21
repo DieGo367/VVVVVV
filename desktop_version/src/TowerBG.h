@@ -2,15 +2,10 @@
 #define TOWERBG_H
 
 #include <SDL.h>
-#ifdef __NDS__
-#include "GraphicsResources.h"
-#endif
 
 struct TowerBG
 {
-    #ifdef __NDS__
-    GLTexture *texture;
-    #else
+    #ifndef __NDS__
     SDL_Texture* texture;
     #endif
     bool tdrawback;

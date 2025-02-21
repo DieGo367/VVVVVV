@@ -974,9 +974,9 @@ static void inline deltaloop(void)
 
         if (implfunc->type == Func_delta && implfunc->func != NULL)
         {
+            #ifndef __NDS__
             graphics.clear();
 
-            #ifndef __NDS__
             graphics.set_render_target(graphics.gameTexture);
             #endif
 

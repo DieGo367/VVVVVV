@@ -1719,8 +1719,8 @@ void customlevelclass::generatecustomminimap(void)
     #ifndef __NDS__
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
     graphics.set_render_target(graphics.images[IMAGE_CUSTOMMINIMAP]);
-    #endif
     graphics.clear();
+    #endif
 
     // Scan over the map size
     for (int j2 = 0; j2 < mapheight; j2++)

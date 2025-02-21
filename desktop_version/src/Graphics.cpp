@@ -111,6 +111,7 @@ void Graphics::init(void)
     // initialize everything else to zero
     m = 0;
     linedelay = 0;
+    #ifndef __NDS__
     gameTexture = NULL;
     gameplayTexture = NULL;
     menuTexture = NULL;
@@ -118,7 +119,6 @@ void Graphics::init(void)
     tempShakeTexture = NULL;
     backgroundTexture = NULL;
     foregroundTexture = NULL;
-    #ifndef __NDS__
     tempScreenshot = NULL;
     tempScreenshot2x = NULL;
     #endif
@@ -203,7 +203,6 @@ void Graphics::create_buffers(void)
     CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS)
 #define CREATE_SCROLL_TEXTURE \
     CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS + 16, SCREEN_WIDTH_PIXELS + 16)
-#endif
 
     gameTexture = CREATE_TEXTURE;
     gameplayTexture = CREATE_TEXTURE;
@@ -215,6 +214,7 @@ void Graphics::create_buffers(void)
     tempScrollingTexture = CREATE_SCROLL_TEXTURE;
     towerbg.texture = CREATE_SCROLL_TEXTURE;
     titlebg.texture = CREATE_SCROLL_TEXTURE;
+#endif
 
 #undef CREATE_SCROLL_TEXTURE
 #undef CREATE_TEXTURE
@@ -508,18 +508,6 @@ int Graphics::set_blendmode(GLTexture *texture, const SDL_BlendMode blendmode)
         WHINE_ONCE_ARGS(("Could not set texture blend mode: %s", SDL_GetError()));
     }
     return result;
-}
-
-int Graphics::clear(const int r, const int g, const int b, const int a)
-{
-    set_color(r, g, b, a);
-    // more performant just to ignore this for now
-    return 0;
-}
-
-int Graphics::clear(void)
-{
-    return clear(0, 0, 0, 255);
 }
 
 bool Graphics::substitute(GLTexture **texture)
@@ -3003,22 +2991,26 @@ void Graphics::drawbackground( int t )
     }
     case 3: //Warp zone (horizontal)
     {
+        #ifndef __NDS__
         clear();
 
         const int offset = (int) lerp(-3, 0);
         const SDL_Rect srcRect = {8 + offset, 0, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
 
         copy_texture(backgroundTexture, &srcRect, NULL);
+        #endif
         break;
     }
     case 4: //Warp zone (vertical)
     {
+        #ifndef __NDS__
         clear();
 
         const int offset = (int) lerp(-3, 0);
         const SDL_Rect srcRect = {0, 8 + offset, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
 
         copy_texture(backgroundTexture, &srcRect, NULL);
+        #endif
         break;
     }
     case 5:
@@ -3453,7 +3445,9 @@ void Graphics::drawmap(void)
         foregrounddrawn = true;
     }
 
+    #ifndef __NDS__
     copy_texture(foregroundTexture, NULL, NULL);
+    #endif
 }
 
 void Graphics::drawfinalmap(void)
@@ -3466,9 +3460,9 @@ void Graphics::drawfinalmap(void)
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
         set_render_target(foregroundTexture);
-        #endif
         set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
         clear(0, 0, 0, 0);
+        #endif
         if (map.tileset == 0) {
             for (int j = 0; j < 30; j++) {
                 for (int i = 0; i < 40; i++) {
@@ -3501,7 +3495,9 @@ void Graphics::drawfinalmap(void)
         foregrounddrawn = true;
     }
 
+    #ifndef __NDS__
     copy_texture(foregroundTexture, NULL, NULL);
+    #endif
 }
 
 void Graphics::drawtowermap(void)
@@ -3548,12 +3544,14 @@ void Graphics::drawtowerspikes(void)
 
 void Graphics::drawtowerbackground(const TowerBG& bg_obj)
 {
+    #ifndef __NDS__
     clear();
 
     const int offset = (int) lerp(-bg_obj.bscroll, 0);
     const SDL_Rect srcRect = {0, 8 + offset, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
 
     copy_texture(bg_obj.texture, &srcRect, NULL);
+    #endif
 }
 
 void Graphics::updatetowerbackground(TowerBG& bg_obj)
@@ -3573,10 +3571,10 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     {
         int off = bg_obj.scrolldir == 0 ? 0 : bg_obj.bscroll;
         //Draw the whole thing; needed for every colour cycle!
-        clear();
         #ifdef __NDS__
         for (int j = 0; j < 30; j++)
         #else
+        clear();
         for (int j = -1; j < 32; j++)
         #endif
         {
@@ -3825,19 +3823,20 @@ void Graphics::menuoffrender(void)
 {
     #ifdef __NDS__
     backgrounddrawn = false;
-    #endif
+    #else
     if (copy_texture(gameplayTexture, NULL, NULL) != 0)
     {
         return;
     }
-
+    
     const int offset = (int) lerp(oldmenuoffset, menuoffset);
     const SDL_Rect offsetRect = {0, offset, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
-
+    
     if (copy_texture(menuTexture, NULL, &offsetRect) != 0)
     {
         return;
     }
+    #endif
 }
 
 SDL_Color Graphics::huetilegetcol()
@@ -4110,20 +4109,22 @@ void Graphics::screenshake(void)
     }
 
     set_render_target(tempShakeTexture);
-    #endif
     set_blendmode(SDL_BLENDMODE_NONE);
     clear();
+    #endif
 
     const SDL_Rect shake = {screenshake_x, screenshake_y, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
 
+    #ifndef __NDS__
     copy_texture(gameTexture, NULL, &shake);
+    #endif
 
     draw_screenshot_border();
 
     #ifndef __NDS__
     set_render_target(gameTexture);
-    #endif
     clear();
+    #endif
 
     // Clear the gameplay texture so blackout() is actually black after a screenshake
     if (game.gamestate == GAMEMODE && game.blackout)
@@ -4139,7 +4140,6 @@ void Graphics::screenshake(void)
 
     #ifndef __NDS__
     set_render_target(NULL);
-    #endif
     set_blendmode(SDL_BLENDMODE_NONE);
     draw_window_background();
 
@@ -4147,6 +4147,7 @@ void Graphics::screenshake(void)
     get_stretch_info(&rect);
 
     copy_texture(tempShakeTexture, NULL, &rect, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
+    #endif
 }
 
 void Graphics::updatescreenshake(void)
@@ -4155,10 +4156,12 @@ void Graphics::updatescreenshake(void)
     screenshake_y =  static_cast<Sint32>((fRandom() * 7) - 4);
 }
 
+#ifndef __NDS__
 void Graphics::draw_window_background(void)
 {
     clear();
 }
+#endif
 
 void Graphics::get_stretch_info(SDL_Rect* rect)
 {
@@ -4222,17 +4225,19 @@ void Graphics::render(void)
     }
 
     set_render_target(NULL);
-    #endif
     set_blendmode(SDL_BLENDMODE_NONE);
 
     draw_window_background();
+    #endif
 
     SDL_Rect stretch_info;
     get_stretch_info(&stretch_info);
 
     ime_set_rect(&stretch_info);
 
+    #ifndef __NDS__
     copy_texture(gameTexture, NULL, &stretch_info, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
+    #endif
 }
 
 void Graphics::renderwithscreeneffects(void)
@@ -4295,8 +4300,10 @@ void Graphics::draw_screenshot_border(void)
 
     int width = 0;
     int height = 0;
+    #ifndef __NDS__
     int result = query_texture(gameTexture, NULL, NULL, &width, &height);
     if (result != 0)
+    #endif // NDS_TODO: something else
     {
         return;
     }

@@ -229,10 +229,10 @@ public:
 
     int set_blendmode(SDL_BlendMode blendmode);
     int set_blendmode(SDL_Texture* texture, SDL_BlendMode blendmode);
-    #endif
 
     int clear(int r, int g, int b, int a);
     int clear(void);
+    #endif
 
     #ifdef __NDS__
     bool substitute(GLTexture **texture);
@@ -289,7 +289,9 @@ public:
     int screenshake_x;
     int screenshake_y;
 
+    #ifndef __NDS__
     void draw_window_background(void);
+    #endif
 
     void get_stretch_info(SDL_Rect* rect);
 
@@ -393,16 +395,7 @@ public:
     bool setflipmode;
     bool notextoutline;
 
-    #ifdef __NDS__
-    GLTexture *gameTexture;
-    GLTexture *tempShakeTexture;
-    GLTexture *gameplayTexture;
-    GLTexture *menuTexture;
-    GLTexture *ghostTexture;
-    GLTexture *backgroundTexture;
-    GLTexture *foregroundTexture;
-    GLTexture *tempScrollingTexture;
-    #else
+    #ifndef __NDS__
     SDL_Texture* gameTexture;
     SDL_Texture* tempShakeTexture;
     SDL_Texture* gameplayTexture;
