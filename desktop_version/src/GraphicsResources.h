@@ -40,8 +40,9 @@ public:
     Tileset *im_tiles;
     Tileset *im_tiles2;
     Tileset *im_tiles3;
-    u16 *im_sprites;
-    u16 *im_flipsprites;
+    GLTexture *im_sprites;
+    GLTexture *im_flipsprites;
+    GLTexture *im_teleporter;
     GLTexture *im_image0;
     GLTexture *im_image1;
     GLTexture *im_image2;

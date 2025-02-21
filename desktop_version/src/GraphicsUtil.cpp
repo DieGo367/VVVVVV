@@ -21,20 +21,7 @@ void setRect( SDL_Rect& _r, int x, int y, int w, int h )
     _r.h = h;
 }
 
-#ifdef __NDS__
-u8 ReadPixel1BPP(u8 *gfx, int pxIdx) {
-    return (gfx[pxIdx / 8] >> pxIdx % 8) & 0x1;
-}
-u8 ReadPixel2BPP(u8 *gfx, int pxIdx) {
-    return (gfx[pxIdx / 4] >> pxIdx % 4 * 2) & 0x3;
-}
-u8 ReadPixel4BPP(u8 *gfx, int pxIdx) {
-    return (gfx[pxIdx / 2] >> pxIdx % 2 * 4) & 0xf;
-}
-u8 ReadPixel8BPP(u8 *gfx, int pxIdx) {
-    return gfx[pxIdx];
-}
-#else
+#ifndef __NDS__
 static SDL_Surface* RecreateSurfaceWithDimensions(
     SDL_Surface* surface,
     const int width,

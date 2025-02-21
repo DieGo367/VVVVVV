@@ -7803,9 +7803,6 @@ void Game::unlockAchievement(const char* name)
 
 void Game::mapmenuchange(const enum GameGamestate newgamestate, const bool user_initiated)
 {
-    #ifdef __NDS__
-    graphics.clear_sprites(true);
-    #endif
     if (user_initiated && graphics.resumegamemode)
     {
         return;

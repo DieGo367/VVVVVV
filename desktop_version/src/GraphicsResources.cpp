@@ -93,7 +93,7 @@ GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, int r
         header.gfxWidth,
         header.gfxHeight,
         GL_TEXTURE_COLOR0_TRANSPARENT,
-        header.palAttr,
+        header.gfxAttr == 2 ? 4 : (header.gfxAttr == 4 ? 16 : (header.gfxAttr == 8 ? 256 : 0)),
         palette,
         gfx
     );
@@ -147,27 +147,6 @@ static void DestroyTileset(Tileset *tileset)
         if (tileset->map) free(tileset->map);
         free(tileset);
     }
-}
-
-static u16 *LoadSprites(const char *filename)
-{
-    GRFHeader header;
-    void *gfx = NULL;
-    size_t gfxSize;
-    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
-    if (!success) return NULL;
-
-    memcpy((u8 *)SPRITE_GFX + 0x20000, gfx, gfxSize);
-    return (u16 *)gfx;
-}
-
-static void LoadTeleporter(const char *filename)
-{
-    GRFHeader header;
-    void *gfx = NULL;
-    size_t gfxSize;
-    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, &gfxSize, NULL, NULL, NULL, NULL);
-    if (success) memcpy(SPRITE_GFX, gfx, gfxSize);
 }
 
 static void LoadSpritesTranslation(
@@ -568,12 +547,10 @@ void GraphicsResources::init(void)
     im_tiles2 = LoadTileset("graphics/tiles2.grf");
     im_tiles3 = LoadTileset("graphics/tiles3.grf");
 
-    im_sprites = LoadSprites("graphics/sprites.grf");
+    im_sprites = LoadImage("graphics/sprites.grf", TEX_WHITE);
     im_flipsprites = im_sprites;
 
-    // extra sprite for moving platforms
-    memset(SPRITE_GFX + (0x37E00/sizeof(u16)), 0x11, 32*8/2);
-    LoadTeleporter("graphics/teleporter.grf");
+    im_teleporter = LoadImage("graphics/teleporter.grf");
 
     im_image0 = LoadImage("graphics/levelcomplete.grf", 320, 48);
     im_image5 = im_image0;
@@ -639,8 +616,6 @@ void GraphicsResources::destroy(void)
     CLEAR_TILES(im_tiles2);
     CLEAR_TILES(im_tiles3);
 #undef CLEAR_TILES
-    VVV_free(im_sprites);
-    VVV_free(im_flipsprites);
 #else
 #define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
     CLEAR(im_tiles);
@@ -651,10 +626,10 @@ void GraphicsResources::destroy(void)
     CLEAR(im_tiles3);
     CLEAR(im_entcolours);
     CLEAR(im_entcolours_tint);
+#endif
     CLEAR(im_sprites);
     CLEAR(im_flipsprites);
     CLEAR(im_teleporter);
-#endif
 
     CLEAR(im_image0);
     CLEAR(im_image1);

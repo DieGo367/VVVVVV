@@ -205,21 +205,12 @@ static void menurender(void)
     case Menu::mainmenu:
     {
         const int temp = 50;
-        #ifdef __NDS__
-        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, true, 23, tr, tg, tb);
-        #else
         graphics.draw_sprite((160 - 96) + 0 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 1 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 2 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 3 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 4 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 5 * 32, temp, 23, tr, tg, tb);
-        #endif
 #if defined(MAKEANDPLAY)
         font::print(PR_RIGHT, 264, temp+35, loc::gettext("MAKE AND PLAY EDITION"), tr, tg, tb);
 #endif
@@ -1348,11 +1339,7 @@ static void menurender(void)
             );
             for (int i = 0; i < 6; i++)
             {
-                #ifdef __NDS__
-                graphics.drawcrewman(169-(3*42)+(i*42), 95-20, i, true, summary->crewstats[i], true);
-                #else
                 graphics.drawcrewman(169-(3*42)+(i*42), 95-20, summary->crewstats[i], true);
-                #endif
             }
             font::print(
                 0, 59, 132-20,
@@ -1371,13 +1358,8 @@ static void menurender(void)
             );
             font::print(PR_RIGHT, 262, 132-20, buffer, 255 - (help.glow / 2), 255 - (help.glow / 2), 255 - (help.glow / 2));
 
-            #ifdef __NDS__
-            graphics.draw_sprite(34, 126-20, 0, true, 50, graphics.col_clock);
-            graphics.draw_sprite(270, 126-20, 1, true, 22, graphics.col_trinket);
-            #else
             graphics.draw_sprite(34, 126-20, 50, graphics.col_clock);
             graphics.draw_sprite(270, 126-20, 22, graphics.col_trinket);
-            #endif
         }
         break;
     }
@@ -1388,11 +1370,7 @@ static void menurender(void)
 
         for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
         {
-            #ifdef __NDS__
-            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, true, game.ndmresultcrewstats[i], true);
-            #else
             graphics.drawcrewman(169-(3*42)+(i*42), 68, game.ndmresultcrewstats[i], true);
-            #endif
         }
         char buffer[2*SCREEN_WIDTH_CHARS + 1];
         loc::gettext_plural_fill(
@@ -1457,11 +1435,7 @@ static void menurender(void)
 
         for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
         {
-            #ifdef __NDS__
-            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, true, game.ndmresultcrewstats[i], true);
-            #else
             graphics.drawcrewman(169-(3*42)+(i*42), 68, game.ndmresultcrewstats[i], true);
-            #endif
         }
         font::print(PR_CEN, -1, 100, loc::gettext("You rescued all the crewmates!"), tr, tg, tb);
 
@@ -1509,11 +1483,7 @@ static void menurender(void)
             sprite_x_2 = SCREEN_WIDTH_PIXELS - 22 - 16 - 4;
         }
 
-        #ifdef __NDS__
-        graphics.drawspritesetcol(sprite_x_1, 80-15, 0, true, 50, 22);
-        #else
         graphics.drawspritesetcol(sprite_x_1, 80-15, 50, 22);
-        #endif
         font::print(PR_CJK_HIGH | PR_RTL_XFLIP, 49, 80-15, loc::gettext("TIME TAKEN:"), 255, 255, 255);
         font::print(PR_CJK_LOW | PR_RTL_XFLIP, 49, 90-15, tempstring, tr, tg, tb);
         if (game.timetrialresulttime <= game.timetrialresultpar)
@@ -1522,11 +1492,7 @@ static void menurender(void)
         }
 
         tempstring = help.String(game.timetrialresultdeaths);
-        #ifdef __NDS__
-        graphics.drawspritesetcol(sprite_x_2, 80+20-4, 1, true, 12, 22);
-        #else
         graphics.drawspritesetcol(sprite_x_2, 80+20-4, 12, 22);
-        #endif
         font::print(PR_CJK_HIGH | PR_RTL_XFLIP, 49, 80+20, loc::gettext("NUMBER OF DEATHS:"), 255, 255, 255);
         font::print(PR_CJK_LOW | PR_RTL_XFLIP, 49, 90+20, tempstring, tr, tg, tb);
         if (game.timetrialresultdeaths == 0)
@@ -1541,11 +1507,7 @@ static void menurender(void)
             "n_trinkets:int, max_trinkets:int",
             game.timetrialresulttrinkets, game.timetrialresultshinytarget
         );
-        #ifdef __NDS__
-        graphics.drawspritesetcol(sprite_x_1, 80+55, 2, true, 22, 22);
-        #else
         graphics.drawspritesetcol(sprite_x_1, 80+55, 22, 22);
-        #endif
         font::print(PR_CJK_HIGH | PR_RTL_XFLIP, 49, 80+55, loc::gettext("SHINY TRINKETS:"), 255, 255, 255);
         font::print(PR_CJK_LOW | PR_RTL_XFLIP, 49, 90+55, buffer, tr, tg, tb);
         if (game.timetrialresulttrinkets >= game.timetrialresultshinytarget)
@@ -1897,21 +1859,12 @@ void titlerender(void)
         tb = graphics.col_tb;
 
         int temp = 50;
-        #ifdef __NDS__
-        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, true, 23, tr, tg, tb);
-        #else
         graphics.draw_sprite((160 - 96) + 0 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 1 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 2 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 3 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 4 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 5 * 32, temp, 23, tr, tg, tb);
-        #endif
 #if defined(MAKEANDPLAY)
         font::print(PR_RIGHT, 264, temp+35, loc::gettext("MAKE AND PLAY EDITION"), tr, tg, tb);
 #endif
@@ -1973,77 +1926,44 @@ void gamecompleterender(void)
     if (graphics.onscreen(220 + position))
     {
         int temp = 220 + position;
-        #ifdef __NDS__
-        graphics.draw_sprite((160 - 96) + 0 * 32, temp, 0, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 1 * 32, temp, 1, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 2 * 32, temp, 2, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 3 * 32, temp, 3, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 4 * 32, temp, 4, true, 23, tr, tg, tb);
-        graphics.draw_sprite((160 - 96) + 5 * 32, temp, 5, true, 23, tr, tg, tb);
-        #else
         graphics.draw_sprite((160 - 96) + 0 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 1 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 2 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 3 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 4 * 32, temp, 23, tr, tg, tb);
         graphics.draw_sprite((160 - 96) + 5 * 32, temp, 23, tr, tg, tb);
-        #endif
     }
 
     if (graphics.onscreen(290 + position)) font::print(PR_2X | PR_CEN, -1, 290 + position, loc::gettext("Starring"), tr, tg, tb);
 
     if (graphics.onscreen(320 + position))
     {
-        #ifdef __NDS__
-        graphics.drawcrewman(70, 320 + position, 6, true, 0, true);
-        #else
         graphics.drawcrewman(70, 320 + position, 0, true);
-        #endif
         font::print(0, 100, 330 + position, loc::gettext("Captain Viridian"), tr, tg, tb);
     }
     if (graphics.onscreen(350 + position))
     {
-        #ifdef __NDS__
-        graphics.drawcrewman(70, 350 + position, 7, true, 1, true);
-        #else
         graphics.drawcrewman(70, 350 + position, 1, true);
-        #endif
         font::print(0, 100, 360 + position, loc::gettext("Doctor Violet"), tr, tg, tb);
     }
     if (graphics.onscreen(380 + position))
     {
-        #ifdef __NDS__
-        graphics.drawcrewman(70, 380 + position, 8, true, 2, true);
-        #else
         graphics.drawcrewman(70, 380 + position, 2, true);
-        #endif
         font::print(0, 100, 390 + position, loc::gettext("Professor Vitellary"), tr, tg, tb);
     }
     if (graphics.onscreen(410 + position))
     {
-        #ifdef __NDS__
-        graphics.drawcrewman(70, 410 + position, 9, true, 3, true);
-        #else
         graphics.drawcrewman(70, 410 + position, 3, true);
-        #endif
         font::print(0, 100, 420 + position, loc::gettext("Officer Vermilion"), tr, tg, tb);
     }
     if (graphics.onscreen(440 + position))
     {
-        #ifdef __NDS__
-        graphics.drawcrewman(70, 440 + position, 10, true, 4, true);
-        #else
         graphics.drawcrewman(70, 440 + position, 4, true);
-        #endif
         font::print(0, 100, 450 + position, loc::gettext("Chief Verdigris"), tr, tg, tb);
     }
     if (graphics.onscreen(470 + position))
     {
-        #ifdef __NDS__
-        graphics.drawcrewman(70, 470 + position, 11, true, 5, true);
-        #else
         graphics.drawcrewman(70, 470 + position, 5, true);
-        #endif
         font::print(0, 100, 480 + position, loc::gettext("Doctor Victoria"), tr, tg, tb);
     }
 
@@ -3215,11 +3135,7 @@ void maprender(void)
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    #ifdef __NDS__
-                    graphics.drawcrewman(16, 32 + (i * 64), 2*i, true, 2-i, game.crewstats[2-i]);
-                    #else
                     graphics.drawcrewman(16, 32 + (i * 64), 2-i, game.crewstats[2-i]);
-                    #endif
                     if (game.crewstats[(2-i)])
                     {
                         graphics.printcrewname(44, 32 + (i * 64)+4+10, 2-i);
@@ -3230,11 +3146,7 @@ void maprender(void)
                     }
                     graphics.printcrewnamestatus(44, 32 + (i * 64)+4, 2-i, game.crewstats[(2-i)]);
 
-                    #ifdef __NDS__
-                    graphics.drawcrewman(16+160, 32 + (i * 64), 2*i + 1, true, (2-i)+3, game.crewstats[(2-i)+3]);
-                    #else
                     graphics.drawcrewman(16+160, 32 + (i * 64), (2-i)+3, game.crewstats[(2-i)+3]);
-                    #endif
                     if (game.crewstats[(2-i)+3])
                     {
                         graphics.printcrewname(44+160, 32 + (i * 64)+4+10, (2-i)+3);
@@ -3250,11 +3162,7 @@ void maprender(void)
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    #ifdef __NDS__
-                    graphics.drawcrewman(16, 32 + (i * 64), 2*i, true, i, game.crewstats[i]);
-                    #else
                     graphics.drawcrewman(16, 32 + (i * 64), i, game.crewstats[i]);
-                    #endif
                     if (game.crewstats[i])
                     {
                         graphics.printcrewname(44, 32 + (i * 64)+4, i);
@@ -3265,11 +3173,7 @@ void maprender(void)
                     }
                     graphics.printcrewnamestatus(44, 32 + (i * 64)+4+10, i, game.crewstats[i]);
 
-                    #ifdef __NDS__
-                    graphics.drawcrewman(16+160, 32 + (i * 64), 2*i + 1, true, i+3, game.crewstats[i+3]);
-                    #else
                     graphics.drawcrewman(16+160, 32 + (i * 64), i+3, game.crewstats[i+3]);
-                    #endif
                     if (game.crewstats[i+3])
                     {
                         graphics.printcrewname(44+160, 32 + (i * 64)+4, i+3);
@@ -3404,11 +3308,7 @@ void maprender(void)
             {
                 /* Crewmates are annoying. Their height is 21 pixels, but to flip them,
                  * we also have to account for their 2-pixel y-offset (and multiply it by 2). */
-                #ifdef __NDS__
-                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), i, true, game.crewstats[i], true);
-                #else
                 graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), game.crewstats[i], true);
-                #endif
             }
         }
 
@@ -3423,23 +3323,13 @@ void maprender(void)
 
         if (graphics.flipmode)
         {
-            #ifdef __NDS__
-            graphics.draw_flipsprite(34, FLIP(126, 17), 0, true, 50, graphics.col_clock);
-            graphics.draw_flipsprite(270, FLIP(126, 17), 1, true, 22, graphics.col_trinket);
-            #else
             graphics.draw_flipsprite(34, FLIP(126, 17), 50, graphics.col_clock);
             graphics.draw_flipsprite(270, FLIP(126, 17), 22, graphics.col_trinket);
-            #endif
         }
         else
         {
-            #ifdef __NDS__
-            graphics.draw_sprite(34, FLIP(126, 17), 0, true, 50, graphics.col_clock);
-            graphics.draw_sprite(270, FLIP(126, 17), 1, true, 22, graphics.col_trinket);
-            #else
             graphics.draw_sprite(34, FLIP(126, 17), 50, graphics.col_clock);
             graphics.draw_sprite(270, FLIP(126, 17), 22, graphics.col_trinket);
-            #endif
         }
         break;
     }

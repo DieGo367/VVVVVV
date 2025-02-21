@@ -58,13 +58,9 @@ void Screen::init(const struct ScreenSettings* settings) {
     tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
     bgUpdate();
 
-    vramSetBankE(VRAM_E_MAIN_SPRITE);
-	vramSetBankB(VRAM_B_MAIN_SPRITE_0x06420000);
-	oamInit(&oamMain, SpriteMapping_1D_256, false);
-    oamRotateScale(&oamMain, 1, 0, (((5 << 8) - 31) / 4), (((5 << 8) - 31) / 4));
-
+    vramSetBankB(VRAM_B_TEXTURE);
     vramSetBankD(VRAM_D_TEXTURE);
-    vramSetBankF(VRAM_F_TEX_PALETTE);
+    vramSetBankE(VRAM_E_TEX_PALETTE);
     glScreen2D();
     glClearColor(0, 0, 0, 0);
     glBegin2D();
@@ -84,7 +80,6 @@ void Screen::GetScreenSize(int* x, int* y) {
 }
 
 void Screen::RenderPresent(void) {
-    oamUpdate(&oamMain);
     glEnd2D();
     glFlush(0);
     glBegin2D();

@@ -463,6 +463,7 @@ if(NINTENDO_DS)
     )
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
+    set(RESIZE_FLAG -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
     foreach(IMAGE ${TILES} ${SPRITES} ${TEXTURES_2BIT} minimap ending ${FONTS_WHITE} ${FONTS_COLOR})
         set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
         set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
@@ -552,33 +553,21 @@ if(NINTENDO_DS)
                     \( -clone 0,7 -flatten \)
                     \( -clone 0,8 -flatten \)
                     \( -clone 0,9 -flatten \)
-                    -delete 0-9 -crop 64x64 +repage -crop 32x8 -append
+                    -delete 0-9 +append +repage -crop 480x96 -append ${RESIZE_FLAG}
                 )
+                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn3)
             else()
-                set(MAGICK_FLAGS -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS}
-                    # separate out sprites by their sizes
-                    \( -clone 0 -crop 32x32 -delete 54-55,64-67,72-75,84-87,96-99,108-111,120-143 \)
-                    \( -clone 0 -crop 64x32 -delete 0-26,28-31,34--1 \)
-                    \( -clone 0 -crop 64x64 -delete 0-17,20-23,26-29,36--1 \)
-                    -delete 0
-                    # put the bigger sprites back into the list in order
-                    -insert 98 -insert 98 -insert 99 -insert 98  # clock
-                    -insert 100 -insert 98 -insert 90 -insert 82 # the big guy
-                    -insert 74 -insert 66                        # factory
-                    -insert 62 -insert 62 -insert 54             # BOOO, TRUTH, and OOOB
-                    # cut up each sprite individually, then take all the rows and stack them vertically
-                    +repage -crop 32x8 -append
-                )
+                set(MAGICK_FLAGS -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS} ${RESIZE_FLAG})
+                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn2)
             endif()
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gt -gB4 -pn3)
         elseif(IMAGE IN_LIST TEXTURES_2BIT)
-            set(MAGICK_FLAGS ${MAGICK_FLAGS} -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
+            set(MAGICK_FLAGS ${MAGICK_FLAGS} ${RESIZE_FLAG})
             set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn2)
         elseif(IMAGE STREQUAL minimap)
             set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn206)
         elseif(IMAGE STREQUAL ending)
             set(MAGICK_FLAGS ${MAGICK_FLAGS} -filter point -resize 256x192 -extent 256x256)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gx -gb -gB4 -pn16)
+            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB4 -pn16)
         elseif(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
             if(IMAGE IN_LIST FONTS_WHITE)
                 set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
@@ -586,7 +575,7 @@ if(NINTENDO_DS)
             else()
                 set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn25)
             endif()
-            set(MAGICK_FLAGS ${MAGICK_FLAGS} -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
+            set(MAGICK_FLAGS ${MAGICK_FLAGS} ${RESIZE_FLAG})
         endif()
 
         if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)

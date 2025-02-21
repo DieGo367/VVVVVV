@@ -4,19 +4,13 @@
 #include <SDL.h>
 
 #ifdef __NDS__
-#define VRAM_COLOR(r, g, b) (1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3)
+#define VRAM_COLOR(r, g, b) (u16)(1 << 15 | ((b) >> 3) << 10 | ((g) >> 3) << 5 | (r) >> 3)
 #define RENDER_SCALE(x) (((x)*4 + 3)/5)
-#define SPRITE_COORD_TRANSFORM(pos, len) (((8 * (pos) - (len)) + 5) / 10)
 #endif
 
 void setRect(SDL_Rect& _r, int x, int y, int w, int h);
 
-#ifdef __NDS__
-u8 ReadPixel1BPP(u8 *gfx, int pxIdx);
-u8 ReadPixel2BPP(u8 *gfx, int pxIdx);
-u8 ReadPixel4BPP(u8 *gfx, int pxIdx);
-u8 ReadPixel8BPP(u8 *gfx, int pxIdx);
-#else
+#ifndef __NDS__
 SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, int height );
 
 void DrawPixel(SDL_Surface* surface, int x, int y, SDL_Color color);

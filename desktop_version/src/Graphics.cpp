@@ -161,7 +161,6 @@ void Graphics::init(void)
 
     #ifdef __NDS__
     active_tileset = -1;
-    teleporter_slot = -1;
     draw_color = VRAM_COLOR(0, 0, 0);
     #endif
 }
@@ -252,17 +251,14 @@ void Graphics::destroy_buffers(void)
     #endif
 }
 
-#ifdef __NDS__
-void Graphics::drawspritesetcol(int x, int y, int slot, bool inMenu, int t, int c)
-{
-    draw_sprite(x, y, slot, inMenu, t, getcol(c));
-}
-#else
 void Graphics::drawspritesetcol(int x, int y, int t, int c)
 {
+    #ifdef __NDS__
+    draw_sprite(x, y, t, getcol(c));
+    #else
     draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, getcol(c));
+    #endif
 }
-#endif
 
 void Graphics::updatetitlecolours(void)
 {
@@ -920,102 +916,24 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 }
 
 #ifdef __NDS__
-#define SPRITE_SIZE_U16 (SPRITE_SIZE_PIXELS(SpriteSize_32x32)/4) // 32x32 at 4bpp, so 4 pixels per short
-static void drawsprite(const int x, const int y, const int slot, bool inMenu, const int t, const u16 vramColor, const SpriteSize size)
+void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b, const int width, const int height)
 {
-    if (y < -32 || y > SCREEN_HEIGHT_PIXELS + 32) return;
-    int colorSlot = slot;
-    if (colorSlot >= 16) {
-        /* We only have 16 palettes to work with. This is fine most of the time,
-        as most rooms only have a few sprites anyway. But in The Tower they're all
-        loaded at once, even if they're not all on screen. This little hack works
-        because even though the palette slots are shared, the sprites that do share
-        one are never on screen at the same time. The +1 prevents Viridian's color
-        from being overridden. */
-        colorSlot = colorSlot % 16 + 1;
-        // vlog_warn("Overwrote sprite palette %d for sprite id %d", colorSlot, slot);
-    }
-    if (game.roomx == 102 && game.roomy == 110 && t == 22) {
-        // trinkets on the ship should all use the same slot to avoid clashing with Victoria
-        colorSlot = 1;
-    }
-    SPRITE_PALETTE[colorSlot*16 + 1] = vramColor;
-    int width, height;
-    switch (size) {
-        case SpriteSize_64x32: // wide
-            width = 64;
-            height = 32;
-            break;
-        case SpriteSize_64x64: // large
-            width = height = 64;
-            break;
-        case SpriteSize_32x8: // moving platforms
-            width = 32;
-            height = 8;
-            break;
-        case SpriteSize_32x32: // standard
-        default:
-            width = height = 32;
-    }
-    oamSet(
-        &oamMain,
-        slot,
-        SPRITE_COORD_TRANSFORM(x, width),
-        SPRITE_COORD_TRANSFORM(y, height),
-        inMenu ? 0 : 1,
-        colorSlot,
-        size,
-        SpriteColorFormat_16Color,
-        SPRITE_GFX + (0x20000/sizeof(u16)) + (t*SPRITE_SIZE_U16),
-        1,
-        false,
-        false,
-        false,
-        false,
-        false
-    );
+    set_texture_color_mod(grphx.im_sprites, r, g, b);
+    draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, 1, 1);
 }
 
-void Graphics::draw_sprite(const int x, const int y, const int slot, bool inMenu, const int t, const int r, const int g, const int b)
+void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
 {
-    drawsprite(x, y, slot, inMenu, t, VRAM_COLOR(r, g, b), SpriteSize_32x32);
+    draw_sprite(x, y, t, r, g, b, 32, 32);
 }
-void Graphics::draw_sprite(const int x, const int y, const int slot, bool inMenu, const int t, const SDL_Color color)
+void Graphics::draw_sprite(const int x, const int y, const int t, const SDL_Color color)
 {
-    draw_sprite(x, y, slot, inMenu, t, color.r, color.g, color.b);
-}
-void Graphics::draw_sprite_wide(const int x, const int y, const int slot, const int t, const SDL_Color color)
-{
-    drawsprite(x, y, slot, false, t, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x32);
-}
-void Graphics::draw_sprite_large(const int x, const int y, const int slot, const int t, const SDL_Color color)
-{
-    int trueTile = (t%4 > 1) ? t + 10 : t;
-    drawsprite(x, y, slot, false, trueTile, VRAM_COLOR(color.r, color.g, color.b), SpriteSize_64x64);
+    draw_sprite(x, y, t, color.r, color.g, color.b);
 }
 
-void Graphics::draw_flipsprite(const int x, const int y, const int slot, bool inMenu, const int t, const SDL_Color color)
+void Graphics::draw_flipsprite(const int x, const int y, const int t, const SDL_Color color)
 {
-    draw_sprite(x, y, slot, inMenu, t, color);
-}
-
-void Graphics::clear_sprite(const int slot)
-{
-    if (slot == teleporter_slot) {
-        oamClear(&oamMain, 13, 3);
-        teleporter_slot = -1;
-    }
-    oamClearSprite(&oamMain, slot);
-}
-void Graphics::clear_sprites(const bool forceUpdate)
-{
-    oamClear(&oamMain, 0, 32); // I'm assuming that there are never more than 32 sprites in use
-    teleporter_slot = -1;
-    if (forceUpdate) oamUpdate(&oamMain);
-}
-void Graphics::clear_sprites(void)
-{
-    clear_sprites(false);
+    draw_sprite(x, y, t, color);
 }
 
 void Graphics::scroll_texture(GLTexture *texture, GLTexture *temp, const int x, const int y)
@@ -1679,64 +1597,6 @@ void Graphics::setbars(const int position)
     oldcutscenebarspos = position;
 }
 
-#ifdef __NDS__
-void Graphics::drawcrewman(int x, int y, int slot, bool inMenu, int t, bool act, bool noshift /*=false*/)
-{
-    if (!act)
-    {
-        if (noshift)
-        {
-            if (flipmode)
-            {
-                draw_sprite(x, y, slot, inMenu, 14, col_crewinactive);
-            }
-            else
-            {
-                draw_sprite(x, y, slot, inMenu, 12, col_crewinactive);
-            }
-        }
-        else
-        {
-            if (flipmode)
-            {
-                draw_sprite(x - 8, y, slot, inMenu, 14, col_crewinactive);
-            }
-            else
-            {
-                draw_sprite(x - 8, y, slot, inMenu, 12, col_crewinactive);
-            }
-        }
-    }
-    else
-    {
-        if (flipmode) crewframe += 6;
-
-        switch(t)
-        {
-        case 0:
-            draw_sprite(x, y, slot, inMenu, crewframe, col_crewcyan);
-            break;
-        case 1:
-            draw_sprite(x, y, slot, inMenu, crewframe, col_crewpurple);
-            break;
-        case 2:
-            draw_sprite(x, y, slot, inMenu, crewframe, col_crewyellow);
-            break;
-        case 3:
-            draw_sprite(x, y, slot, inMenu, crewframe, col_crewred);
-            break;
-        case 4:
-            draw_sprite(x, y, slot, inMenu, crewframe, col_crewgreen);
-            break;
-        case 5:
-            draw_sprite(x, y, slot, inMenu, crewframe, col_crewblue);
-            break;
-        }
-
-        if (flipmode) crewframe -= 6;
-    }
-}
-#else
 void Graphics::drawcrewman(int x, int y, int t, bool act, bool noshift /*=false*/)
 {
     if (!act)
@@ -1793,7 +1653,6 @@ void Graphics::drawcrewman(int x, int y, int t, bool act, bool noshift /*=false*
         if (flipmode) crewframe -= 6;
     }
 }
-#endif
 
 void Graphics::drawpixeltextbox(
     const int x,
@@ -2268,8 +2127,10 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
     if(intersection)
     {
         #ifdef __NDS__
-        const u8 * const frame1Gfx = (u8 *)(grphx.im_sprites + frame1 * SPRITE_SIZE_U16);
-        const u8 * const frame2Gfx = (u8 *)(grphx.im_sprites + frame2 * SPRITE_SIZE_U16);
+        const u8 * const gfx = (u8 *)glGetTexturePointer(grphx.im_sprites->id);
+        u32 vramState = VRAM_CR;
+        const u8 * const frame1Gfx = (gfx + ((frame1 % 12) + (frame1 / 12) * grphx.im_sprites->width) * 32 / 4);
+        const u8 * const frame2Gfx = (gfx + ((frame2 % 12) + (frame2 / 12) * grphx.im_sprites->width) * 32 / 4);
         #endif
         int r3_left = SDL_max(r1_left, r2_left);
         int r3_top = SDL_min(r1_top, r2_top);
@@ -2282,22 +2143,19 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
             #ifdef __NDS__
             const int px1 = x - p1.x;
             const int px2 = x - p2.x;
-            const u8 tile1X = px1/8; 
-            const u8 tile2X = px2/8; 
             #endif
             for(int y = r3_bottom; y < r3_top; y++)
             {
                 #ifdef __NDS__
                 const int py1 = y - p1.y;
                 const int py2 = y - p2.y;
-                const u8 tile1Y = py1/8;
-                const u8 tile2Y = py2/8;
-                const u8 tile1 = tile1Y * 4 + tile1X;
-                const u8 tile2 = tile2Y * 4 + tile2X;
 
-                u8 pixel1 = frame1Gfx[tile1 * 32 + (py1%8) * 16 + (px1%8)/2] & (px1%2 ? 0xF0 : 0x0F);
-                u8 pixel2 = frame2Gfx[tile2 * 32 + (py2%8) * 16 + (px2%8)/2] & (px2%2 ? 0xF0 : 0x0F);
-                if (pixel1 && pixel2) return true;
+                u8 pixel1 = (frame1Gfx[(px1 + py1 * grphx.im_sprites->width) / 4] >> px1 % 4 * 2) & 0x03;
+                u8 pixel2 = (frame2Gfx[(px2 + py2 * grphx.im_sprites->width) / 4] >> px2 % 4 * 2) & 0x03;
+                if (pixel1 && pixel2) {
+                    intersection = false;
+                    break;
+                }
                 #else
                 const SDL_Color pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
                 const SDL_Color pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
@@ -2311,8 +2169,15 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
                 #endif
             }
         }
+        #ifdef __NDS__
+        vramRestorePrimaryBanks(vramState);
+        #endif
     }
+    #ifdef __NDS__
+    return intersection;
+    #else
     return false;
+    #endif
 
 }
 
@@ -2563,7 +2428,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         #ifdef __NDS__
-        draw_sprite(drawRect.x, drawRect.y, i, false, obj.entities[i].drawframe, ct);
+        draw_sprite(drawRect.x, drawRect.y, obj.entities[i].drawframe, ct);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         #endif
@@ -2655,7 +2520,11 @@ void Graphics::drawentity(const int i, const int yoff)
             if (obj.entities[i].animate == 100) { // if moving platform (not treadmill), render as a sprite
                 const u16 tileGfxIdx = grphx.im_tiles->map[drawTile] & 0x03FF;
                 const u8 firstPixel = ((u8 *)grphx.im_tiles->gfx)[tileGfxIdx * 64];
-                drawsprite(tpoint.x, tpoint.y, i, false, 191, grphx.im_tiles->palette[firstPixel], SpriteSize_32x8);
+                glBoxFilled(
+                    RENDER_SCALE(tpoint.x), RENDER_SCALE(tpoint.y),
+                    RENDER_SCALE(tpoint.x + 31), RENDER_SCALE(tpoint.y + 7),
+                    grphx.im_tiles->palette[firstPixel]
+                );
                 thiswidth = 0; // prevent placing tiles in the tilemap
             }
             else if (active_tileset == 1) { // treadmill in tiles2, redirect tile
@@ -2730,7 +2599,7 @@ void Graphics::drawentity(const int i, const int yoff)
         break;
     case 7: // Teleporter
         #ifdef __NDS__
-        drawtele(xp, yp - yoff, i, obj.entities[i].drawframe, obj.entities[i].realcol);
+        drawtele(xp, yp - yoff, obj.entities[i].drawframe, obj.entities[i].realcol);
         #else
         drawtele(xp, yp - yoff, obj.entities[i].drawframe, obj.entities[i].realcol);
         #endif
@@ -2750,7 +2619,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         #ifdef __NDS__
-        draw_sprite_large(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        draw_sprite(drawRect.x, drawRect.y, obj.entities[i].drawframe, ct.r, ct.g, ct.b, 64, 64);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
@@ -2795,7 +2664,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         #ifdef __NDS__
-        draw_sprite_wide(drawRect.x, drawRect.y, i, obj.entities[i].drawframe, ct);
+        draw_sprite(drawRect.x, drawRect.y, obj.entities[i].drawframe, ct.r, ct.g, ct.b, 64, 32);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
@@ -2823,8 +2692,8 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        #ifdef __NDS__ // NDS_TODO: again, check wrapping behavior
-        draw_sprite(drawRect.x, drawRect.y, i, false, obj.entities[i].drawframe, ct);
+        #ifdef __NDS__
+        draw_sprite(drawRect.x, drawRect.y, obj.entities[i].drawframe, ct);
         #else
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         #endif
@@ -3949,7 +3818,6 @@ SDL_Color Graphics::getcol( int t )
 void Graphics::menuoffrender(void)
 {
     #ifdef __NDS__
-    clear_sprites();
     backgrounddrawn = false;
     #endif
     if (copy_texture(gameplayTexture, NULL, NULL) != 0)
@@ -4441,11 +4309,7 @@ void Graphics::draw_screenshot_border(void)
     set_blendmode(SDL_BLENDMODE_NONE);
 }
 
-#ifdef __NDS__
-void Graphics::drawtele(int x, int y, int slot, int t, const SDL_Color color)
-#else
 void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
-#endif
 {
     SDL_Rect telerect;
     setRect(telerect, x, y, tele_rect.w, tele_rect.h);
@@ -4458,80 +4322,10 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     if (t < 1) t = 1;
 
     #ifdef __NDS__
-    u16 *frameOffset = SPRITE_GFX + 96*96 / 4 * (t - 1); // 4bpp
-    SPRITE_PALETTE[slot*16 + 1] = VRAM_COLOR(color.r, color.g, color.b);
-    SPRITE_PALETTE[slot*16 + 2] = VRAM_COLOR(16, 16, 16);
-
-    oamSet(
-        &oamMain,
-        slot,
-        SPRITE_COORD_TRANSFORM(x, 64),
-        SPRITE_COORD_TRANSFORM(y, 64),
-        1,
-        slot,
-        SpriteSize_64x64,
-        SpriteColorFormat_16Color,
-        frameOffset,
-        1,
-        false,
-        false,
-        false,
-        false,
-        false
-    );
-    // assume I can use slots 13-15
-    oamSet(
-        &oamMain,
-        13,
-        SPRITE_COORD_TRANSFORM(x + 64, 32),
-        SPRITE_COORD_TRANSFORM(y, 64),
-        1,
-        slot,
-        SpriteSize_32x64,
-        SpriteColorFormat_16Color,
-        frameOffset + (64*64)/4,
-        1,
-        false,
-        false,
-        false,
-        false,
-        false
-    );
-    oamSet(
-        &oamMain,
-        14,
-        SPRITE_COORD_TRANSFORM(x, 64),
-        SPRITE_COORD_TRANSFORM(y + 64, 32),
-        1,
-        slot,
-        SpriteSize_64x32,
-        SpriteColorFormat_16Color,
-        frameOffset + (96*64)/4,
-        1,
-        false,
-        false,
-        false,
-        false,
-        false
-    );
-    oamSet(
-        &oamMain,
-        15,
-        SPRITE_COORD_TRANSFORM(x + 64, 32),
-        SPRITE_COORD_TRANSFORM(y + 64, 32),
-        1,
-        slot,
-        SpriteSize_32x32,
-        SpriteColorFormat_16Color,
-        frameOffset + (96*96 - 32*32)/4,
-        1,
-        false,
-        false,
-        false,
-        false,
-        false
-    );
-    teleporter_slot = slot;
+    u16 palette[] = {VRAM_COLOR(color.r, color.g, color.b), VRAM_COLOR(16, 16, 16)};
+    glBindTexture(0, grphx.im_teleporter->id);
+    glColorSubTableEXT(0, 1, 2, 0, 0, palette);
+    draw_texture_part(grphx.im_teleporter, x, y, (t-1)%5 * telerect.w, (t-1)/5 * telerect.h, telerect.w, telerect.h, 1, 1);
     #else
     draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
     #endif

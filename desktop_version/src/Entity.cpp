@@ -1137,10 +1137,6 @@ bool entityclass::disableentity(int t)
     entities[t].rule = -1;
     entities[t].isplatform = false;
 
-    #ifdef __NDS__
-    graphics.clear_sprite(t);
-    #endif
-
     return true;
 }
 

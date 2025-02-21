@@ -145,11 +145,7 @@ public:
 
     void drawpixeltextbox(int x, int y, int w, int h, int r, int g, int b);
 
-    #ifdef __NDS__
-    void drawcrewman(int x, int y, int slot, bool inMenu, int t, bool act, bool noshift =false);
-    #else
     void drawcrewman(int x, int y, int t, bool act, bool noshift =false);
-    #endif
 
     int crewcolour(const int t);
 
@@ -186,14 +182,10 @@ public:
     void drawgui(void);
 
     #ifdef __NDS__
-    void draw_sprite(int x, int y, int slot, bool inMenu, int t, int r, int g, int b);
-    void draw_sprite(int x, int y, int slot, bool inMenu, int t, SDL_Color color);
-    void draw_sprite_wide(int x, int y, int slot, int t, SDL_Color color);
-    void draw_sprite_large(int x, int y, int slot, int t, SDL_Color color);
-    void draw_flipsprite(int x, int y, int slot, bool inMenu, int t, SDL_Color color);
-    void clear_sprite(int slot);
-    void clear_sprites(void);
-    void clear_sprites(bool forceUpdate);
+    void draw_sprite(int x, int y, int t, int r, int g, int b, int width, int height);
+    void draw_sprite(int x, int y, int t, int r, int g, int b);
+    void draw_sprite(int x, int y, int t, SDL_Color color);
+    void draw_flipsprite(int x, int y, int t, SDL_Color color);
 
     void scroll_texture(GLTexture *texture, GLTexture *temp, int x, int y);
     #else
@@ -289,11 +281,7 @@ public:
 
     void map_option(int opt, int num_opts, const std::string& text, bool selected = false);
 
-    #ifdef __NDS__
-    void drawspritesetcol(int x, int y, int slot, bool inMenu, int t, int c);
-    #else
     void drawspritesetcol(int x, int y, int t, int c);
-    #endif
 
 
     void flashlight(void);
@@ -326,11 +314,7 @@ public:
 
     void drawtrophytext(void);
 
-    #ifdef __NDS__
-    void drawtele(int x, int y, int slot, int t, SDL_Color c);
-    #else
     void drawtele(int x, int y, int t, SDL_Color c);
-    #endif
 
     SDL_Color getRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
@@ -519,7 +503,6 @@ public:
 
     #ifdef __NDS__
     int active_tileset;
-    int teleporter_slot;
     u16 draw_color;
     #endif
 };
