@@ -182,7 +182,7 @@ public:
     void drawgui(void);
 
     #ifdef __NDS__
-    void draw_sprite(int x, int y, int t, int r, int g, int b, int width, int height);
+    void draw_sprite(int x, int y, int t, int r, int g, int b, int width, int height, int scale = 1);
     void draw_sprite(int x, int y, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int t, SDL_Color color);
     void draw_flipsprite(int x, int y, int t, SDL_Color color);

@@ -916,10 +916,10 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 }
 
 #ifdef __NDS__
-void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b, const int width, const int height)
+void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b, const int width, const int height, const int scale)
 {
     set_texture_color_mod(grphx.im_sprites, r, g, b);
-    draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, 1, 1);
+    draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, scale, scale);
 }
 
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
@@ -2754,7 +2754,8 @@ void Graphics::drawentity(const int i, const int yoff)
     {
         // Special for epilogue: huge hero!
         #ifdef __NDS__
-        // NDS_TODO: uhhhh we'll see how I do this later
+        const SDL_Color ct = obj.entities[i].realcol;
+        draw_sprite(xp, yp - yoff, obj.entities[i].drawframe, ct.r, ct.g, ct.b, sprites_rect.w, sprites_rect.h, 6);
         #else
         draw_grid_tile(grphx.im_sprites, obj.entities[i].drawframe, xp, yp - yoff, sprites_rect.w, sprites_rect.h, obj.entities[i].realcol, 6, 6);
         #endif
