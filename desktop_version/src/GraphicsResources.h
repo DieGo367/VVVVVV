@@ -23,7 +23,6 @@ typedef struct {
     int width;
     int height;
     u8 bpp;
-    u8 alphaMod; // NDS_TODO: use this
     u16 colorMod;
 } GLTexture;
 #endif

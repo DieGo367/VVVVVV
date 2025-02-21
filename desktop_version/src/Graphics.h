@@ -214,8 +214,6 @@ public:
     #ifdef __NDS__
     int set_texture_color_mod(GLTexture *texture, Uint8 r, Uint8 g, Uint8 b);
 
-    int set_texture_alpha_mod(GLTexture *texture, Uint8 alpha);
-
     int query_texture(GLTexture *texture, Uint32* format, int* access, int* w, int* h);
 
     int set_blendmode(SDL_BlendMode blendmode);

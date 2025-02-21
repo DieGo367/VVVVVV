@@ -482,12 +482,6 @@ int Graphics::set_texture_color_mod(GLTexture *texture, const Uint8 r, const Uin
     return 0;
 }
 
-int Graphics::set_texture_alpha_mod(GLTexture *texture, const Uint8 alpha)
-{
-    if (texture) texture->alphaMod = alpha;
-    return 0;
-}
-
 int Graphics::query_texture(GLTexture *texture, Uint32* format, int* access, int* w, int* h)
 {
     if (texture) {
@@ -544,7 +538,6 @@ bool Graphics::substitute(GLTexture **texture)
 void Graphics::post_substitute(GLTexture *subst)
 {
     set_texture_color_mod(subst, 255, 255, 255);
-    set_texture_alpha_mod(subst, 255);
 }
 
 int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest)
