@@ -2127,8 +2127,10 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
     if(intersection)
     {
         #ifdef __NDS__
-        const u8 * const gfx = (u8 *)glGetTexturePointer(grphx.im_sprites->id);
+        intersection = false;
         u32 vramState = VRAM_CR;
+        vramSetPrimaryBanks(VRAM_A_LCD, VRAM_B_LCD, VRAM_C_LCD, VRAM_D_LCD);
+        const u8 * const gfx = (u8 *)glGetTexturePointer(grphx.im_sprites->id);
         const u8 * const frame1Gfx = (gfx + ((frame1 % 12) + (frame1 / 12) * grphx.im_sprites->width) * 32 / 4);
         const u8 * const frame2Gfx = (gfx + ((frame2 % 12) + (frame2 / 12) * grphx.im_sprites->width) * 32 / 4);
         #endif
@@ -2153,7 +2155,7 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
                 u8 pixel1 = (frame1Gfx[(px1 + py1 * grphx.im_sprites->width) / 4] >> px1 % 4 * 2) & 0x03;
                 u8 pixel2 = (frame2Gfx[(px2 + py2 * grphx.im_sprites->width) / 4] >> px2 % 4 * 2) & 0x03;
                 if (pixel1 && pixel2) {
-                    intersection = false;
+                    intersection = true;
                     break;
                 }
                 #else
