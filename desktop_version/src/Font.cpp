@@ -421,8 +421,9 @@ static uint8_t load_font(FontContainer* container, const char* name)
         #endif
         {
             #ifdef __NDS__
+            u32 vramState = VRAM_CR;
+            vramSetPrimaryBanks(VRAM_A_LCD, VRAM_B_LCD, VRAM_C_LCD, VRAM_D_LCD);
             u8 *texGfx = (u8 *)glGetTexturePointer(f->image->id);
-            u16 *texPal = (u16 *)glGetColorTablePointer(f->image->id);
             const uint32_t chars_per_line = f->image->width / f->glyph_w;
             const uint32_t max_codepoint = (f->image->height / f->glyph_h) * chars_per_line;
             #else
@@ -448,15 +449,19 @@ static uint8_t load_font(FontContainer* container, const char* name)
                             int texX = glyph_x+pixel_x, texY = glyph_y+pixel_y;
                             if (texX >= 0 && texX < f->image->width && texY >= 0 && texY < f->image->height) {
                                 int pixelIdx = texY * f->image->width + texX;
-                                u16 color;
-                                if (f->image->bpp == 16) color = ((u16 *)texGfx)[pixelIdx];
+                                if (f->image->bpp == 16) {
+                                    u16 color = ((u16 *)texGfx)[pixelIdx];
+                                    if (color & 1 << 15) {
+                                        found_pixel = true;
+                                        goto no_more_pixels;
+                                    }
+                                }
                                 else {
                                     u8 value = texGfx[pixelIdx * f->image->bpp / 8] >> pixelIdx % (8 / f->image->bpp) * f->image->bpp & ((1 << f->image->bpp) - 1);
-                                    color = value ? texPal[value] : 0;
-                                }
-                                if (color & 1 << 15) {
-                                    found_pixel = true;
-                                    goto no_more_pixels;
+                                    if (value > 0) {
+                                        found_pixel = true;
+                                        goto no_more_pixels;
+                                    }
                                 }
                             }
                             #else
@@ -478,9 +483,11 @@ static uint8_t load_font(FontContainer* container, const char* name)
                 add_glyphinfo(f, codepoint, codepoint);
             }
 
-        #ifndef __NDS__
+            #ifdef __NDS__
+            vramRestorePrimaryBanks(vramState);
+            #else
             VVV_freefunc(SDL_FreeSurface, temp_surface);
-        #endif
+            #endif
         }
     }
 
