@@ -4133,10 +4133,13 @@ void Graphics::screenshake(void)
     // Clear the gameplay texture so blackout() is actually black after a screenshake
     if (game.gamestate == GAMEMODE && game.blackout)
     {
-        #ifndef __NDS__
+        #ifdef __NDS__
+        clear_tile_layer(true);
+        clear_tile_layer(false);
+        #else
         set_render_target(gameplayTexture);
-        #endif
         clear();
+        #endif
     }
 
     #ifndef __NDS__
