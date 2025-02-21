@@ -1310,7 +1310,7 @@ void Graphics::drawgui(void)
             }
 
             #ifdef __NDS__
-            // NDS_TODO: see what this does
+            draw_sprite(sprite->x + textboxes[i].xp, y, sprite->tile, getcol(sprite->col));
             #else
             draw_grid_tile(
                 grphx.im_sprites,
