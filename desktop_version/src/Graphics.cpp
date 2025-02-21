@@ -2462,30 +2462,40 @@ void Graphics::drawentity(const int i, const int yoff)
             wrappedPoint.y -= 232;
         }
 
-        #ifndef __NDS__ // NDS_TODO: check sprite wrapping behavior
         const bool isInWrappingAreaOfTower = map.towermode && !map.minitowermode && map.ypos >= 500 && map.ypos <= 5000;
         if (wrapX && (map.warpx || isInWrappingAreaOfTower))
         {
             drawRect = sprites_rect;
             drawRect.x += wrappedPoint.x;
             drawRect.y += tpoint.y;
+            #ifdef __NDS__
+            draw_sprite(drawRect.x, drawRect.y, obj.entities[i].drawframe, ct);
+            #else
             draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            #endif
         }
         if (wrapY && map.warpy)
         {
             drawRect = sprites_rect;
             drawRect.x += tpoint.x;
             drawRect.y += wrappedPoint.y;
+            #ifdef __NDS__
+            draw_sprite(drawRect.x, drawRect.y, obj.entities[i].drawframe, ct);
+            #else
             draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            #endif
         }
         if (wrapX && wrapY && map.warpx && map.warpy)
         {
             drawRect = sprites_rect;
             drawRect.x += wrappedPoint.x;
             drawRect.y += wrappedPoint.y;
+            #ifdef __NDS__
+            draw_sprite(drawRect.x, drawRect.y, obj.entities[i].drawframe, ct);
+            #else
             draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            #endif
         }
-        #endif
         break;
     }
     case 1:
