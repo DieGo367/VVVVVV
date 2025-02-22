@@ -56,6 +56,8 @@ public:
     GLTexture *im_image11;
     GLTexture *im_image12;
 
+    u8 *spriteGfxRaw;
+
     u16 *im_sprites_translated;
     u16 *im_flipsprites_translated;
     #else
@@ -93,7 +95,7 @@ public:
 };
 
 #ifdef __NDS__
-GLTexture *LoadImage(const char *filename, TextureLoadType loadtype, int realWidth = 0, int realHeight = 0);
+GLTexture *LoadImage(const char *filename, TextureLoadType loadtype, u8** gfxDst = NULL, int realWidth = 0, int realHeight = 0);
 void DestroyImage(GLTexture *image);
 #else
 SDL_Surface* LoadImageSurface(const char* filename);

@@ -62,7 +62,7 @@ static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void 
     return true;
 }
 
-GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, int realWidth, int realHeight)
+GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, u8 **gfxDst, int realWidth, int realHeight)
 {
     GRFHeader header;
     void *gfx = NULL, *palette = NULL;
@@ -102,16 +102,19 @@ GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, int r
         goto fail;
     }
 
-    VVV_free(gfx); VVV_free(palette);
+    if (gfxDst) *gfxDst = (u8 *)gfx;
+    else VVV_free(gfx);
+    VVV_free(palette);
     return tex;
 fail:
+    if (gfxDst) *gfxDst = NULL;
     VVV_free(tex); VVV_free(gfx); VVV_free(palette);
     return 0;
 }
 
 static GLTexture *LoadImage(const char* filename, int realWidth = 0, int realHeight = 0)
 {
-    return LoadImage(filename, TEX_COLOR, realWidth, realHeight);
+    return LoadImage(filename, TEX_COLOR, NULL, realWidth, realHeight);
 }
 
 void DestroyImage(GLTexture *texture)
@@ -547,7 +550,7 @@ void GraphicsResources::init(void)
     im_tiles2 = LoadTileset("graphics/tiles2.grf");
     im_tiles3 = LoadTileset("graphics/tiles3.grf");
 
-    im_sprites = LoadImage("graphics/sprites.grf", TEX_WHITE);
+    im_sprites = LoadImage("graphics/sprites.grf", TEX_WHITE, &spriteGfxRaw);
     im_flipsprites = im_sprites;
 
     im_teleporter = LoadImage("graphics/teleporter.grf");
@@ -646,6 +649,7 @@ void GraphicsResources::destroy(void)
     CLEAR(im_image12);
 
     #ifdef __NDS__
+    VVV_free(spriteGfxRaw);
     VVV_free(im_sprites_translated);
     VVV_free(im_flipsprites_translated);
     #else

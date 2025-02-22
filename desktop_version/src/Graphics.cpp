@@ -2077,6 +2077,7 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
     //find rectangle where they intersect:
 
     #ifdef __NDS__
+    if (!grphx.spriteGfxRaw) return false;
     int r1_left = p1.x;
     int r1_right = r1_left + 32;
     int r2_left = p2.x;
@@ -2109,11 +2110,8 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
     {
         #ifdef __NDS__
         intersection = false;
-        u32 vramState = VRAM_CR;
-        vramSetPrimaryBanks(VRAM_A_LCD, VRAM_B_LCD, VRAM_C_LCD, VRAM_D_LCD);
-        const u8 * const gfx = (u8 *)glGetTexturePointer(grphx.im_sprites->id);
-        const u8 * const frame1Gfx = (gfx + ((frame1 % 12) + (frame1 / 12) * grphx.im_sprites->width) * 32 / 4);
-        const u8 * const frame2Gfx = (gfx + ((frame2 % 12) + (frame2 / 12) * grphx.im_sprites->width) * 32 / 4);
+        const u8 * const frame1Gfx = (grphx.spriteGfxRaw + ((frame1 % 12) + (frame1 / 12) * grphx.im_sprites->width) * 32 / 4);
+        const u8 * const frame2Gfx = (grphx.spriteGfxRaw + ((frame2 % 12) + (frame2 / 12) * grphx.im_sprites->width) * 32 / 4);
         #endif
         int r3_left = SDL_max(r1_left, r2_left);
         int r3_top = SDL_min(r1_top, r2_top);
@@ -2135,10 +2133,7 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
 
                 u8 pixel1 = (frame1Gfx[(px1 + py1 * grphx.im_sprites->width) / 4] >> px1 % 4 * 2) & 0x03;
                 u8 pixel2 = (frame2Gfx[(px2 + py2 * grphx.im_sprites->width) / 4] >> px2 % 4 * 2) & 0x03;
-                if (pixel1 && pixel2) {
-                    intersection = true;
-                    break;
-                }
+                if (pixel1 && pixel2) return true;
                 #else
                 const SDL_Color pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
                 const SDL_Color pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
@@ -2152,15 +2147,8 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
                 #endif
             }
         }
-        #ifdef __NDS__
-        vramRestorePrimaryBanks(vramState);
-        #endif
     }
-    #ifdef __NDS__
-    return intersection;
-    #else
     return false;
-    #endif
 
 }
 
