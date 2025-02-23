@@ -413,6 +413,7 @@ endforeach(static_library)
 
 if(NINTENDO_DS)
     target_compile_definitions(VVVVVV PRIVATE -Dasm=__asm__) # needed for c99
+    target_link_libraries(VVVVVV -lmm9) # add Maxmod
     set(CMAKE_C_FLAGS_RELEASE "-g -O2") # -DNDEBUG causes a Data Abort for some reason
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
@@ -442,7 +443,9 @@ if(NINTENDO_DS)
 
     # prepare nitro files
     find_program(MAGICK magick REQUIRED)
+    find_program(FFMPEG ffmpeg REQUIRED)
     set(GRIT ${BLOCKSDS}/tools/grit/grit)
+    set(MMUTIL ${BLOCKSDS}/tools/mmutil/mmutil)
     set(DATA_ZIP ${CMAKE_CURRENT_SOURCE_DIR}/data.zip)
     set(FONT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/fonts)
     add_custom_command(
@@ -600,6 +603,46 @@ if(NINTENDO_DS)
         )
         list(APPEND NITRO_DEPS nitro/graphics/${IMAGE}.grf)
     endforeach()
+    set(SOUNDS # in the same order as Music.cpp
+        jump jump2
+        hurt
+        souleyeminijingle
+        coin
+        save
+        crumble
+        vanish
+        blip
+        preteleport
+        teleport
+        crew1 crew2 crew3 crew4 crew5 crew6
+        terminal
+        gamesaved
+        crashing
+        blip2
+        countdown
+        go
+        crash
+        combine
+        newrecord
+        trophy
+        rescue
+    )
+    foreach(SOUND ${SOUNDS})
+        set(FFMPEG_CMDS ${FFMPEG_CMDS}
+            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i sounds/${SOUND}.wav -ar 8000 sounds_low_hz/${SOUND}.wav
+        )
+        set(SOUNDS_LOW_HZ ${SOUNDS_LOW_HZ} sounds_low_hz/${SOUND}.wav)
+    endforeach()
+    add_custom_command(
+        OUTPUT nitro/soundbank.bin
+        DEPENDS ${DATA_ZIP}
+        BYPRODUCTS sounds sounds_low_hz
+        COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} sounds
+        COMMAND ${CMAKE_COMMAND} -E make_directory sounds_low_hz
+        ${FFMPEG_CMDS}
+        COMMAND ${MMUTIL} ${SOUNDS_LOW_HZ} -d -onitro/soundbank.bin
+    )
+    list(APPEND NITRO_DEPS nitro/soundbank.bin)
     add_custom_target(VVVVVV_NITROFS DEPENDS ${NITRO_DEPS})
     
     # these need to exist at project configuration since nds_create_rom checks for them

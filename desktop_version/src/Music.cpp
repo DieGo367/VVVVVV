@@ -2,8 +2,12 @@
 #include "Music.h"
 
 #include <SDL.h>
+#ifdef __NDS__
+#include <maxmod9.h>
+#else
 #include <FAudio.h>
 #include <physfsrwops.h>
+#endif
 
 #include "Alloc.h"
 #include "BinaryBlob.h"
@@ -18,13 +22,9 @@
 
 #include <vector>
 
+#ifndef __NDS__
 /* stb_vorbis */
 
-#ifdef __NDS__
-#define assert SDL_assert
-#define uint32 u32vorbis
-#define int32 i32vorbis
-#else
 #define malloc SDL_malloc
 #define realloc SDL_realloc
 #define free VVV_free
@@ -74,7 +74,6 @@
 #define fread(dst, size, count, io) SDL_RWread(io, dst, size, count)
 #define fseek(io, offset, whence) SDL_RWseek(io, offset, whence)
 #define ftell(io) SDL_RWtell(io)
-#endif
 
 #define FAudio_alloca(x) SDL_stack_alloc(uint8_t, x)
 #define FAudio_dealloca(x) SDL_stack_free(x)
@@ -84,10 +83,12 @@
 #include <stb_vorbis.h>
 
 /* End stb_vorbis include */
+#endif
 
 #define VVV_MAX_VOLUME 128
 #define VVV_MAX_CHANNELS 8
 
+#ifndef __NDS__
 class SoundTrack;
 class MusicTrack;
 static std::vector<SoundTrack> soundTracks;
@@ -128,7 +129,6 @@ public:
 
     void LoadWAV(const char* fileName, unsigned char* mem, const size_t length)
     {
-        #ifndef __NDS__
         SDL_AudioSpec spec;
         SDL_RWops *fileIn;
         fileIn = SDL_RWFromConstMem(mem, length);
@@ -145,14 +145,12 @@ public:
         format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
         format.cbSize = 0;
         valid = true;
-        #endif
 end:
         VVV_free(mem);
     }
 
     void LoadOGG(const char* fileName, unsigned char* mem, const size_t length)
     {
-        #ifndef __NDS__
         int err;
         stb_vorbis_info vorbis_info;
         vorbis = stb_vorbis_open_memory(mem, length, &err, NULL);
@@ -179,19 +177,16 @@ end:
 
         ogg_file = mem;
         valid = true;
-        #endif
     }
 
     void Dispose(void)
     {
-        #ifndef __NDS__
         VVV_free(wav_buffer);
 
         VVV_free(decoded_buf_playing);
         VVV_free(decoded_buf_reserve);
         VVV_freefunc(stb_vorbis_close, vorbis);
         VVV_free(ogg_file);
-        #endif
     }
 
     void Play(void)
@@ -264,7 +259,6 @@ end:
 
     static void Init(int audio_rate)
     {
-        #ifndef __NDS__
         if (voices == NULL)
         {
             voices = (FAudioSourceVoice**) SDL_malloc(sizeof(FAudioSourceVoice*) * VVV_MAX_CHANNELS);
@@ -286,32 +280,26 @@ end:
                 }
             }
         }
-        #endif
     }
 
     static void Pause(void)
     {
-        #ifndef __NDS__
         for (size_t i = 0; i < VVV_MAX_CHANNELS; i++)
         {
             FAudioSourceVoice_Stop(voices[i], 0, FAUDIO_COMMIT_NOW);
         }
-        #endif
     }
 
     static void Resume(void)
     {
-        #ifndef __NDS__
         for (size_t i = 0; i < VVV_MAX_CHANNELS; i++)
         {
             FAudioSourceVoice_Start(voices[i], 0, FAUDIO_COMMIT_NOW);
         }
-        #endif
     }
 
     static void Destroy(void)
     {
-        #ifndef __NDS__
         if (voices != NULL)
         {
             for (int i = 0; i < VVV_MAX_CHANNELS; i++)
@@ -320,23 +308,19 @@ end:
             }
             VVV_free(voices);
         }
-        #endif
     }
 
     static void SetVolume(int soundVolume)
     {
-        #ifndef __NDS__
         volume = (float) soundVolume / VVV_MAX_VOLUME;
         for (size_t i = 0; i < VVV_MAX_CHANNELS; i++)
         {
             FAudioVoice_SetVolume(voices[i], volume, FAUDIO_COMMIT_NOW);
         }
-        #endif
     }
 
     static void refillReserve(FAudioVoiceCallback* callback, void* ctx)
     {
-        #ifndef __NDS__
         bool inbounds;
         SoundTrack* t = (SoundTrack*) ctx;
         FAudioBuffer faudio_buffer;
@@ -358,7 +342,6 @@ end:
         }
 
         FAudioSourceVoice_SubmitSourceBuffer(voices[t->voice_index], &faudio_buffer, NULL);
-        #endif
     }
 
     static void swapBuffers(FAudioVoiceCallback* callback, void* ctx)
@@ -398,7 +381,6 @@ class MusicTrack
 public:
     MusicTrack(SDL_RWops *rw)
     {
-        #ifndef __NDS__
         SDL_zerop(this);
         read_buf = (Uint8*) SDL_malloc(rw->size(rw));
         SDL_RWread(rw, read_buf, rw->size(rw), 1);
@@ -432,7 +414,6 @@ public:
         vorbis_comment = stb_vorbis_get_comment(vorbis);
         parseComments(this, vorbis_comment.comment_list, vorbis_comment.comment_list_length);
         valid = true;
-        #endif
 
 end:
         SDL_RWclose(rw);
@@ -440,7 +421,6 @@ end:
 
     void Dispose(void)
     {
-        #ifndef __NDS__
         VVV_freefunc(stb_vorbis_close, vorbis);
         VVV_free(read_buf);
         VVV_free(decoded_buf_playing);
@@ -449,7 +429,6 @@ end:
         {
             VVV_freefunc(FAudioVoice_DestroyVoice, musicVoice);
         }
-        #endif
     }
 
     bool Play(bool loop)
@@ -496,14 +475,12 @@ end:
 
     static void Halt(void)
     {  
-        #ifndef __NDS__
         if (!IsHalted())
         {
             FAudioSourceVoice_FlushSourceBuffers(musicVoice);
             VVV_freefunc(FAudioVoice_DestroyVoice, musicVoice);
             paused = true;
         }
-        #endif
     }
 
     static bool IsHalted(void)
@@ -513,13 +490,11 @@ end:
 
     static void Pause(void)
     {
-        #ifndef __NDS__
         if (!IsHalted())
         {
             FAudioSourceVoice_Stop(musicVoice, 0, FAUDIO_COMMIT_NOW);
             paused = true;
         }
-        #endif
     }
 
     static bool IsPaused(void)
@@ -529,24 +504,20 @@ end:
 
     static void Resume(void)
     {
-        #ifndef __NDS__
         if (!IsHalted())
         {
             FAudioSourceVoice_Start(musicVoice, 0, FAUDIO_COMMIT_NOW);
             paused = false;
         }
-        #endif
     }
 
     static void SetVolume(int musicVolume)
     {
-        #ifndef __NDS__
         float adj_vol = (float) musicVolume / VVV_MAX_VOLUME;
         if (!IsHalted())
         {
             FAudioVoice_SetVolume(musicVoice, adj_vol, FAUDIO_COMMIT_NOW);
         }
-        #endif
     }
 
     stb_vorbis* vorbis;
@@ -570,7 +541,6 @@ end:
 
     static void refillReserve(FAudioVoiceCallback* callback, void* ctx)
     {
-        #ifndef __NDS__
         MusicTrack* t = (MusicTrack*) ctx;
         FAudioBuffer faudio_buffer;
         SDL_zero(faudio_buffer);
@@ -614,7 +584,6 @@ end:
         }
         t->sample_pos += faudio_buffer.PlayLength;
         FAudioSourceVoice_SubmitSourceBuffer(musicVoice, &faudio_buffer, NULL);
-        #endif
     }
 
     static void swapBuffers(FAudioVoiceCallback* callback, void* ctx)
@@ -747,6 +716,7 @@ end:
 };
 bool MusicTrack::paused = false;
 FAudioSourceVoice* MusicTrack::musicVoice = NULL;
+#endif // !__NDS__
 
 musicclass::musicclass(void)
 {
@@ -769,7 +739,46 @@ musicclass::musicclass(void)
 
 void musicclass::init(void)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    u8 *bin = NULL;
+    size_t length;
+    FILESYSTEM_loadAssetToMemory("soundbank.bin", &bin, &length);
+    if (bin != NULL) {
+        mmInitDefaultMem(bin);
+        VVV_free(bin);
+        mmLoadEffect(Sound_FLIP);
+        mmLoadEffect(Sound_UNFLIP);
+        mmLoadEffect(Sound_CRY);
+        mmLoadEffect(Sound_TRINKET);
+        mmLoadEffect(Sound_COIN);
+        mmLoadEffect(Sound_CHECKPOINT);
+        mmLoadEffect(Sound_CRUMBLE);
+        mmLoadEffect(Sound_DISAPPEAR);
+        mmLoadEffect(Sound_GRAVITYLINE);
+        mmLoadEffect(Sound_FLASH);
+        mmLoadEffect(Sound_TELEPORT);
+        mmLoadEffect(Sound_VIRIDIAN);
+        mmLoadEffect(Sound_VERDIGRIS);
+        mmLoadEffect(Sound_VICTORIA);
+        mmLoadEffect(Sound_VITELLARY);
+        mmLoadEffect(Sound_VIOLET);
+        mmLoadEffect(Sound_VERMILION);
+        mmLoadEffect(Sound_TERMINALTOUCH);
+        mmLoadEffect(Sound_GAMESAVED);
+        mmLoadEffect(Sound_ALARM);
+        mmLoadEffect(Sound_TERMINALTEXT);
+        mmLoadEffect(Sound_COUNTDOWN);
+        mmLoadEffect(Sound_GO);
+        mmLoadEffect(Sound_DESTROY);
+        mmLoadEffect(Sound_COMBINE);
+        mmLoadEffect(Sound_NEWRECORD);
+        mmLoadEffect(Sound_TROPHY);
+        mmLoadEffect(Sound_RESCUE);
+    }
+    else {
+        vlog_error("Unable to initialize Maxmod");
+    }
+    #else
     if (FAudioCreate(&faudioctx, 0, FAUDIO_DEFAULT_PROCESSOR))
     {
         vlog_error("Unable to initialize FAudio");
@@ -934,6 +943,7 @@ void musicclass::init(void)
 
 void musicclass::destroy(void)
 {
+    #ifndef __NDS__
     for (size_t i = 0; i < soundTracks.size(); ++i)
     {
         soundTracks[i].Dispose();
@@ -951,6 +961,7 @@ void musicclass::destroy(void)
     mmmmmm_blob.clear();
     VVV_freefunc(FAudioVoice_DestroyVoice, masteringvoice);
     VVV_freefunc(FAudio_Release, faudioctx);
+    #endif
 }
 
 void musicclass::play(int t)
@@ -1045,7 +1056,9 @@ void musicclass::resume(void)
         currentsong = haltedsong;
         haltedsong = -1;
     }
+    #ifndef __NDS__
     MusicTrack::Resume();
+    #endif
 }
 
 void musicclass::resumefade(const int fadein_ms)
@@ -1061,7 +1074,9 @@ void musicclass::fadein(void)
 
 void musicclass::pause(void)
 {
+    #ifndef __NDS__
     MusicTrack::Pause();
+    #endif
 }
 
 void musicclass::haltdasmusik(void)
@@ -1146,7 +1161,9 @@ void musicclass::fadeMusicVolumeIn(int ms)
     musicVolume = 0;
 
     /* Fix 1-frame glitch */
+    #ifndef __NDS__
     MusicTrack::SetVolume(0);
+    #endif
 
     fade.step_ms = 0;
     fade.duration_ms = ms;
@@ -1319,37 +1336,58 @@ void musicclass::changemusicarea(int x, int y)
 
 void musicclass::playef(int t)
 {
+    #ifdef __NDS__
+    mmEffect(t);
+    #else
     if (!INBOUNDS_VEC(t, soundTracks))
     {
         return;
     }
     soundTracks[t].Play();
+    #endif
 }
 
 void musicclass::pauseef(void)
 {
+    #ifdef __NDS__
+    mmEffectCancelAll();
+    #else
     SoundTrack::Pause();
+    #endif
 }
 
 void musicclass::resumeef(void)
 {
+    #ifndef __NDS__
     SoundTrack::Resume();
+    #endif
 }
 
 bool musicclass::halted(void)
 {
+    #ifdef __NDS__
+    return false;
+    #else
     return MusicTrack::IsPaused();
+    #endif
 }
 
 void musicclass::updatemutestate(void)
 {
     if (game.muted)
     {
+        #ifdef __NDS__
+        mmSetModuleVolume(0);
+        #else
         MusicTrack::SetVolume(0);
         SoundTrack::SetVolume(0);
+        #endif
     }
     else
     {
+        #ifdef __NDS__
+        mmSetModuleVolume(1024 * user_sound_volume / USER_VOLUME_MAX);
+        #else
         SoundTrack::SetVolume(VVV_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX);
 
         if (game.musicmuted)
@@ -1360,5 +1398,6 @@ void musicclass::updatemutestate(void)
         {
             MusicTrack::SetVolume(musicVolume * user_music_volume / USER_VOLUME_MAX);
         }
+        #endif
     }
 }
