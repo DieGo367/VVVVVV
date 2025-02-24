@@ -613,7 +613,7 @@ int main(int argc, char *argv[])
     /* We already do the button swapping in ButtonGlyphs, disable SDL's swapping */
     SDL_SetHintWithPriority(SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS, "0", SDL_HINT_OVERRIDE);
 
-    if(!FILESYSTEM_init(argv[0], baseDir, assetsPath, langDir, fontsDir))
+    if(!FILESYSTEM_init(argc > 0 ? argv[0] : NULL, baseDir, assetsPath, langDir, fontsDir))
     {
         vlog_error("Unable to initialize filesystem!");
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Unable to initialize filesystem!", NULL);
