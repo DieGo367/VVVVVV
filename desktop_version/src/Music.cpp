@@ -4,6 +4,7 @@
 #include <SDL.h>
 #ifdef __NDS__
 #include <maxmod9.h>
+#define MM_MAX_VOLUME 1024
 #else
 #include <FAudio.h>
 #include <physfsrwops.h>
@@ -718,6 +719,104 @@ bool MusicTrack::paused = false;
 FAudioSourceVoice* MusicTrack::musicVoice = NULL;
 #endif // !__NDS__
 
+#ifdef __NDS__
+extern musicclass music;
+
+// https://github.com/blocksds/sdk/blob/master/examples/maxmod/streaming/source/main.c
+typedef struct WAVHeader {
+    // "RIFF" chunk descriptor
+    uint32_t chunkID;
+    uint32_t chunkSize;
+    uint32_t format;
+    // "fmt" subchunk
+    uint32_t subchunk1ID;
+    uint32_t subchunk1Size;
+    uint16_t audioFormat;
+    uint16_t numChannels;
+    uint32_t sampleRate;
+    uint32_t byteRate;
+    uint16_t blockAlign;
+    uint16_t bitsPerSample;
+    // "data" subchunk
+    uint32_t subchunk2ID;
+    uint32_t subchunk2Size;
+} WAVHeader;
+
+#define Music_COUNT 16
+static FILE *wavFiles[Music_COUNT] = {0};
+static int currentTrack = -1;
+static bool loopCurrentTrack = false;
+static bool paused = true;
+
+static void openWavFile(int id, const char *filename) {
+    FILE *wavFile = fopen(filename, "r");
+    if (wavFile) {
+        WAVHeader header;
+        fread(&header, 1, sizeof(WAVHeader), wavFile);
+        if (header.chunkID == 0x46464952  // RIFF
+            && header.format == 0x45564157 // WAVE
+            && header.subchunk1ID == 0x20746d66 // "fmt "
+            && header.subchunk2ID == 0x61746164 // data
+            && header.numChannels == 2
+            && header.bitsPerSample == 8
+            && header.sampleRate == 8000
+        ) {
+            wavFiles[id] = wavFile;
+            return;
+        }
+        else {
+            fclose(wavFile);
+            vlog_error("WAV file invalid format: %s", filename);
+        }
+    }
+    wavFiles[id] = NULL;
+}
+
+static bool playTrack(int id, bool loop) {
+    currentTrack = id;
+    loopCurrentTrack = loop;
+    if (currentTrack >= 0) {
+        FILE *wavFile = wavFiles[currentTrack];
+        if (wavFile != NULL) {
+            fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
+            paused = false;
+            return true;
+        }
+    }
+    return false;
+}
+
+mm_word musicStreamCallback(mm_word length, mm_addr dest, mm_stream_formats format) {
+    if (currentTrack < 0 || paused || wavFiles[currentTrack] == NULL) {
+        memset(dest, 0, 2*length); // silence
+        return length;
+    }
+    FILE *wavFile = wavFiles[currentTrack];
+    int readCount = fread(dest, 2, length, wavFile);
+    if (feof(wavFile)) {
+        if (loopCurrentTrack) {
+            fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
+            readCount = fread(dest, 2, length, wavFile);
+        }
+        else {
+            paused = true;
+            memset(dest, 0, 2*length);
+            return length;
+        }
+    }
+    if (music.user_music_volume == 0) { // NDS_TODO: support proper volume control
+        memset(dest, 0, 2*readCount);
+    }
+    else {
+        s8 *samples = (s8 *)dest;
+        for (mm_word i = 0; i < 2*length; i++) {
+            samples[i] = samples[i] - 128;
+        }
+    }
+    return readCount;
+}
+#endif
+
 musicclass::musicclass(void)
 {
     safeToProcessMusic= false;
@@ -740,6 +839,10 @@ musicclass::musicclass(void)
 void musicclass::init(void)
 {
     #ifdef __NDS__
+    mmmmmm = false;
+    num_mmmmmm_tracks = 0;
+    num_pppppp_tracks = 0;
+
     u8 *bin = NULL;
     size_t length;
     FILESYSTEM_loadAssetToMemory("soundbank.bin", &bin, &length);
@@ -774,6 +877,33 @@ void musicclass::init(void)
         mmLoadEffect(Sound_NEWRECORD);
         mmLoadEffect(Sound_TROPHY);
         mmLoadEffect(Sound_RESCUE);
+
+        num_pppppp_tracks = Music_COUNT;
+        mm_stream stream;
+        stream.sampling_rate = 8000;
+        stream.buffer_length = 3200;
+        stream.callback = musicStreamCallback;
+        stream.format = MM_STREAM_8BIT_STEREO;
+        stream.timer = MM_TIMER0;
+        stream.manual = true;
+        mmStreamOpen(&stream);
+
+        openWavFile(Music_PATHCOMPLETE, "music/0levelcomplete.wav");
+        openWavFile(Music_PUSHINGONWARDS, "music/1pushingonwards.wav");
+        openWavFile(Music_POSITIVEFORCE, "music/2positiveforce.wav");
+        openWavFile(Music_POTENTIALFORANYTHING, "music/3potentialforanything.wav");
+        openWavFile(Music_PASSIONFOREXPLORING, "music/4passionforexploring.wav");
+        openWavFile(Music_PAUSE, "music/5intermission.wav");
+        openWavFile(Music_PRESENTINGVVVVVV, "music/6presentingvvvvvv.wav");
+        openWavFile(Music_PLENARY, "music/7gamecomplete.wav");
+        openWavFile(Music_PREDESTINEDFATE, "music/8predestinedfate.wav");
+        openWavFile(Music_POSITIVEFORCEREVERSED, "music/9positiveforcereversed.wav");
+        openWavFile(Music_POPULARPOTPOURRI, "music/10popularpotpourri.wav");
+        openWavFile(Music_PIPEDREAM, "music/11pipedream.wav");
+        openWavFile(Music_PRESSURECOOKER, "music/12pressurecooker.wav");
+        openWavFile(Music_PACEDENERGY, "music/13pacedenergy.wav");
+        openWavFile(Music_PIERCINGTHESKY, "music/14piercingthesky.wav");
+        openWavFile(Music_PREDESTINEDFATEREMIX, "music/predestinedfatefinallevel.wav");
     }
     else {
         vlog_error("Unable to initialize Maxmod");
@@ -830,13 +960,9 @@ void musicclass::init(void)
 
     musicWriteBlob.writeBinaryBlob("data/BinaryMusic.vvv");
     musicWriteBlob.clear();
-#endif
 
     num_mmmmmm_tracks = 0;
     num_pppppp_tracks = 0;
-#ifdef __NDS__
-    mmmmmm = usingmmmmmm = false;
-#else
 
     if (!mmmmmm_blob.unPackBinary("mmmmmm.vvv"))
     {
@@ -938,12 +1064,20 @@ void musicclass::init(void)
         num_pppppp_tracks++;
         index_++;
     }
-#endif
+    #endif
 }
 
 void musicclass::destroy(void)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    mmStreamClose();
+    for (int i = 0; i < Music_COUNT; i++) {
+        if (wavFiles[i]) {
+            fclose(wavFiles[i]);
+            wavFiles[i] = NULL;
+        }
+    }
+    #else
     for (size_t i = 0; i < soundTracks.size(); ++i)
     {
         soundTracks[i].Dispose();
@@ -966,7 +1100,6 @@ void musicclass::destroy(void)
 
 void musicclass::play(int t)
 {
-    #ifndef __NDS__
     if (mmmmmm && usingmmmmmm)
     {
         // Don't conjoin this if-statement with the above one...
@@ -1000,7 +1133,11 @@ void musicclass::play(int t)
         return;
     }
 
+    #ifdef __NDS__
+    if (t < 0 || t >= Music_COUNT)
+    #else
     if (!INBOUNDS_VEC(t, musicTracks))
+    #endif
     {
         vlog_error("play() out-of-bounds!");
         currentsong = -1;
@@ -1013,12 +1150,18 @@ void musicclass::play(int t)
                              || currentsong == Music_PLENARY + num_mmmmmm_tracks)))
     {
         // No fade in or repeat
+        #ifdef __NDS__
+        if (playTrack(t, false))
+        #else
         if (musicTracks[t].Play(false))
+        #endif
         {
             m_doFadeInVol = false;
             m_doFadeOutVol = false;
             musicVolume = VVV_MAX_VOLUME;
+            #ifndef __NDS__
             MusicTrack::SetVolume(VVV_MAX_VOLUME * user_music_volume / USER_VOLUME_MAX);
+            #endif
         }
     }
     else
@@ -1039,14 +1182,17 @@ void musicclass::play(int t)
                 quick_fade = true;
             }
         }
+        #ifdef __NDS__
+        else if (playTrack(t, true))
+        #else
         else if (musicTracks[t].Play(true))
+        #endif
         {
             m_doFadeInVol = false;
             m_doFadeOutVol = false;
             fadeMusicVolumeIn(3000);
         }
     }
-    #endif
 }
 
 void musicclass::resume(void)
@@ -1056,7 +1202,9 @@ void musicclass::resume(void)
         currentsong = haltedsong;
         haltedsong = -1;
     }
-    #ifndef __NDS__
+    #ifdef __NDS__
+    paused = false;
+    #else
     MusicTrack::Resume();
     #endif
 }
@@ -1074,7 +1222,9 @@ void musicclass::fadein(void)
 
 void musicclass::pause(void)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    paused = true;
+    #else
     MusicTrack::Pause();
     #endif
 }
@@ -1182,8 +1332,12 @@ void musicclass::fadeMusicVolumeOut(const int fadeout_ms)
     m_doFadeOutVol = true;
 
     fade.step_ms = 0;
+    #ifdef __NDS__
+    fade.duration_ms = 0; // NDS_TODO: renable fading once I can control stream volume
+    #else
     /* Duration is proportional to current volume. */
     fade.duration_ms = fadeout_ms * musicVolume / VVV_MAX_VOLUME;
+    #endif
     fade.start_volume = musicVolume;
     fade.end_volume = 0;
 }
@@ -1366,7 +1520,7 @@ void musicclass::resumeef(void)
 bool musicclass::halted(void)
 {
     #ifdef __NDS__
-    return false;
+    return paused;
     #else
     return MusicTrack::IsPaused();
     #endif
@@ -1377,7 +1531,7 @@ void musicclass::updatemutestate(void)
     if (game.muted)
     {
         #ifdef __NDS__
-        mmSetModuleVolume(0);
+        mmSetEffectsVolume(0);
         #else
         MusicTrack::SetVolume(0);
         SoundTrack::SetVolume(0);
@@ -1386,7 +1540,7 @@ void musicclass::updatemutestate(void)
     else
     {
         #ifdef __NDS__
-        mmSetModuleVolume(1024 * user_sound_volume / USER_VOLUME_MAX);
+        mmSetEffectsVolume(MM_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX);
         #else
         SoundTrack::SetVolume(VVV_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX);
 
@@ -1400,4 +1554,8 @@ void musicclass::updatemutestate(void)
         }
         #endif
     }
+    #ifdef __NDS__
+    // this is a reasonable place to put this I suppose
+    mmStreamUpdate();
+    #endif
 }

@@ -444,6 +444,7 @@ if(NINTENDO_DS)
     # prepare nitro files
     find_program(MAGICK magick REQUIRED)
     find_program(FFMPEG ffmpeg REQUIRED)
+    find_program(PYTHON NAMES python3 python REQUIRED)
     set(GRIT ${BLOCKSDS}/tools/grit/grit)
     set(MMUTIL ${BLOCKSDS}/tools/mmutil/mmutil)
     set(DATA_ZIP ${CMAKE_CURRENT_SOURCE_DIR}/data.zip)
@@ -643,6 +644,41 @@ if(NINTENDO_DS)
         COMMAND ${MMUTIL} ${SOUNDS_LOW_HZ} -d -onitro/soundbank.bin
     )
     list(APPEND NITRO_DEPS nitro/soundbank.bin)
+    add_custom_command(
+        OUTPUT music nitro/music
+        DEPENDS ${DATA_ZIP} ${CMAKE_CURRENT_SOURCE_DIR}/dump_music.py
+        BYPRODUCTS vvvvvvmusic.vvv
+        COMMAND ${CMAKE_COMMAND} -E make_directory music
+        COMMAND ${CMAKE_COMMAND} -E make_directory nitro/music
+        COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} vvvvvvmusic.vvv
+        COMMAND ${PYTHON} ${CMAKE_CURRENT_SOURCE_DIR}/dump_music.py
+    )
+    set(MUSIC_TRACKS
+        0levelcomplete
+        1pushingonwards
+        2positiveforce
+        3potentialforanything
+        4passionforexploring
+        5intermission
+        6presentingvvvvvv
+        7gamecomplete
+        8predestinedfate
+        9positiveforcereversed
+        10popularpotpourri
+        11pipedream
+        12pressurecooker
+        13pacedenergy
+        14piercingthesky
+        predestinedfatefinallevel
+    )
+    foreach(TRACK ${MUSIC_TRACKS})
+        add_custom_command(
+            OUTPUT nitro/music/${TRACK}.wav
+            DEPENDS music nitro/music
+            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 -bitexact nitro/music/${TRACK}.wav
+        )
+        list(APPEND NITRO_DEPS nitro/music/${TRACK}.wav)
+    endforeach()
     add_custom_target(VVVVVV_NITROFS DEPENDS ${NITRO_DEPS})
     
     # these need to exist at project configuration since nds_create_rom checks for them
