@@ -746,7 +746,7 @@ typedef struct WAVHeader {
 static FILE *wavFiles[Music_COUNT] = {0};
 static int currentTrack = -1;
 static bool loopCurrentTrack = false;
-static bool paused = true;
+static bool paused = true, streamOpened = false;
 
 static void openWavFile(int id, const char *filename) {
     FILE *wavFile = fopen(filename, "r");
@@ -770,20 +770,6 @@ static void openWavFile(int id, const char *filename) {
         }
     }
     wavFiles[id] = NULL;
-}
-
-static bool playTrack(int id, bool loop) {
-    currentTrack = id;
-    loopCurrentTrack = loop;
-    if (currentTrack >= 0) {
-        FILE *wavFile = wavFiles[currentTrack];
-        if (wavFile != NULL) {
-            fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
-            paused = false;
-            return true;
-        }
-    }
-    return false;
 }
 
 mm_word musicStreamCallback(mm_word length, mm_addr dest, mm_stream_formats format) {
@@ -814,6 +800,30 @@ mm_word musicStreamCallback(mm_word length, mm_addr dest, mm_stream_formats form
         }
     }
     return readCount;
+}
+
+static bool playTrack(int id, bool loop) {
+    currentTrack = id;
+    loopCurrentTrack = loop;
+    if (currentTrack >= 0) {
+        FILE *wavFile = wavFiles[currentTrack];
+        if (wavFile != NULL) {
+            fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
+            paused = false;
+            if (streamOpened) mmStreamClose();
+            mm_stream stream;
+            stream.sampling_rate = 8000;
+            stream.buffer_length = 3200;
+            stream.callback = musicStreamCallback;
+            stream.format = MM_STREAM_8BIT_STEREO;
+            stream.timer = MM_TIMER0;
+            stream.manual = true;
+            mmStreamOpen(&stream);
+            streamOpened = true;
+            return true;
+        }
+    }
+    return false;
 }
 #endif
 
@@ -879,14 +889,6 @@ void musicclass::init(void)
         mmLoadEffect(Sound_RESCUE);
 
         num_pppppp_tracks = Music_COUNT;
-        mm_stream stream;
-        stream.sampling_rate = 8000;
-        stream.buffer_length = 3200;
-        stream.callback = musicStreamCallback;
-        stream.format = MM_STREAM_8BIT_STEREO;
-        stream.timer = MM_TIMER0;
-        stream.manual = true;
-        mmStreamOpen(&stream);
 
         openWavFile(Music_PATHCOMPLETE, "music/0levelcomplete.wav");
         openWavFile(Music_PUSHINGONWARDS, "music/1pushingonwards.wav");
