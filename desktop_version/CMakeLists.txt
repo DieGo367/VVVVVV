@@ -441,28 +441,28 @@ if(NINTENDO_DS)
     set(SDL2_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/SnDsL/include)
     set(SDL2_LIBRARIES sndsl-static)
 
-    # prepare nitro files
+    # tools for preparing nitro files
     find_program(MAGICK magick REQUIRED)
     find_program(FFMPEG ffmpeg REQUIRED)
     find_program(PYTHON NAMES python3 python REQUIRED)
+    set(E ${CMAKE_COMMAND} -E)
     set(GRIT ${BLOCKSDS}/tools/grit/grit)
     set(MMUTIL ${BLOCKSDS}/tools/mmutil/mmutil)
-    set(DATA_ZIP ${CMAKE_CURRENT_SOURCE_DIR}/data.zip)
-    set(FONT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/fonts)
-    add_custom_command(
-        OUTPUT nitro/graphics
-        COMMAND ${CMAKE_COMMAND} -E make_directory nitro/graphics
-    )
+
+    macro(depend_data_files)
+        list(APPEND DATA_FILES ${ARGV})
+    endmacro()
+    macro(add_nitro_files)
+        list(APPEND NITRO_FILES ${ARGV})
+    endmacro()
+
     set(TILES tiles tiles2 tiles3)
     set(SPRITES sprites teleporter)
     set(TEXTURES_2BIT
         elephant
         gamecomplete
         levelcomplete
-        site
-        site2
-        site3
-        site4
+        site site2 site3 site4
         covered
     )
     set(FONTS_WHITE font)
@@ -473,7 +473,7 @@ if(NINTENDO_DS)
         set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
 
         if(IMAGE IN_LIST TILES)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gt -gB8 -m)
+            list(APPEND GRIT_FLAGS -gt -gB8 -m)
             if (IMAGE STREQUAL tiles2)
                 # generate some custom tiles for the warp zone bgs
                 set(INSTRUCTIONS
@@ -486,7 +486,7 @@ if(NINTENDO_DS)
                     \( -clone 0 -crop 16x4+0+16 -repage +0+44! \)
                     \( -clone 0 -crop 16x12+0+20 -repage +0+28! \)
                 )
-                set(MAGICK_FLAGS ${MAGICK_FLAGS}
+                list(APPEND MAGICK_FLAGS
                     -repage -0-144! ${INSTRUCTIONS} -repage +0+144!
                     -repage -24-144! ${INSTRUCTIONS} -repage +24+144!
                     -repage -48-144! ${INSTRUCTIONS} -repage +48+144!
@@ -506,7 +506,7 @@ if(NINTENDO_DS)
                         -draw "rectangle 196,104 227,127"
                         -draw "rectangle 197,105 226,126"
                     # copy one of the treadmill platforms from the first tileset
-                    \( graphics/tiles.png -crop 32x16+288+0 \) -flatten
+                    \( data/graphics/tiles.png -crop 32x16+288+0 \) -flatten
                 )
             endif()
             if (IMAGE STREQUAL tiles OR IMAGE STREQUAL tiles2)
@@ -540,7 +540,7 @@ if(NINTENDO_DS)
                             -draw "rectangle 70,22 71,23"
                     \)
                 )
-                set(MAGICK_FLAGS ${MAGICK_FLAGS}
+                list(APPEND MAGICK_FLAGS
                     -repage -104-216 ${INSTR_1} -fill "#555555" ${INSTR_2} -repage +104+216! -flatten
                     -repage -176-216 ${INSTR_1} -fill "#222222" ${INSTR_2} -repage +176+216! -flatten
                 )
@@ -559,51 +559,52 @@ if(NINTENDO_DS)
                     \( -clone 0,9 -flatten \)
                     -delete 0-9 +append +repage -crop 480x96 -append ${RESIZE_FLAG}
                 )
-                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn3)
+                list(APPEND GRIT_FLAGS -gb -gB2 -pn3)
             else()
                 set(MAGICK_FLAGS -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS} ${RESIZE_FLAG})
-                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn2)
+                list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
             endif()
         elseif(IMAGE IN_LIST TEXTURES_2BIT)
-            set(MAGICK_FLAGS ${MAGICK_FLAGS} ${RESIZE_FLAG})
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn2)
+            list(APPEND MAGICK_FLAGS ${RESIZE_FLAG})
+            list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
         elseif(IMAGE STREQUAL minimap)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn206)
+            list(APPEND GRIT_FLAGS -gb -gB8 -pn206)
         elseif(IMAGE STREQUAL ending)
-            set(MAGICK_FLAGS ${MAGICK_FLAGS} -filter point -resize 256x192 -extent 256x256)
-            set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB4 -pn16)
+            list(APPEND MAGICK_FLAGS -filter point -resize 256x192 -extent 256x256)
+            list(APPEND GRIT_FLAGS -gb -gB4 -pn16)
         elseif(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
             if(IMAGE IN_LIST FONTS_WHITE)
                 set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
-                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB2 -pn2)
+                list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
             else()
-                set(GRIT_FLAGS ${GRIT_FLAGS} -gb -gB8 -pn25)
+                list(APPEND GRIT_FLAGS -gb -gB8 -pn25)
             endif()
-            set(MAGICK_FLAGS ${MAGICK_FLAGS} ${RESIZE_FLAG})
+            list(APPEND MAGICK_FLAGS ${RESIZE_FLAG})
         endif()
 
         if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
-            set(EXTRA_DEPENDS ${FONT_PATH}/${IMAGE}.png ${FONT_PATH}/${IMAGE}.fontmeta)
-            set(SRC_PATH ${FONT_PATH})
-            set(START_CMD true)
-            set(END_CMD copy_if_different ${FONT_PATH}/${IMAGE}.fontmeta nitro/graphics/${IMAGE}.fontmeta)
+            set(IMAGE_SRC ${CMAKE_SOURCE_DIR}/fonts/${IMAGE}.png)
+            add_custom_command(
+                OUTPUT nitro/graphics/${IMAGE}.fontmeta
+                DEPENDS ${CMAKE_SOURCE_DIR}/fonts/${IMAGE}.fontmeta
+                COMMAND ${E} copy_if_different ${CMAKE_SOURCE_DIR}/fonts/${IMAGE}.fontmeta nitro/graphics/${IMAGE}.fontmeta
+            )
+            add_nitro_files(nitro/graphics/${IMAGE}.fontmeta)
         else()
-            set(EXTRA_DEPENDS ${DATA_ZIP})
-            set(SRC_PATH graphics)
-            set(START_CMD tar x ${DATA_ZIP} graphics/${IMAGE}.png)
-            set(END_CMD true)
+            set(IMAGE_SRC data/graphics/${IMAGE}.png)
+            depend_data_files(${IMAGE_SRC})
         endif()
         add_custom_command(
             OUTPUT nitro/graphics/${IMAGE}.grf
-            BYPRODUCTS graphics
-            DEPENDS nitro/graphics ${EXTRA_DEPENDS}
-            COMMAND ${CMAKE_COMMAND} -E ${START_CMD}
-            COMMAND ${MAGICK} ${SRC_PATH}/${IMAGE}.png ${MAGICK_FLAGS} graphics/${IMAGE}.png VERBATIM
-            COMMAND ${GRIT} graphics/${IMAGE}.png ${GRIT_FLAGS} -o nitro/graphics/${IMAGE}.grf
-            COMMAND ${CMAKE_COMMAND} -E ${END_CMD}
+            BYPRODUCTS prep nitro/graphics
+            DEPENDS ${IMAGE_SRC}
+            COMMAND ${E} make_directory prep/graphics nitro/graphics
+            COMMAND ${MAGICK} ${IMAGE_SRC} ${MAGICK_FLAGS} prep/graphics/${IMAGE}.png VERBATIM
+            COMMAND ${GRIT} prep/graphics/${IMAGE}.png ${GRIT_FLAGS} -o nitro/graphics/${IMAGE}.grf
         )
-        list(APPEND NITRO_DEPS nitro/graphics/${IMAGE}.grf)
+        add_nitro_files(nitro/graphics/${IMAGE}.grf)
     endforeach()
+
     set(SOUNDS # in the same order as Music.cpp
         jump jump2
         hurt
@@ -629,30 +630,23 @@ if(NINTENDO_DS)
         rescue
     )
     foreach(SOUND ${SOUNDS})
-        set(FFMPEG_CMDS ${FFMPEG_CMDS}
-            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i sounds/${SOUND}.wav -ar 8000 sounds_low_hz/${SOUND}.wav
+        list(APPEND FFMPEG_SFX_CMDS
+            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i data/sounds/${SOUND}.wav -ar 8000 prep/sounds/${SOUND}.wav
         )
-        set(SOUNDS_LOW_HZ ${SOUNDS_LOW_HZ} sounds_low_hz/${SOUND}.wav)
+        list(APPEND SOUNDS_SRC data/sounds/${SOUND}.wav)
+        list(APPEND SOUNDS_PREPPED prep/sounds/${SOUND}.wav)
     endforeach()
     add_custom_command(
         OUTPUT nitro/soundbank.bin
-        DEPENDS ${DATA_ZIP}
-        BYPRODUCTS sounds sounds_low_hz
-        COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} sounds
-        COMMAND ${CMAKE_COMMAND} -E make_directory sounds_low_hz
-        ${FFMPEG_CMDS}
-        COMMAND ${MMUTIL} ${SOUNDS_LOW_HZ} -d -onitro/soundbank.bin
+        DEPENDS ${SOUNDS_SRC}
+        BYPRODUCTS prep
+        COMMAND ${E} make_directory prep/sounds
+        ${FFMPEG_SFX_CMDS}
+        COMMAND ${MMUTIL} ${SOUNDS_PREPPED} -d -onitro/soundbank.bin
     )
-    list(APPEND NITRO_DEPS nitro/soundbank.bin)
-    add_custom_command(
-        OUTPUT music nitro/music
-        DEPENDS ${DATA_ZIP} ${CMAKE_CURRENT_SOURCE_DIR}/dump_music.py
-        BYPRODUCTS vvvvvvmusic.vvv
-        COMMAND ${CMAKE_COMMAND} -E make_directory music
-        COMMAND ${CMAKE_COMMAND} -E make_directory nitro/music
-        COMMAND ${CMAKE_COMMAND} -E tar x ${DATA_ZIP} vvvvvvmusic.vvv
-        COMMAND ${PYTHON} ${CMAKE_CURRENT_SOURCE_DIR}/dump_music.py
-    )
+    depend_data_files(${SOUNDS_SRC})
+    add_nitro_files(nitro/soundbank.bin)
+
     set(MUSIC_TRACKS
         0levelcomplete
         1pushingonwards
@@ -674,23 +668,43 @@ if(NINTENDO_DS)
     foreach(TRACK ${MUSIC_TRACKS})
         add_custom_command(
             OUTPUT nitro/music/${TRACK}.wav
-            DEPENDS music nitro/music
-            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 -bitexact nitro/music/${TRACK}.wav
+            DEPENDS data/music/${TRACK}.ogg
+            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i data/music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 -bitexact nitro/music/${TRACK}.wav
         )
-        list(APPEND NITRO_DEPS nitro/music/${TRACK}.wav)
+        list(APPEND MUSIC_TRACK_SRC data/music/${TRACK}.ogg)
+        add_nitro_files(nitro/music/${TRACK}.wav)
     endforeach()
-    add_custom_target(VVVVVV_NITROFS DEPENDS ${NITRO_DEPS})
-    
+    add_custom_command(
+        OUTPUT ${MUSIC_TRACK_SRC}
+        BYPRODUCTS nitro/music
+        DEPENDS data/vvvvvvmusic.vvv ${CMAKE_SOURCE_DIR}/dump_music.py
+        COMMENT "Unpacking vvvvvvmusic.vvv"
+        COMMAND ${E} make_directory data/music nitro/music
+        COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/dump_music.py
+    )
+    depend_data_files(data/vvvvvvmusic.vvv)
+
+    add_custom_command(
+        OUTPUT ${DATA_FILES}
+        BYPRODUCTS data
+        DEPENDS ${CMAKE_SOURCE_DIR}/data.zip
+        COMMENT "Extracting data.zip"
+        COMMAND ${E} make_directory data
+        COMMAND ${E} chdir data ${E} tar x ${CMAKE_SOURCE_DIR}/data.zip --touch
+    )
+
+    add_custom_target(VVVVVV_NITROFS DEPENDS ${NITRO_FILES})
+
     # these need to exist at project configuration since nds_create_rom checks for them
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E make_directory nitro
-        COMMAND ${MAGICK} ${CMAKE_CURRENT_SOURCE_DIR}/icon.ico icon.bmp
+        COMMAND ${E} make_directory nitro
+        COMMAND ${MAGICK} ${CMAKE_SOURCE_DIR}/icon.ico icon.bmp
     )
 
     nds_create_rom(VVVVVV
         AUTHOR "Terry Cavanagh"
-        ICON ${CMAKE_CURRENT_BINARY_DIR}/icon.bmp
-        NITROFS ${CMAKE_CURRENT_BINARY_DIR}/nitro
+        ICON ${CMAKE_BINARY_DIR}/icon.bmp
+        NITROFS ${CMAKE_BINARY_DIR}/nitro
     )
     add_dependencies(VVVVVV_nds VVVVVV_NITROFS)
 endif()

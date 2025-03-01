@@ -1,9 +1,8 @@
-import re
 import struct
 
 HEADER_COUNT = 128
 
-with open("vvvvvvmusic.vvv", "rb") as blob:
+with open("data/vvvvvvmusic.vvv", "rb") as blob:
 	headers = []
 	for i in range(HEADER_COUNT):
 		header = struct.unpack("<48s2iB3x", blob.read(60))
@@ -12,6 +11,5 @@ with open("vvvvvvmusic.vvv", "rb") as blob:
 
 	for (name, size) in headers:
 		ogg = blob.read(size)
-		filepath = re.sub("^data\\/music", "music", name)
-		with open(filepath, "wb") as out:
+		with open(name, "wb") as out:
 			out.write(ogg)
