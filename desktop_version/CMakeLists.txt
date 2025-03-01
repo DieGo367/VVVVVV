@@ -346,17 +346,28 @@ endif()
 if(BUNDLE_DEPENDENCIES)
     add_library(tinyxml2-static STATIC ${XML2_SRC})
     add_library(physfs-static STATIC ${PFS_SRC})
-    target_compile_definitions(physfs-static PRIVATE
-        -DPHYSFS_SUPPORTS_DEFAULT=0 -DPHYSFS_SUPPORTS_ZIP=1
-    )
-    add_library(faudio-static STATIC ${FAUDIO_SRC})
-    target_include_directories(
-        faudio-static PRIVATE
-        ../third_party/FAudio/include
-    )
-    # Disable FAudio debug stuff in release mode. This needs a generator expression for CMake reasons(TM)
-    target_compile_definitions(faudio-static PRIVATE $<$<CONFIG:Release>:FAUDIO_DISABLE_DEBUGCONFIGURATION>)
-
+    if(NINTENDO_DS) # heyyyyy
+        # minimize lodepng to just the encoding part
+        target_compile_definitions(lodepng-static PRIVATE
+            -DLODEPNG_NO_COMPILE_ANCILLARY_CHUNKS
+            -DLODEPNG_NO_COMPILE_DECODER
+        )
+        # don't include zip support in physfs
+        target_compile_definitions(physfs-static PRIVATE -DPHYSFS_SUPPORTS_DEFAULT=0)
+        # and don't include faudio at all
+        list(REMOVE_ITEM STATIC_LIBRARIES faudio-static)
+    else()
+        target_compile_definitions(physfs-static PRIVATE
+            -DPHYSFS_SUPPORTS_DEFAULT=0 -DPHYSFS_SUPPORTS_ZIP=1
+        )
+        add_library(faudio-static STATIC ${FAUDIO_SRC})
+        target_include_directories(
+            faudio-static PRIVATE
+            ../third_party/FAudio/include
+        )
+        # Disable FAudio debug stuff in release mode. This needs a generator expression for CMake reasons(TM)
+        target_compile_definitions(faudio-static PRIVATE $<$<CONFIG:Release>:FAUDIO_DISABLE_DEBUGCONFIGURATION>)
+    endif()
     target_link_libraries(VVVVVV ${STATIC_LIBRARIES})
 else()
     target_link_libraries(VVVVVV ${STATIC_LIBRARIES} physfs tinyxml2 FAudio)
@@ -417,21 +428,9 @@ if(NINTENDO_DS)
     set(CMAKE_C_FLAGS_RELEASE "-g -O2") # -DNDEBUG causes a Data Abort for some reason
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
-    # minimize lodepng to just the encoding part
-    target_compile_definitions(lodepng-static PRIVATE
-        -DLODEPNG_NO_COMPILE_ANCILLARY_CHUNKS
-        -DLODEPNG_NO_COMPILE_DECODER
-    )
-
-    # force remove zip support from physfs
-    get_target_property(defs physfs-static COMPILE_DEFINITIONS)
-    list(FILTER defs EXCLUDE REGEX [[^PHYSFS_SUPPORTS_ZIP=1$]])
-    set_property(TARGET physfs-static PROPERTY COMPILE_DEFINITIONS ${defs} PHYSFS_SUPPORTS_ZIP=0)
-
     # custom SDL replacement
     add_library(sndsl-static STATIC
         ../third_party/SnDsL/src/main.c
-        ../third_party/SnDsL/src/audio.c
         ../third_party/SnDsL/src/messagebox.c
     )
     target_include_directories(sndsl-static PRIVATE ../third_party/SnDsL/include)
@@ -714,7 +713,7 @@ if(DEFINED SDL2_INCLUDE_DIRS AND DEFINED SDL2_LIBRARIES)
     message(STATUS "Using pre-defined SDL2 variables SDL2_INCLUDE_DIRS and SDL2_LIBRARIES")
     target_include_directories(VVVVVV SYSTEM PRIVATE "$<BUILD_INTERFACE:${SDL2_INCLUDE_DIRS}>")
     target_link_libraries(VVVVVV ${SDL2_LIBRARIES})
-    if(BUNDLE_DEPENDENCIES)
+    if(BUNDLE_DEPENDENCIES AND NOT DEFINED NINTENDO_DS)
         target_include_directories(faudio-static SYSTEM PRIVATE "$<BUILD_INTERFACE:${SDL2_INCLUDE_DIRS}>")
         target_link_libraries(faudio-static ${SDL2_LIBRARIES})
     endif()

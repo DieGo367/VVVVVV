@@ -16,8 +16,6 @@ extern "C" {
 
 #include "SDL_stdinc.h"
 #include "SDL_assert.h"
-#include "SDL_audio.h"
-#include "SDL_endian.h"
 #include "SDL_keyboard.h"
 #include "SDL_log.h"
 #include "SDL_rwops.h"
