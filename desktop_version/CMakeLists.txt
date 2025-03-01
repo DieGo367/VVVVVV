@@ -664,11 +664,17 @@ if(NINTENDO_DS)
         14piercingthesky
         predestinedfatefinallevel
     )
+    set(MUSIC_TRACKS_MONO 0levelcomplete 1pushingonwards 2positiveforce 9positiveforcereversed 11pipedream)
     foreach(TRACK ${MUSIC_TRACKS})
+        if (TRACK IN_LIST MUSIC_TRACKS_MONO)
+            set(USE_MONO -ac 1)
+        else()
+            set(USE_MONO)
+        endif()
         add_custom_command(
             OUTPUT nitro/music/${TRACK}.wav
             DEPENDS data/music/${TRACK}.ogg
-            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i data/music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 -bitexact nitro/music/${TRACK}.wav
+            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i data/music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 ${USE_MONO} -bitexact nitro/music/${TRACK}.wav
         )
         list(APPEND MUSIC_TRACK_SRC data/music/${TRACK}.ogg)
         add_nitro_files(nitro/music/${TRACK}.wav)

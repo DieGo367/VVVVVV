@@ -744,6 +744,7 @@ typedef struct WAVHeader {
 
 #define Music_COUNT 16
 static FILE *wavFiles[Music_COUNT] = {0};
+static bool wavFileIsStereo[Music_COUNT] = {0};
 static int currentTrack = -1;
 static bool loopCurrentTrack = false;
 static bool paused = true, streamOpened = false;
@@ -757,11 +758,12 @@ static void openWavFile(int id, const char *filename) {
             && header.format == 0x45564157 // WAVE
             && header.subchunk1ID == 0x20746d66 // "fmt "
             && header.subchunk2ID == 0x61746164 // data
-            && header.numChannels == 2
+            && (header.numChannels == 1 || header.numChannels == 2)
             && header.bitsPerSample == 8
             && header.sampleRate == 8000
         ) {
             wavFiles[id] = wavFile;
+            wavFileIsStereo[id] = header.numChannels == 2;
             return;
         }
         else {
@@ -773,29 +775,30 @@ static void openWavFile(int id, const char *filename) {
 }
 
 mm_word musicStreamCallback(mm_word length, mm_addr dest, mm_stream_formats format) {
+    int size = format + 1; // 1 or 2, depending on 8bit Mono vs 8bit Stereo
     if (currentTrack < 0 || paused || wavFiles[currentTrack] == NULL) {
-        memset(dest, 0, 2*length); // silence
+        memset(dest, 0, size*length); // silence
         return length;
     }
     FILE *wavFile = wavFiles[currentTrack];
-    int readCount = fread(dest, 2, length, wavFile);
+    int readCount = fread(dest, size, length, wavFile);
     if (feof(wavFile)) {
         if (loopCurrentTrack) {
             fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
-            readCount = fread(dest, 2, length, wavFile);
+            readCount = fread(dest, size, length, wavFile);
         }
         else {
             paused = true;
-            memset(dest, 0, 2*length);
+            memset(dest, 0, size*length);
             return length;
         }
     }
     if (music.user_music_volume == 0) { // NDS_TODO: support proper volume control
-        memset(dest, 0, 2*readCount);
+        memset(dest, 0, size*readCount);
     }
     else {
         s8 *samples = (s8 *)dest;
-        for (mm_word i = 0; i < 2*length; i++) {
+        for (mm_word i = 0; i < size*length; i++) {
             samples[i] = samples[i] - 128;
         }
     }
@@ -815,7 +818,7 @@ static bool playTrack(int id, bool loop) {
             stream.sampling_rate = 8000;
             stream.buffer_length = 3200;
             stream.callback = musicStreamCallback;
-            stream.format = MM_STREAM_8BIT_STEREO;
+            stream.format = wavFileIsStereo[id] ? MM_STREAM_8BIT_STEREO : MM_STREAM_8BIT_MONO;
             stream.timer = MM_TIMER0;
             stream.manual = true;
             mmStreamOpen(&stream);
