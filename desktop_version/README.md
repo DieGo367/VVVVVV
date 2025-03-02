@@ -25,7 +25,7 @@ Be sure to use `git submodule update --init` after cloning this repo to get all
 the submodules downloaded.
 
 Place your `data.zip` file here in the `desktop_version` folder.
-See "Including data.zip" in the original README below for where to find it.
+See [Including data.zip](#including-datazip) in the original README below for where to find it.
 
 To set up the build environment run these commands from within this folder:
 ```
