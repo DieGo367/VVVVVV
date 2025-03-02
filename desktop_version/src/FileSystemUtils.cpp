@@ -291,6 +291,17 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         basePath = SDL_strdup("./");
     }
 
+#ifdef __NDS__
+    // mount all data from nitrofs instead
+    if (PHYSFS_mount("nitro:/", NULL, 1)) {
+        doesLangDirExist = true;
+        doesFontsDirExist = true;
+    } else {
+        vlog_error("Failed to mount nitrofs");
+        VVV_exit(1);
+        return 0;
+    }
+#else
 #ifdef __ANDROID__
     // This is kind of a mess, but that's not really solvable unless we expect the user to download the data.zip manually.
     if (!PHYSFS_mount(PHYSFS_getBaseDir(), "/apk", 1))
@@ -308,12 +319,6 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
 
     PHYSFS_File* dataZip = PHYSFS_openRead("/apk/assets/data.zip");
     if (!dataZip || !PHYSFS_mountHandle(dataZip, "data.zip", NULL, 1))
-#elif defined(__NDS__)
-    // mount all data from nitrofs instead
-    if (PHYSFS_mount("nitro:/", NULL, 1)) {
-        doesLangDirExist = true;
-        doesFontsDirExist = true;
-    } else
 #else
     doesLangDirExist = mount_pre_datazip(mainLangDir, "lang", "lang/", langDir);
     vlog_info("Languages directory: %s", mainLangDir);
@@ -359,7 +364,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         vlog_info("gamecontrollerdb.txt not found!");
     }
     #endif
-
+#endif
     isInit = true;
     return 1;
 }
