@@ -1,5 +1,11 @@
 ![logo](logo.gif "VVVVVV")
 
+NDS Port!
+---------
+This fork is a **Work In Progress** port of VVVVVV to the Nintendo DS and DS<sup>i</sup> systems. For detailed build instructions, please see the README in the [`desktop_version` folder](https://github.com/DieGo367/VVVVVV/tree/master/desktop_version).
+
+Original README
+---------------
 This is the source code to VVVVVV, the 2010 indie game by [Terry Cavanagh](http://distractionware.com/), with music by [Magnus Pålsson](http://souleye.madtracker.net/). You can read the [announcement](http://distractionware.com/blog/2020/01/vvvvvv-is-now-open-source/) of the source code release on Terry's blog!
 
 The source code for the desktop version is in [this folder](desktop_version).

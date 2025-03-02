@@ -1,3 +1,48 @@
+Build Dependencies
+------------------
+Compared to building VVVVVV natively, there are several additional tools required
+at build time. These include the DS development toolchain as well as tools to
+preprocess the images/sounds/music from the `data.zip` file so they can be
+included in the DS rom file.
+
+- [BlocksDS](https://blocksds.skylyrac.net/) - The toolchain used for this project.
+Follow these [installation instructions](https://blocksds.skylyrac.net/docs/setup/options/).
+Be sure to export the `BLOCKSDS` and `WONDERFUL_TOOLCHAIN` environment variables
+as they are required when using BlocksDS with CMake.
+- [ImageMagick](https://imagemagick.org/script/download.php) - Used to preprocess the
+images before they can be converted to the format used on DS. Ensure it is in your `PATH`.
+- [FFmpeg](https://ffmpeg.org/download.html) - Used to reencode sounds/music to lower quality
+(and to WAV instead of OGG). Ensure it is in your `PATH`.
+- [Python](https://www.python.org/downloads/) - Used to run a small script extracting
+the music out of the binary blob in `data.zip`.
+
+Unlike other versions, there is no longer a dependency on SDL2. All libraries are either
+bundled with the VVVVVV source code or included with your BlocksDS installation.
+
+Build Instructions
+------------------
+Be sure to use `git submodule update --init` after cloning this repo to get all
+the submodules downloaded.
+
+Place your `data.zip` file here in the `desktop_version` folder.
+See "Including data.zip" in the original README below for where to find it.
+
+To set up the build environment run these commands from within this folder:
+```
+mkdir build
+cd build
+cmake .. --toolchain=$BLOCKSDS/cmake/BlocksDS.cmake -DNDS_ARCH_THUMB=1
+```
+
+Now you can just run `make` to compile the game. This will also extract and
+convert the assets and bundle them into the output `VVVVVV.nds` rom.
+
+This repository makes most of its changes via `#ifdef`s and `#define`s so it should
+still be possible to build the desktop native versions of VVVVVV here as well,
+if you follow the original instructions.
+
+Original README
+---------------
 How to Build
 ------------
 VVVVVV's official desktop versions are built with the following environments:
