@@ -2697,7 +2697,15 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
 
             #ifdef __NDS__
-            drawtile(drawRect.x, drawRect.y, 1167, false); // NDS_TODO: color
+            // just approximate it with a tri
+            int rx = RENDER_SCALE(drawRect.x), ry = RENDER_SCALE(drawRect.y);
+            // not RENDER_SCALEing the width/height to make it look better
+            glTriangleFilled(
+                rx,                ry + drawRect.h/2,
+                rx + drawRect.w/2, ry + drawRect.h,
+                rx + drawRect.w/2, ry,
+                VRAM_COLOR(ct.r, ct.g, ct.b)
+            );
             #else
             draw_grid_tile(grphx.im_tiles_white, 1167, drawRect.x, drawRect.y, 8, 8, ct);
             #endif
@@ -2721,7 +2729,14 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
 
             #ifdef __NDS__
-            drawtile(drawRect.x, drawRect.y, 1166, false); // NDS_TODO: color
+            int rx = RENDER_SCALE(drawRect.x), ry = RENDER_SCALE(drawRect.y);
+            // much weirdness with the shape, the +1's are needed for it to look comparable
+            glTriangleFilled(
+                rx + drawRect.w/2 + 1, ry + drawRect.h/2 + 1,
+                rx,                    ry + drawRect.h,
+                rx + 1,                ry + 1,
+                VRAM_COLOR(ct.r, ct.g, ct.b)
+            );
             #else
             draw_grid_tile(grphx.im_tiles_white, 1166, drawRect.x, drawRect.y, 8, 8, ct);
             #endif
