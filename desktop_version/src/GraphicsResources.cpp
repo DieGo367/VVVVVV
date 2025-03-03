@@ -565,7 +565,7 @@ void GraphicsResources::init(void)
     im_image7 = LoadImage("graphics/site.grf", TEX_WHITE);
     im_image8 = LoadImage("graphics/site2.grf", TEX_WHITE);
     im_image9 = LoadImage("graphics/site3.grf", TEX_WHITE);
-    im_image10 = LoadImage("graphics/ending.grf");
+    im_image10 = LoadImage("graphics/ending.grf", 256, 192);
     im_image11 = LoadImage("graphics/site4.grf", TEX_WHITE);
     #else
     LoadVariants("graphics/tiles.png", &im_tiles, &im_tiles_white, &im_tiles_tint);

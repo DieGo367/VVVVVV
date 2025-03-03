@@ -540,7 +540,7 @@ int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Re
         srcX = src->x, srcY = src->y, srcW = src->w, srcH = src->h;
     }
 
-    int destX = 0, destY = 0, destW = SCREEN_WIDTH_PIXELS, destH = SCREEN_HEIGHT_PIXELS;
+    int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
     if (dest) {
         destX = RENDER_SCALE(dest->x), destY = RENDER_SCALE(dest->y);
         destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
@@ -3559,7 +3559,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
         int off = bg_obj.scrolldir == 0 ? 0 : bg_obj.bscroll;
         //Draw the whole thing; needed for every colour cycle!
         #ifdef __NDS__
-        for (int j = 0; j < 30; j++)
+        for (int j = 0; j < 31; j++)
         #else
         clear();
         for (int j = -1; j < 32; j++)

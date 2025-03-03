@@ -1913,7 +1913,12 @@ void titlerender(void)
 
 void gamecompleterender(void)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    if (graphics.foregrounddrawn) {
+        graphics.clear_tile_layer(false);
+        graphics.foregrounddrawn = false;
+    }
+    #else
     graphics.clear();
     #endif
 
@@ -2165,11 +2170,13 @@ void gamecompleterender(void)
 
 void gamecompleterender2(void)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    graphics.copy_texture(graphics.images[IMAGE_ENDING], NULL, NULL); // ensure it will fit to screen
+    #else
     graphics.clear();
-    #endif
 
     graphics.drawimage(IMAGE_ENDING, 0, 0);
+    #endif
 
     for (int j = 0; j < 30; j++)
     {
