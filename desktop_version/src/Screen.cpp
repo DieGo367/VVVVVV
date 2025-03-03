@@ -19,7 +19,6 @@
 
 #ifdef __NDS__
 #include <nds/arm9/background.h>
-#include <nds/arm9/sprite.h>
 #include <gl2d.h>
 void ScreenSettings_default(struct ScreenSettings* _this)
 {

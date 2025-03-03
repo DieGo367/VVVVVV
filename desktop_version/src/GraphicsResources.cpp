@@ -36,7 +36,6 @@ extern "C"
 
 #ifdef __NDS__
 #include <nds/arm9/grf.h>
-#include <nds/arm9/sprite.h>
 #include <gl2d.h>
 
 static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void **gfxDst, size_t *gfxSize, void **mapDst, size_t *mapSize, void **palDst, size_t *palSize)
