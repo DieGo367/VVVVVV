@@ -955,7 +955,6 @@ void musicclass::init(void)
     soundTracks.push_back(SoundTrack( "sounds/newrecord.wav" ));
     soundTracks.push_back(SoundTrack( "sounds/trophy.wav" ));
     soundTracks.push_back(SoundTrack( "sounds/rescue.wav" ));
-    #endif
 
 #ifdef VVV_COMPILEMUSIC
     binaryBlob musicWriteBlob;
@@ -965,6 +964,7 @@ void musicclass::init(void)
 
     musicWriteBlob.writeBinaryBlob("data/BinaryMusic.vvv");
     musicWriteBlob.clear();
+#endif
 
     num_mmmmmm_tracks = 0;
     num_pppppp_tracks = 0;
