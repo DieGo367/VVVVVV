@@ -2536,8 +2536,9 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect.y += tpoint.y;
             drawRect.x += 8 * ii;
             #ifdef __NDS__
-            if (active_tileset == 1) drawtile2(drawRect.x, drawRect.y, drawTile, false);
-            else drawtile(drawRect.x, drawRect.y, drawTile, false);
+            int finalDrawTile = drawTile == 0 ? map.contents[TILE_IDX(drawRect.x/8, drawRect.y/8)] : drawTile;
+            if (active_tileset == 1) drawtile2(drawRect.x, drawRect.y, finalDrawTile, false);
+            else drawtile(drawRect.x, drawRect.y, finalDrawTile, false);
             #else
             if (custom_gray)
             {
