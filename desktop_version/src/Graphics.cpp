@@ -466,11 +466,9 @@ void Graphics::print_level_creator(
         sprite_x = 103;
         print_flags |= PR_RIGHT;
     }
-    #ifndef __NDS__ // NDS_TODO: draw this happy face manually somehow, can't use the sprites as they are
     set_texture_color_mod(grphx.im_sprites, r, g, b);
     draw_texture_part(grphx.im_sprites, face_x, y - 1, sprite_x, 2, 10, 10, 1, 1);
     set_texture_color_mod(grphx.im_sprites, 255, 255, 255);
-    #endif
     font::print(print_flags, text_x, y, creator, r, g, b);
 }
 
