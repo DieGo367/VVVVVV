@@ -5,6 +5,8 @@
 #include <nds/interrupts.h>
 
 int SDL_ShowSimpleMessageBox(uint32_t flags, const char *title, const char *message, SDL_Window *window) {
+	consoleDemoInit();
+
 	if (flags & SDL_MESSAGEBOX_ERROR) {
 		printf("\x1b[31;1m");
 	}

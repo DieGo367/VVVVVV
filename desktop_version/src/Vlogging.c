@@ -22,22 +22,16 @@
 
 #define COLOR(EXPR) (color_enabled && color_supported ? EXPR : "")
 
-#ifdef __NDS__
-#define Color_RESET COLOR("\x1b[39;0m")
-#define Color_BOLD COLOR("\x1b[1m")
-#define Color_BOLD_YELLOW COLOR("\x1b[33;1m")
-#define Color_BOLD_RED COLOR("\x1b[31;1m")
-#define Color_BOLD_GRAY COLOR("\x1b[37m")
-#else
 #define Color_RESET COLOR("\x1b[0m")
 #define Color_BOLD COLOR("\x1b[1m")
 #define Color_BOLD_YELLOW COLOR("\x1b[1;33m")
 #define Color_BOLD_RED COLOR("\x1b[1;31m")
 #define Color_BOLD_GRAY COLOR("\x1b[1;90m")
-#endif
 
 #ifdef __ANDROID__
 const int color_supported = 0;
+#elif defined(__NDS__)
+const int color_supported = 1;
 #else
 static int color_supported = 0;
 #endif
@@ -51,12 +45,31 @@ static int error_enabled = 1;
 
 static void check_color_support(void);
 
+#ifdef __NDS__
+static char outputBuffer[256];
+static int outputLen = 0;
+static int outputToNocash(const char *str, unsigned int length) {
+    unsigned int i = length;
+    while (i--) {
+        if (*str == '\n' || outputLen == 256) {
+            nocashWrite(outputBuffer, outputLen);
+            outputLen = 0;
+        }
+        else {
+            outputBuffer[outputLen++] = *str++;
+        }
+    }
+    return length;
+}
+#endif
+
 void vlog_init(void)
 {
 #ifdef VLOG_USE_SDL
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
 #elif defined(__NDS__)
-    consoleDemoInit();
+    consoleSetCustomStdout(outputToNocash);
+    consoleSetCustomStderr(outputToNocash);
 #endif
     check_color_support();
 }
@@ -109,21 +122,12 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_debug(const char* text, ...)
     printf("[DEBUG]");
     printf(Color_RESET);
     printf(" ");
-#ifdef __NDS__
-    char msg[120];
-#endif
 
     va_start(list, text);
     vprintf(text, list);
-#ifdef __NDS__
-    vsnprintf(msg, 120, text, list);
-#endif
     va_end(list);
 
     putchar('\n');
-#ifdef __NDS__
-    nocashf("%s[DEBUG]%s %s", Color_BOLD_GRAY, Color_RESET, msg);
-#endif
 #endif
 }
 
@@ -145,21 +149,12 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_info(const char* text, ...)
     printf("[INFO]");
     printf(Color_RESET);
     printf(" ");
-#ifdef __NDS__
-    char msg[120];
-#endif
 
     va_start(list, text);
     vprintf(text, list);
-#ifdef __NDS__
-    vsnprintf(msg, 120, text, list);
-#endif
     va_end(list);
 
     putchar('\n');
-#ifdef __NDS__
-    nocashf("%s[INFO]%s %s", Color_BOLD, Color_RESET, msg);
-#endif
 #endif
 }
 
@@ -181,21 +176,12 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_warn(const char* text, ...)
     fprintf(stderr, "[WARN]");
     fprintf(stderr, Color_RESET);
     fprintf(stderr, " ");
-#ifdef __NDS__
-    char msg[120];
-#endif
 
     va_start(list, text);
     vfprintf(stderr, text, list);
-#ifdef __NDS__
-    vsnprintf(msg, 120, text, list);
-#endif
     va_end(list);
 
     fputc('\n', stderr);
-#ifdef __NDS__
-    nocashf("%s[WARN]%s %s", Color_BOLD_YELLOW, Color_RESET, msg);
-#endif
 #endif
 }
 
@@ -217,21 +203,12 @@ SDL_PRINTF_VARARG_FUNC(1) void vlog_error(const char* text, ...)
     fprintf(stderr, "[ERROR]");
     fprintf(stderr, Color_RESET);
     fprintf(stderr, " ");
-#ifdef __NDS__
-    char msg[120];
-#endif
 
     va_start(list, text);
     vfprintf(stderr, text, list);
-#ifdef __NDS__
-    vsnprintf(msg, 120, text, list);
-#endif
     va_end(list);
 
     fputc('\n', stderr);
-#ifdef __NDS__
-    nocashf("%s[ERROR]%s %s", Color_BOLD_RED, Color_RESET, msg);
-#endif
 #endif
 }
 
@@ -332,8 +309,6 @@ static void check_color_support(void)
         return;
     }
 
-    color_supported = 1;
-#elif (defined(__NDS__))
     color_supported = 1;
 #elif (defined(__unix__) || defined(__APPLE__)) && !defined(VLOG_USE_SDL)
     if (isatty(STDOUT_FILENO) && isatty(STDERR_FILENO))
