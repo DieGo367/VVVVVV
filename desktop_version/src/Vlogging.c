@@ -14,6 +14,7 @@
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
 #elif defined(__NDS__)
+#   include <nds/debug.h>
 #   include <sys/types.h>
 #   include <nds/arm9/console.h>
 #elif defined(__unix__) || defined(__APPLE__)
