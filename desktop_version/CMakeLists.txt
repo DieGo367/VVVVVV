@@ -425,7 +425,6 @@ endforeach(static_library)
 if(NINTENDO_DS)
     target_compile_definitions(VVVVVV PRIVATE -Dasm=__asm__) # needed for c99
     target_link_libraries(VVVVVV -lmm9) # add Maxmod
-    set(CMAKE_C_FLAGS_RELEASE "-g -O2") # -DNDEBUG causes a Data Abort for some reason
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
     # custom SDL replacement

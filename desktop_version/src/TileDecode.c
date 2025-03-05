@@ -15,7 +15,8 @@ void decodeTilesShort(short *dest, const unsigned char *data, size_t dataLen) {
 			while (run--) *dest++ = tile;
 			break;
 		case 0x80:
-			SDL_assert(++i < dataLen);
+			++i;
+			SDL_assert(i < dataLen);
 			tile = (byte & 0x3F) | (data[i] << 6);
 			*dest++ = tile;
 			break;
@@ -41,7 +42,8 @@ void decodeTilesInt(int *dest, const unsigned char *data, size_t dataLen) {
 			while (run--) *dest++ = tile;
 			break;
 		case 0x80:
-			SDL_assert(++i < dataLen);
+			++i;
+			SDL_assert(i < dataLen);
 			tile = (byte & 0x3F) | (data[i] << 6);
 			*dest++ = tile;
 			break;
