@@ -108,7 +108,7 @@ GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, u8 **
 fail:
     if (gfxDst) *gfxDst = NULL;
     VVV_free(tex); VVV_free(gfx); VVV_free(palette);
-    return 0;
+    return NULL;
 }
 
 static GLTexture *LoadImage(const char* filename, int realWidth = 0, int realHeight = 0)
@@ -118,7 +118,7 @@ static GLTexture *LoadImage(const char* filename, int realWidth = 0, int realHei
 
 void DestroyImage(GLTexture *texture)
 {
-    if (texture && texture->id) {
+    if (texture) {
         glDeleteTextures(1, &texture->id);
         free(texture);
     }
