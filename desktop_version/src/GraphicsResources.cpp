@@ -118,7 +118,7 @@ static GLTexture *LoadImage(const char* filename, int realWidth = 0, int realHei
 
 void DestroyImage(GLTexture *texture)
 {
-    if (texture) {
+    if (texture && texture->id != -1) {
         glDeleteTextures(1, &texture->id);
         free(texture);
     }
