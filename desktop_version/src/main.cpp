@@ -4,7 +4,9 @@
 #include <emscripten/html5.h>
 #endif
 #ifdef __NDS__
+#include <nds/fifocommon.h>
 #include <nds/interrupts.h>
+#include <nds/system.h>
 #endif
 
 #include "ButtonGlyphs.h"
@@ -901,6 +903,12 @@ int main(int argc, char *argv[])
 
     cleanup();
 #endif
+    #ifdef __NDS__
+    if (isDSiMode()) {
+        // reboot (see comment in VVV_exit)
+        fifoSendValue32(FIFO_USER_01, 1);
+    }
+    #endif
 
     return 0;
 }
@@ -930,6 +938,18 @@ static void cleanup(void)
 SDL_NORETURN void VVV_exit(const int exit_code)
 {
     cleanup();
+    #ifdef __NDS__
+    if (isDSiMode()) {
+        /* Return to loader crashes on BlocksDS DSi mode.
+         * For now, we can work around this by triggering a reboot.
+         * Not ideal, but for some users this *will* appear to return to their
+         * loader of choice if they've set it to autoboot.
+         * Also, there's no function for this, we need to tell the ARM7
+         * to do it for us via FIFO channel.
+         */
+        fifoSendValue32(FIFO_USER_01, 1);
+    }
+    #endif
     exit(exit_code);
 }
 
