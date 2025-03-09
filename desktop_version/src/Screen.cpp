@@ -58,6 +58,7 @@ void Screen::init(const struct ScreenSettings* settings) {
     bgUpdate();
 
     vramSetBankB(VRAM_B_TEXTURE);
+    vramSetBankC(VRAM_C_TEXTURE);
     vramSetBankD(VRAM_D_TEXTURE);
     vramSetBankE(VRAM_E_TEX_PALETTE);
     glScreen2D();
