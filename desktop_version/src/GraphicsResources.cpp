@@ -630,7 +630,9 @@ void GraphicsResources::destroy(void)
     CLEAR(im_entcolours_tint);
 #endif
     CLEAR(im_sprites);
+    #ifndef __NDS__
     CLEAR(im_flipsprites);
+    #endif
     CLEAR(im_teleporter);
 
     CLEAR(im_image0);
@@ -638,8 +640,10 @@ void GraphicsResources::destroy(void)
     CLEAR(im_image2);
     CLEAR(im_image3);
     CLEAR(im_image4);
+    #ifndef __NDS__
     CLEAR(im_image5);
     CLEAR(im_image6);
+    #endif
     CLEAR(im_image7);
     CLEAR(im_image8);
     CLEAR(im_image9);
