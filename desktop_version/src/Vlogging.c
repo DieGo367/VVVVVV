@@ -47,17 +47,17 @@ static int error_enabled = 1;
 static void check_color_support(void);
 
 #ifdef __NDS__
-static char outputBuffer[256];
+static char outputBuffer[120];
 static int outputLen = 0;
 static int outputToNocash(const char *str, unsigned int length) {
     unsigned int i = length;
     while (i--) {
-        if (*str == '\n' || outputLen == 256) {
+        char current = *str++;
+        if (current != '\n') outputBuffer[outputLen++] = current;
+        if (current == '\n' || outputLen == 120) {
+            if (outputLen == 0) outputBuffer[0] = '\0';
             nocashWrite(outputBuffer, outputLen);
             outputLen = 0;
-        }
-        else {
-            outputBuffer[outputLen++] = *str++;
         }
     }
     return length;
