@@ -151,6 +151,34 @@ static void DestroyTileset(Tileset *tileset)
     }
 }
 
+GLTexture *GraphicsResources::LoadSprites(const char *filename) {
+    u8 *gfx;
+    GLTexture *tex = LoadImage(filename, TEX_WHITE, &gfx);
+    if (tex == NULL) return NULL;
+
+    for (int id = 0; id < 12*16; id++) {
+        u8 *spriteTopLeft = &gfx[(id/12 * tex->width*32 + id%12 * 32) / 4];
+        for (int row = 0; row < 32; row++) {
+            for (int col = 0; col < 32; col += 8) {
+                u16 srcPixels = *(u16 *)&spriteTopLeft[(row * tex->width + col) / 4];
+                spriteHitmaps[id][(row * 32 + col) / 8] = (
+                    (srcPixels & 0b11       ? BIT(0) : 0) |
+                    (srcPixels & 0b11 <<  2 ? BIT(1) : 0) |
+                    (srcPixels & 0b11 <<  4 ? BIT(2) : 0) |
+                    (srcPixels & 0b11 <<  6 ? BIT(3) : 0) |
+                    (srcPixels & 0b11 <<  8 ? BIT(4) : 0) |
+                    (srcPixels & 0b11 << 10 ? BIT(5) : 0) |
+                    (srcPixels & 0b11 << 12 ? BIT(6) : 0) |
+                    (srcPixels & 0b11 << 14 ? BIT(7) : 0)
+                );
+            }
+        }
+    }
+
+    VVV_free(gfx);
+    return tex;
+}
+
 static void LoadSpritesTranslation(
     const char* filename,
     tinyxml2::XMLDocument* mask,
@@ -549,7 +577,7 @@ void GraphicsResources::init(void)
     im_tiles2 = LoadTileset("graphics/tiles2.grf");
     im_tiles3 = LoadTileset("graphics/tiles3.grf");
 
-    im_sprites = LoadImage("graphics/sprites.grf", TEX_WHITE, &spriteGfxRaw);
+    im_sprites = LoadSprites("graphics/sprites.grf");
     im_flipsprites = im_sprites;
 
     im_teleporter = LoadImage("graphics/teleporter.grf");
@@ -652,7 +680,6 @@ void GraphicsResources::destroy(void)
     CLEAR(im_image12);
 
     #ifdef __NDS__
-    VVV_free(spriteGfxRaw);
     VVV_free(im_sprites_translated);
     VVV_free(im_flipsprites_translated);
     #else

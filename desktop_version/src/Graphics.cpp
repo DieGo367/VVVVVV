@@ -2074,7 +2074,6 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
     //find rectangle where they intersect:
 
     #ifdef __NDS__
-    if (!grphx.spriteGfxRaw) return false;
     int r1_left = p1.x;
     int r1_right = r1_left + 32;
     int r2_left = p2.x;
@@ -2107,8 +2106,8 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
     {
         #ifdef __NDS__
         intersection = false;
-        const u8 * const frame1Gfx = (grphx.spriteGfxRaw + ((frame1 % 12) + (frame1 / 12) * grphx.im_sprites->width) * 32 / 4);
-        const u8 * const frame2Gfx = (grphx.spriteGfxRaw + ((frame2 % 12) + (frame2 / 12) * grphx.im_sprites->width) * 32 / 4);
+        const u8 * const frame1Hitmap = grphx.spriteHitmaps[frame1];
+        const u8 * const frame2Hitmap = grphx.spriteHitmaps[frame2];
         #endif
         int r3_left = SDL_max(r1_left, r2_left);
         int r3_top = SDL_min(r1_top, r2_top);
@@ -2128,8 +2127,8 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
                 const int py1 = y - p1.y;
                 const int py2 = y - p2.y;
 
-                u8 pixel1 = (frame1Gfx[(px1 + py1 * grphx.im_sprites->width) / 4] >> px1 % 4 * 2) & 0x03;
-                u8 pixel2 = (frame2Gfx[(px2 + py2 * grphx.im_sprites->width) / 4] >> px2 % 4 * 2) & 0x03;
+                u8 pixel1 = (frame1Hitmap[(px1 + py1 * 32) / 8] >> px1 % 8) & 0x1;
+                u8 pixel2 = (frame2Hitmap[(px2 + py2 * 32) / 8] >> px2 % 8) & 0x1;
                 if (pixel1 && pixel2) return true;
                 #else
                 const SDL_Color pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);

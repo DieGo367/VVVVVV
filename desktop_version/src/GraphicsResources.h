@@ -56,10 +56,12 @@ public:
     GLTexture *im_image11;
     GLTexture *im_image12;
 
-    u8 *spriteGfxRaw;
+    u8 spriteHitmaps[12*16][32*32/8];
 
     u16 *im_sprites_translated;
     u16 *im_flipsprites_translated;
+private:
+    GLTexture *LoadSprites(const char *filename);
     #else
     SDL_Surface* im_sprites_surf;
     SDL_Surface* im_flipsprites_surf;
