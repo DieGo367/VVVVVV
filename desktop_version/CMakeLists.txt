@@ -476,8 +476,8 @@ if(NINTENDO_DS)
                 # generate some custom tiles for the warp zone bgs
                 set(INSTRUCTIONS
                     \( -clone 0 -crop 16x72+0+0
-                        -fill "%[pixel:p{0,0}]" -draw "rectangle 0,64 7,71"
-                        -fill "%[pixel:p{0,7}]" -draw "rectangle 8,64 15,71"
+                        -fill "%[pixel: p{0,0}]" -draw "rectangle 0,64 7,71"
+                        -fill "%[pixel: p{0,7}]" -draw "rectangle 8,64 15,71"
                     \)
                     \( -clone 0 -crop 4x16+0+0 -repage +12+32! \)
                     \( -clone 0 -crop 12x16+4+0 -repage -4+32! \)
@@ -514,9 +514,9 @@ if(NINTENDO_DS)
                         -fill "#FF00FF" -stroke none
                             -draw "rectangle 0,0 31,23"
                             -draw "rectangle 40,16 71,23"
-                        )
-                        # splitting into 2 parts to set a new fill (see below)
-                        set(INSTR_2
+                )
+                # splitting into 2 parts to set a new fill (see below)
+                set(INSTR_2
                             -draw "rectangle 0,0 1,1"
                             -draw "rectangle 10,0 11,1"
                             -draw "rectangle 20,0 21,1"
