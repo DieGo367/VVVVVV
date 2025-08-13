@@ -742,91 +742,145 @@ typedef struct WAVHeader {
     uint32_t subchunk2Size;
 } WAVHeader;
 
-#define Music_COUNT 16
-static FILE *wavFiles[Music_COUNT] = {0};
-static bool wavFileIsStereo[Music_COUNT] = {0};
-static int currentTrack = -1;
-static bool loopCurrentTrack = false;
-static bool paused = true, streamOpened = false;
+static u8 *soundbank = NULL;
+static mm_word effectVolume = MM_MAX_VOLUME;
 
-static void openWavFile(int id, const char *filename) {
-    FILE *wavFile = fopen(filename, "r");
-    if (wavFile) {
-        WAVHeader header;
-        fread(&header, 1, sizeof(WAVHeader), wavFile);
-        if (header.chunkID == 0x46464952  // RIFF
-            && header.format == 0x45564157 // WAVE
-            && header.subchunk1ID == 0x20746d66 // "fmt "
-            && header.subchunk2ID == 0x61746164 // data
-            && (header.numChannels == 1 || header.numChannels == 2)
-            && header.bitsPerSample == 8
-            && header.sampleRate == 8000
-        ) {
-            wavFiles[id] = wavFile;
-            wavFileIsStereo[id] = header.numChannels == 2;
-            return;
-        }
-        else {
-            fclose(wavFile);
-            vlog_error("WAV file invalid format: %s", filename);
-        }
-    }
-    wavFiles[id] = NULL;
+#define Music_COUNT 16
+static int wavFileStatus[Music_COUNT] = {0};
+static FILE *wavFile = NULL;
+
+static bool streamLoop = false;
+static bool streamOpened = false;
+static bool streamPaused = true;
+#define STREAM_BUFFER_LENGTH 3200
+static u8 streamBuffer[STREAM_BUFFER_LENGTH];
+static int streamBufferIn = -1, streamBufferOut = 0;
+
+static FILE *openWavFile(int id) {
+    char path[32];
+    snprintf(path, 32, "music/%i.wav", id);
+    return fopen(path, "r");
 }
 
-mm_word musicStreamCallback(mm_word length, mm_addr dest, mm_stream_formats format) {
-    int size = format + 1; // 1 or 2, depending on 8bit Mono vs 8bit Stereo
-    if (currentTrack < 0 || paused || wavFiles[currentTrack] == NULL) {
-        memset(dest, 0, size*length); // silence
-        return length;
+static void testWavFile(int id) {
+    wavFileStatus[id] = 0;
+    FILE *file = openWavFile(id);
+    if (file == NULL) {
+        vlog_error("Unable to open WAV file for track id %i", id);
+        return;
     }
-    FILE *wavFile = wavFiles[currentTrack];
-    int readCount = fread(dest, size, length, wavFile);
-    if (feof(wavFile)) {
-        if (loopCurrentTrack) {
-            fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
-            readCount = fread(dest, size, length, wavFile);
-        }
-        else {
-            paused = true;
-            memset(dest, 0, size*length);
-            return length;
-        }
-    }
-    if (music.user_music_volume == 0) { // NDS_TODO: support proper volume control
-        memset(dest, 0, size*readCount);
+    WAVHeader header;
+    fread(&header, 1, sizeof(WAVHeader), file);
+    if (header.chunkID == 0x46464952  // RIFF
+        && header.format == 0x45564157 // WAVE
+        && header.subchunk1ID == 0x20746d66 // "fmt "
+        && header.subchunk2ID == 0x61746164 // data
+        && (header.numChannels == 1 || header.numChannels == 2)
+        && header.bitsPerSample == 8
+        && header.sampleRate == 8000
+    ) {
+        wavFileStatus[id] = header.numChannels;
     }
     else {
-        s8 *samples = (s8 *)dest;
-        for (mm_word i = 0; i < size*length; i++) {
-            samples[i] = samples[i] - 128;
+        vlog_error("WAV file invalid format. Track id %i", id);
+    }
+    fclose(file);
+}
+
+static void readWavFile(void *out, int size) {
+    if (wavFile == NULL) return;
+    while (size) {
+        int read = fread(out, 1, size, wavFile);
+        out = (u8 *)out + read;
+        size -= read;
+        if (feof(wavFile)) {
+            if (streamLoop) {
+                fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
+            }
+            else {
+                memset(out, 0, size);
+                return;
+            }
         }
     }
-    return readCount;
+}
+
+static void fillBuffer(void) {
+    if (streamBufferIn < 0) streamBufferIn = 0;
+    else if (streamBufferIn == streamBufferOut) return;
+
+    if (streamBufferIn < streamBufferOut) {
+        int size = streamBufferOut - streamBufferIn;
+        readWavFile(streamBuffer + streamBufferIn, size);
+        streamBufferIn += size;
+    }
+    else {
+        int size = STREAM_BUFFER_LENGTH - streamBufferIn;
+        readWavFile(streamBuffer + streamBufferIn, size);
+        streamBufferIn = streamBufferOut;
+        readWavFile(streamBuffer, streamBufferIn);
+    }
+}
+
+mm_word streamCallback(mm_word length, mm_addr dest, mm_stream_formats format) {
+    int sampleWidth = format + 1; // 1 or 2, depending on 8bit Mono vs 8bit Stereo
+    int requestLength = sampleWidth * length;
+    if (streamPaused) {
+        memset(dest, 0, requestLength); // silence
+        return length;
+    }
+
+    int bufferRightSize = STREAM_BUFFER_LENGTH - streamBufferOut;
+    if (bufferRightSize > requestLength) {
+        memcpy(dest, streamBuffer + streamBufferOut, requestLength);
+        streamBufferOut += requestLength;
+    }
+    else {
+        memcpy(dest, streamBuffer + streamBufferOut, bufferRightSize);
+        streamBufferOut = requestLength - bufferRightSize;
+        memcpy((u8 *)dest + bufferRightSize, streamBuffer, streamBufferOut);
+    }
+    s8 *samples = (s8 *)dest;
+    if (music.user_music_volume == 0) memset(samples, 0, requestLength);
+    else for (int i = 0; i < requestLength; i++) {
+        samples[i] = samples[i] - 128;
+    }
+    return length;
 }
 
 static bool playTrack(int id, bool loop) {
-    currentTrack = id;
-    loopCurrentTrack = loop;
-    if (currentTrack >= 0) {
-        FILE *wavFile = wavFiles[currentTrack];
-        if (wavFile != NULL) {
-            fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
-            paused = false;
-            if (streamOpened) mmStreamClose();
-            mm_stream stream;
-            stream.sampling_rate = 8000;
-            stream.buffer_length = 3200;
-            stream.callback = musicStreamCallback;
-            stream.format = wavFileIsStereo[id] ? MM_STREAM_8BIT_STEREO : MM_STREAM_8BIT_MONO;
-            stream.timer = MM_TIMER0;
-            stream.manual = true;
-            mmStreamOpen(&stream);
-            streamOpened = true;
-            return true;
-        }
+    streamPaused = true;
+    if (wavFile) {
+        fclose(wavFile);
+        wavFile = NULL;
     }
-    return false;
+    if (streamOpened) {
+        mmStreamClose();
+        streamOpened = false;
+    }
+
+    if (wavFileStatus[id] == 0) return false;
+    wavFile = openWavFile(id);
+    if (wavFile == NULL) return false;
+    fseek(wavFile, sizeof(WAVHeader), SEEK_SET);
+    
+    streamLoop = loop;
+    streamPaused = false;
+    streamBufferIn = -1;
+    streamBufferOut = 0;
+    fillBuffer();
+
+    mm_stream stream;
+    stream.sampling_rate = 8000;
+    stream.buffer_length = 800;
+    stream.callback = streamCallback;
+    stream.format = wavFileStatus[id] == 2 ? MM_STREAM_8BIT_STEREO : MM_STREAM_8BIT_MONO;
+    stream.timer = MM_TIMER0;
+    stream.manual = false;
+    mmStreamOpen(&stream);
+    streamOpened = true;
+
+    return true;
 }
 #endif
 
@@ -856,62 +910,22 @@ void musicclass::init(void)
     num_mmmmmm_tracks = 0;
     num_pppppp_tracks = 0;
 
-    u8 *bin = NULL;
     size_t length;
-    FILESYSTEM_loadAssetToMemory("soundbank.bin", &bin, &length);
-    if (bin != NULL) {
-        mmInitDefaultMem(bin);
-        VVV_free(bin);
-        mmLoadEffect(Sound_FLIP);
-        mmLoadEffect(Sound_UNFLIP);
-        mmLoadEffect(Sound_CRY);
-        mmLoadEffect(Sound_TRINKET);
-        mmLoadEffect(Sound_COIN);
-        mmLoadEffect(Sound_CHECKPOINT);
-        mmLoadEffect(Sound_CRUMBLE);
-        mmLoadEffect(Sound_DISAPPEAR);
-        mmLoadEffect(Sound_GRAVITYLINE);
-        mmLoadEffect(Sound_FLASH);
-        mmLoadEffect(Sound_TELEPORT);
-        mmLoadEffect(Sound_VIRIDIAN);
-        mmLoadEffect(Sound_VERDIGRIS);
-        mmLoadEffect(Sound_VICTORIA);
-        mmLoadEffect(Sound_VITELLARY);
-        mmLoadEffect(Sound_VIOLET);
-        mmLoadEffect(Sound_VERMILION);
-        mmLoadEffect(Sound_TERMINALTOUCH);
-        mmLoadEffect(Sound_GAMESAVED);
-        mmLoadEffect(Sound_ALARM);
-        mmLoadEffect(Sound_TERMINALTEXT);
-        mmLoadEffect(Sound_COUNTDOWN);
-        mmLoadEffect(Sound_GO);
-        mmLoadEffect(Sound_DESTROY);
-        mmLoadEffect(Sound_COMBINE);
-        mmLoadEffect(Sound_NEWRECORD);
-        mmLoadEffect(Sound_TROPHY);
-        mmLoadEffect(Sound_RESCUE);
-
-        num_pppppp_tracks = Music_COUNT;
-
-        openWavFile(Music_PATHCOMPLETE, "music/0levelcomplete.wav");
-        openWavFile(Music_PUSHINGONWARDS, "music/1pushingonwards.wav");
-        openWavFile(Music_POSITIVEFORCE, "music/2positiveforce.wav");
-        openWavFile(Music_POTENTIALFORANYTHING, "music/3potentialforanything.wav");
-        openWavFile(Music_PASSIONFOREXPLORING, "music/4passionforexploring.wav");
-        openWavFile(Music_PAUSE, "music/5intermission.wav");
-        openWavFile(Music_PRESENTINGVVVVVV, "music/6presentingvvvvvv.wav");
-        openWavFile(Music_PLENARY, "music/7gamecomplete.wav");
-        openWavFile(Music_PREDESTINEDFATE, "music/8predestinedfate.wav");
-        openWavFile(Music_POSITIVEFORCEREVERSED, "music/9positiveforcereversed.wav");
-        openWavFile(Music_POPULARPOTPOURRI, "music/10popularpotpourri.wav");
-        openWavFile(Music_PIPEDREAM, "music/11pipedream.wav");
-        openWavFile(Music_PRESSURECOOKER, "music/12pressurecooker.wav");
-        openWavFile(Music_PACEDENERGY, "music/13pacedenergy.wav");
-        openWavFile(Music_PIERCINGTHESKY, "music/14piercingthesky.wav");
-        openWavFile(Music_PREDESTINEDFATEREMIX, "music/predestinedfatefinallevel.wav");
-    }
-    else {
+    if (soundbank == NULL) FILESYSTEM_loadAssetToMemory("soundbank.bin", &soundbank, &length);
+    if (soundbank == NULL || mmInitDefaultMem(soundbank) != true) {
         vlog_error("Unable to initialize Maxmod");
+        return;
+    }
+
+    for (int i = 0; i <= Sound_RESCUE; i++) {
+        if (mmLoadEffect(i) != 0) {
+            vlog_error("Failed to load sound effect id %i", i);
+        }
+    }
+
+    num_pppppp_tracks = Music_COUNT;
+    for (int i = 0; i < Music_COUNT; i++) {
+        testWavFile(i);
     }
     #else
     if (FAudioCreate(&faudioctx, 0, FAUDIO_DEFAULT_PROCESSOR))
@@ -1075,13 +1089,15 @@ void musicclass::init(void)
 void musicclass::destroy(void)
 {
     #ifdef __NDS__
-    mmStreamClose();
-    for (int i = 0; i < Music_COUNT; i++) {
-        if (wavFiles[i]) {
-            fclose(wavFiles[i]);
-            wavFiles[i] = NULL;
-        }
+    if (wavFile) {
+        fclose(wavFile);
+        wavFile = NULL;
     }
+    if (streamOpened) {
+        mmStreamClose();
+        streamOpened = false;
+    }
+    VVV_free(soundbank);
     #else
     for (size_t i = 0; i < soundTracks.size(); ++i)
     {
@@ -1208,7 +1224,7 @@ void musicclass::resume(void)
         haltedsong = -1;
     }
     #ifdef __NDS__
-    paused = false;
+    streamPaused = false;
     #else
     MusicTrack::Resume();
     #endif
@@ -1228,7 +1244,7 @@ void musicclass::fadein(void)
 void musicclass::pause(void)
 {
     #ifdef __NDS__
-    paused = true;
+    streamPaused = true;
     #else
     MusicTrack::Pause();
     #endif
@@ -1525,7 +1541,7 @@ void musicclass::resumeef(void)
 bool musicclass::halted(void)
 {
     #ifdef __NDS__
-    return paused;
+    return streamPaused;
     #else
     return MusicTrack::IsPaused();
     #endif
@@ -1536,7 +1552,10 @@ void musicclass::updatemutestate(void)
     if (game.muted)
     {
         #ifdef __NDS__
-        mmSetEffectsVolume(0);
+        if (effectVolume != 0) {
+            mmSetEffectsVolume(0);
+            effectVolume = 0;
+        }
         #else
         MusicTrack::SetVolume(0);
         SoundTrack::SetVolume(0);
@@ -1545,7 +1564,11 @@ void musicclass::updatemutestate(void)
     else
     {
         #ifdef __NDS__
-        mmSetEffectsVolume(MM_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX);
+        mm_word targetVolume = MM_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX;
+        if (effectVolume != targetVolume) {
+            mmSetEffectsVolume(targetVolume);
+            effectVolume = targetVolume;
+        }
         #else
         SoundTrack::SetVolume(VVV_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX);
 
@@ -1561,6 +1584,6 @@ void musicclass::updatemutestate(void)
     }
     #ifdef __NDS__
     // this is a reasonable place to put this I suppose
-    mmStreamUpdate();
+    if (streamOpened) fillBuffer();
     #endif
 }

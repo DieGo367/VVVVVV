@@ -672,13 +672,14 @@ if(NINTENDO_DS)
         else()
             set(USE_MONO)
         endif()
+        list(FIND MUSIC_TRACKS ${TRACK} TRACK_ID)
         add_custom_command(
-            OUTPUT nitro/music/${TRACK}.wav
+            OUTPUT nitro/music/${TRACK_ID}.wav
             DEPENDS data/music/${TRACK}.ogg
-            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i data/music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 ${USE_MONO} -bitexact nitro/music/${TRACK}.wav
+            COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i data/music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 ${USE_MONO} -bitexact nitro/music/${TRACK_ID}.wav
         )
         list(APPEND MUSIC_TRACK_SRC data/music/${TRACK}.ogg)
-        add_nitro_files(nitro/music/${TRACK}.wav)
+        add_nitro_files(nitro/music/${TRACK_ID}.wav)
     endforeach()
     add_custom_command(
         OUTPUT ${MUSIC_TRACK_SRC}
