@@ -87,6 +87,9 @@ void Graphics::init(void)
     backoffset = 0;
     foregrounddrawn = false;
     backgrounddrawn = false;
+    #ifdef __NDS__
+    subscreendrawn = false;
+    #endif
 
     warpskip = 0;
 
@@ -3639,6 +3642,39 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     set_render_target(target);
     #endif
 }
+
+#ifdef __NDS__
+void Graphics::clear_sub(void) {
+    memset(gameScreen.bitmapSub, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16));
+}
+
+void Graphics::draw_minimap_cell_sub(int cellX, int cellY, bool explored) {
+    MinimapCell *cell = &grphx.minimapCells[cellX + cellY * MINIMAP_SIDE_LENGTH];
+    if (subscreendrawn && cell->state > 0 && cell->state - 1 == explored) return;
+
+    MinimapCellGraphic *gfx = explored ? &cell->graphic : &grphx.minimapFogGraphic;
+    u16 *out = &gameScreen.bitmapSub[(8 + cellX * MINIMAP_CELL_WIDTH + (4 + cellY * MINIMAP_CELL_HEIGHT) * SCREEN_WIDTH) / 2];
+
+    for (int row = 0; row < MINIMAP_CELL_HEIGHT; row++) {
+        for (int col = 0; col < MINIMAP_CELL_WIDTH; col += 4) {
+            u8 values = (*gfx)[row][col / 4];
+            u8 results[4];
+            for (int i = 0; i < 4; i++) {
+                u8 value = (values >> (2*i)) & 0b11;
+                if (!explored) results[i] = MINIMAP_PALETTE_LENGTH + value;
+                else if (value == 0) results[i] = 0;
+                else results[i] = cell->paletteIndices[value - 1];
+            }
+            *out = results[0] | results[1] << 8;
+            *(out+1) = results[2] | results[3] << 8;
+            out+=2;
+        }
+        out += (SCREEN_WIDTH - MINIMAP_CELL_WIDTH) / 2;
+    }
+
+    cell->state = 1 + explored;
+}
+#endif
 
 #define GETCOL_RANDOM (game.noflashingmode ? 0.5 : fRandom())
 SDL_Color Graphics::getcol( int t )

@@ -42,6 +42,7 @@ public:
     #ifdef __NDS__
     u16 *tilemapLevel;
     u16 *tilemapBackdrop;
+    u16 *bitmapSub;
     #else
     SDL_Window *m_window;
     SDL_Renderer *m_renderer;

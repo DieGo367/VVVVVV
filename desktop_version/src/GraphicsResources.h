@@ -25,6 +25,17 @@ typedef struct {
     u8 bpp;
     u16 colorMod;
 } GLTexture;
+
+#define MINIMAP_CELL_WIDTH 12
+#define MINIMAP_CELL_HEIGHT 9
+#define MINIMAP_SIDE_LENGTH 20
+#define MINIMAP_PALETTE_LENGTH 32
+typedef u8 MinimapCellGraphic[MINIMAP_CELL_HEIGHT][MINIMAP_CELL_WIDTH / 4]; // 12x9 at 2bpp (4 pixels per byte)
+typedef struct {
+    u8 paletteIndices[3];
+    MinimapCellGraphic graphic;
+    u8 state;
+} MinimapCell;
 #endif
 
 class GraphicsResources
@@ -57,6 +68,8 @@ public:
     GLTexture *im_image12;
 
     u8 spriteHitmaps[12*16][32*32/8];
+    MinimapCell minimapCells[20 * 20];
+    MinimapCellGraphic minimapFogGraphic;
 
     u16 *im_sprites_translated;
     u16 *im_flipsprites_translated;
@@ -97,7 +110,7 @@ private:
 };
 
 #ifdef __NDS__
-GLTexture *LoadImage(const char *filename, TextureLoadType loadtype, u8** gfxDst = NULL, int realWidth = 0, int realHeight = 0);
+GLTexture *LoadImage(const char *filename, TextureLoadType loadtype, u8 **gfxDst = NULL, u16 **palDst = NULL, int realWidth = 0, int realHeight = 0);
 void DestroyImage(GLTexture *image);
 #else
 SDL_Surface* LoadImageSurface(const char* filename);

@@ -346,6 +346,11 @@ public:
 
     void drawtowerspikes(void);
 
+    #ifdef __NDS__
+    void clear_sub(void);
+    void draw_minimap_cell_sub(int cellX, int cellY, bool explored);
+    #endif
+    
     bool onscreen(int t);
 
     bool reloadresources(void);
@@ -420,6 +425,9 @@ public:
     int linestate, linedelay;
     int backoffset;
     bool backgrounddrawn, foregrounddrawn;
+    #ifdef __NDS__
+    bool subscreendrawn;
+    #endif
 
     int menuoffset;
     int oldmenuoffset;

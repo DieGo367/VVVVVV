@@ -42,7 +42,8 @@ void Screen::init(const struct ScreenSettings* settings) {
     vsync = settings->useVsync;
 
 	videoSetMode(MODE_5_3D);
-    vramSetBankA(VRAM_A_MAIN_BG);
+    vramSetBankE(VRAM_E_MAIN_BG);
+    vramSetBankF(VRAM_F_MAIN_BG_0x06010000);
 	bgInit(BG_LAYER_LEVEL, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
 	bgSetCenter(BG_LAYER_LEVEL, 0, 0);
 	bgSetScale(BG_LAYER_LEVEL, (5 << 8) / 4, (5 << 8) / 4);
@@ -55,12 +56,17 @@ void Screen::init(const struct ScreenSettings* settings) {
     bgSetPriority(BG_LAYER_BACKDROP, 3);
     bgWrapOff(BG_LAYER_BACKDROP);
     tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
+
+    videoSetModeSub(MODE_3_2D);
+    vramSetBankC(VRAM_C_SUB_BG);
+    bgInitSub(BG_LAYER_SUBSCREEN & 0b11, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+    bitmapSub = bgGetGfxPtr(BG_LAYER_SUBSCREEN);
     bgUpdate();
 
+    vramSetBankA(VRAM_A_TEXTURE);
     vramSetBankB(VRAM_B_TEXTURE);
-    vramSetBankC(VRAM_C_TEXTURE);
     vramSetBankD(VRAM_D_TEXTURE);
-    vramSetBankE(VRAM_E_TEX_PALETTE);
+    vramSetBankG(VRAM_G_TEX_PALETTE);
     glScreen2D();
     glClearColor(0, 0, 0, 0);
     glBegin2D();

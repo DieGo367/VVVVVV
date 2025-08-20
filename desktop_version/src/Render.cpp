@@ -1909,6 +1909,17 @@ void titlerender(void)
     graphics.drawfade();
 
     graphics.renderwithscreeneffects();
+
+    #ifdef __NDS__
+    if (graphics.foregrounddrawn) {
+        graphics.clear_tile_layer(false);
+        graphics.foregrounddrawn = false;
+    }
+    if (graphics.subscreendrawn) {
+        graphics.clear_sub();
+        graphics.subscreendrawn = false;
+    }
+    #endif
 }
 
 void gamecompleterender(void)
@@ -2306,6 +2317,17 @@ static void mode_indicator_text(const int alpha)
         y += spacing;
     }
 }
+
+#ifdef __NDS__
+static void rendermap_sub(void) {
+    for (int j = 0; j < map.getheight(); j++) {
+        for (int i = 0; i < map.getwidth(); i++) {
+            graphics.draw_minimap_cell_sub(i, j, map.isexplored(i, j));
+        }
+    }
+    graphics.subscreendrawn = true;
+}
+#endif
 
 void gamerender(void)
 {
@@ -2772,6 +2794,11 @@ void gamerender(void)
     level_debugger::render();
 
     graphics.renderwithscreeneffects();
+
+
+    #ifdef __NDS__
+    rendermap_sub();
+    #endif
 }
 
 static void draw_roomname_menu(void)

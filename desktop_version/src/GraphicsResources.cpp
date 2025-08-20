@@ -61,7 +61,7 @@ static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void 
     return true;
 }
 
-GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, u8 **gfxDst, int realWidth, int realHeight)
+GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, u8 **gfxDst, u16 **palDst, int realWidth, int realHeight)
 {
     GRFHeader header;
     void *gfx = NULL, *palette = NULL;
@@ -103,7 +103,8 @@ GLTexture *LoadImage(const char *filename, const TextureLoadType loadtype, u8 **
 
     if (gfxDst) *gfxDst = (u8 *)gfx;
     else VVV_free(gfx);
-    VVV_free(palette);
+    if (palDst) *palDst = (u16 *)palette;
+    else VVV_free(palette);
     return tex;
 fail:
     if (gfxDst) *gfxDst = NULL;
@@ -113,7 +114,7 @@ fail:
 
 static GLTexture *LoadImage(const char* filename, int realWidth = 0, int realHeight = 0)
 {
-    return LoadImage(filename, TEX_COLOR, NULL, realWidth, realHeight);
+    return LoadImage(filename, TEX_COLOR, NULL, NULL, realWidth, realHeight);
 }
 
 void DestroyImage(GLTexture *texture)
@@ -149,6 +150,65 @@ static void DestroyTileset(Tileset *tileset)
         if (tileset->map) free(tileset->map);
         free(tileset);
     }
+}
+
+static GLTexture *LoadMinimap(const char *filename, MinimapCell *cells) {
+    u8 *gfx;
+    u16 *pal;
+    GLTexture *tex = LoadImage(filename, TEX_COLOR, &gfx, &pal);
+    if (tex == NULL) return NULL;
+
+    for (int cellY = 0; cellY < MINIMAP_SIDE_LENGTH; cellY++) {
+        for (int cellX = 0; cellX < MINIMAP_SIDE_LENGTH; cellX++) {
+            MinimapCell *cell = &cells[cellX + cellY * MINIMAP_SIDE_LENGTH];
+            for (int row = 0; row < MINIMAP_CELL_HEIGHT; row++) {
+                for (int col = 0; col < MINIMAP_CELL_WIDTH; col += 4) {
+                    u8 *pxPtr = &gfx[cellX * MINIMAP_CELL_WIDTH + col + (cellY * MINIMAP_CELL_HEIGHT + row) * tex->width];
+                    u8 results = 0;
+                    for (int i = 0; i < 4; i++) {
+                        u8 result = 0;
+                        u8 paletteIdx = pxPtr[i];
+                        u16 color = pal[paletteIdx];
+                        if (color != 0) {
+                            for (int indicesIdx = 0; indicesIdx < 3; indicesIdx++) {
+                                if (cell->paletteIndices[indicesIdx] == 0) {
+                                    cell->paletteIndices[indicesIdx] = paletteIdx;
+                                }
+                                if (color == pal[cell->paletteIndices[indicesIdx]]) {
+                                    result = 1 + indicesIdx;
+                                    break;
+                                }
+                            }
+                        }
+                        results |= result << (2*i);
+                    }
+                    cell->graphic[row][col / 4] = results;
+                }
+            }
+            cell->state = 0;
+        }
+    }
+    memcpy(BG_PALETTE_SUB + 1, pal + 1, MINIMAP_PALETTE_LENGTH - 1);
+
+    VVV_free(gfx);
+    VVV_free(pal);
+    return tex;
+}
+
+static GLTexture *LoadCovered(const char *filename, MinimapCellGraphic *graphic) {
+    u8 *gfx;
+    u16 *pal;
+    GLTexture *tex = LoadImage(filename, TEX_COLOR, &gfx, &pal);
+    if (tex == NULL) return NULL;
+
+    memcpy(BG_PALETTE_SUB + MINIMAP_PALETTE_LENGTH, pal, 4*sizeof(u16));
+    for (int row = 0; row < MINIMAP_CELL_HEIGHT; row++) {
+        memcpy(&(*graphic)[row], &gfx[row * tex->width / 4], MINIMAP_CELL_WIDTH / 4);
+    }
+
+    VVV_free(gfx);
+    VVV_free(pal);
+    return tex;
 }
 
 GLTexture *GraphicsResources::LoadSprites(const char *filename) {
@@ -584,8 +644,8 @@ void GraphicsResources::init(void)
 
     im_image0 = LoadImage("graphics/levelcomplete.grf", 320, 48);
     im_image5 = im_image0;
-    im_image1 = LoadImage("graphics/minimap.grf");
-    im_image2 = LoadImage("graphics/covered.grf");
+    im_image1 = LoadMinimap("graphics/minimap.grf", minimapCells);
+    im_image2 = LoadCovered("graphics/covered.grf", &minimapFogGraphic);
     im_image3 = LoadImage("graphics/elephant.grf", TEX_WHITE);
     im_image4 = LoadImage("graphics/gamecomplete.grf", 320, 48);
     im_image6 = im_image4;

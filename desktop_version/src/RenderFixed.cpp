@@ -182,12 +182,6 @@ void titlerenderfixed(void)
     {
         graphics.updatetowerbackground(graphics.titlebg);
     }
-    #ifdef __NDS__
-    if (graphics.foregrounddrawn) {
-        graphics.clear_tile_layer(false);
-        graphics.foregrounddrawn = false;
-    }
-    #endif
 
     if (!game.menustart)
     {
