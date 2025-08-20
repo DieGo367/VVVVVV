@@ -161,6 +161,7 @@ static GLTexture *LoadMinimap(const char *filename, MinimapCell *cells) {
     for (int cellY = 0; cellY < MINIMAP_SIDE_LENGTH; cellY++) {
         for (int cellX = 0; cellX < MINIMAP_SIDE_LENGTH; cellX++) {
             MinimapCell *cell = &cells[cellX + cellY * MINIMAP_SIDE_LENGTH];
+            memset(cell->paletteIndices, 0, sizeof(cell->paletteIndices));
             for (int row = 0; row < MINIMAP_CELL_HEIGHT; row++) {
                 for (int col = 0; col < MINIMAP_CELL_WIDTH; col += 4) {
                     u8 *pxPtr = &gfx[cellX * MINIMAP_CELL_WIDTH + col + (cellY * MINIMAP_CELL_HEIGHT + row) * tex->width];
@@ -170,7 +171,7 @@ static GLTexture *LoadMinimap(const char *filename, MinimapCell *cells) {
                         u8 paletteIdx = pxPtr[i];
                         u16 color = pal[paletteIdx];
                         if (color != 0) {
-                            for (int indicesIdx = 0; indicesIdx < 3; indicesIdx++) {
+                            for (size_t indicesIdx = 0; indicesIdx < sizeof(cell->paletteIndices); indicesIdx++) {
                                 if (cell->paletteIndices[indicesIdx] == 0) {
                                     cell->paletteIndices[indicesIdx] = paletteIdx;
                                 }
@@ -188,7 +189,7 @@ static GLTexture *LoadMinimap(const char *filename, MinimapCell *cells) {
             cell->state = 0;
         }
     }
-    memcpy(BG_PALETTE_SUB + 1, pal + 1, MINIMAP_PALETTE_LENGTH - 1);
+    memcpy(BG_PALETTE_SUB + 1, pal + 1, (MINIMAP_PALETTE_LENGTH - 1) * sizeof(u16));
 
     VVV_free(gfx);
     VVV_free(pal);
