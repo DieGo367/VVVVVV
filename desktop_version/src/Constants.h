@@ -21,6 +21,9 @@
 #define BG_LAYER_LEVEL 2
 #define BG_LAYER_BACKDROP 3
 #define BG_LAYER_SUBSCREEN 7
+
+#define MINIMAP_SUB_XOFFSET 8
+#define MINIMAP_SUB_YOFFSET 4
 #endif
 
 #endif /* CONSTANTS_H */

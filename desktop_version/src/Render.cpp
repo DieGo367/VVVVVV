@@ -2325,6 +2325,9 @@ static void rendermap_sub(void) {
             graphics.draw_minimap_cell_sub(i, j, map.isexplored(i, j));
         }
     }
+
+    graphics.draw_cursor_sub(game.roomx - 100, game.roomy - 100, 16, 245 - help.glow, 245 - help.glow);
+
     graphics.subscreendrawn = true;
 }
 #endif

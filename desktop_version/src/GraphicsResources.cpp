@@ -37,6 +37,8 @@ extern "C"
 #ifdef __NDS__
 #include <nds/arm9/grf.h>
 #include <gl2d.h>
+#include <nds/arm9/sprite.h>
+#include <Constants.h>
 
 static bool LoadGRFFromFILESYSTEM(const char *filename, GRFHeader *header, void **gfxDst, size_t *gfxSize, void **mapDst, size_t *mapSize, void **palDst, size_t *palSize)
 {
@@ -210,6 +212,96 @@ static GLTexture *LoadCovered(const char *filename, MinimapCellGraphic *graphic)
     VVV_free(gfx);
     VVV_free(pal);
     return tex;
+}
+
+static void init_minimap_cursor(void) {
+    u16 *cursorGfx = oamGetGfxPtr(&oamSub, 0);
+    cursorGfx[0x2] = 0x1110; cursorGfx[0x3] = 0x1111; cursorGfx[0x12] = 0x0111;
+    cursorGfx[0xe] = 0x1110; cursorGfx[0xf] = 0x1111; cursorGfx[0x1e] = 0x0111;
+    for (int i = 2; i < MINIMAP_CELL_HEIGHT - 2; i++) {
+        cursorGfx[i*2] = 0x0010;
+        cursorGfx[i*2 + 16] = 0x0100;
+    }
+    oamSet(&oamSub,
+        0,
+        0, 0,
+        0,
+        0,
+        SpriteSize_16x8,
+        SpriteColorFormat_16Color,
+        cursorGfx,
+        -1,
+        false,
+        false,
+        false, false,
+        false
+    );
+    oamSetHidden(&oamSub, 0, true);
+    
+    u16 *towerCursorTopGfx = oamGetGfxPtr(&oamSub, 1);
+    towerCursorTopGfx[0x2] = 0x1110; towerCursorTopGfx[0x3] = 0x1111; towerCursorTopGfx[0x12] = 0x0111;
+    for (int i = 2; i < 16; i++) {
+        towerCursorTopGfx[(i/8)*32 + (i%8)*2] = 0x0010;
+        towerCursorTopGfx[(i/8)*32 + (i%8)*2 + 16] = 0x0100;
+    }
+    oamSet(&oamSub,
+        1,
+        MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH, MINIMAP_SUB_YOFFSET,
+        0,
+        0,
+        SpriteSize_16x16,
+        SpriteColorFormat_16Color,
+        towerCursorTopGfx,
+        -1,
+        false,
+        false,
+        false, false,
+        false
+    );
+
+    u16 *towerCursorMiddleGfx = oamGetGfxPtr(&oamSub, 2);
+    for (int i = 0; i < 16; i++) {
+        towerCursorMiddleGfx[(i/8)*32 + (i%8)*2] = 0x0010;
+        towerCursorMiddleGfx[(i/8)*32 + (i%8)*2 + 16] = 0x0100;
+    }
+    for (int i = 0; i < 5; i++) {
+        oamSet(&oamSub,
+            2 + i,
+            MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH - 8, MINIMAP_SUB_YOFFSET + 8 + 32 * i,
+            0,
+            0,
+            SpriteSize_16x16,
+            SpriteColorFormat_16Color,
+            towerCursorMiddleGfx,
+            -1,
+            false,
+            false,
+            false, false,
+            false
+        );
+    }
+    oamRotateScale(&oamSub, 0, 0, 1 << 8, 1 << 7);
+
+    u16 *towerCursorBottomGfx = oamGetGfxPtr(&oamSub, 3);
+    towerCursorBottomGfx[0x2c] = 0x1110; towerCursorBottomGfx[0x2d] = 0x1111; towerCursorBottomGfx[0x3c] = 0x0111;
+    for (int i = 0; i < 14; i++) {
+        towerCursorBottomGfx[(i/8)*32 + (i%8)*2] = 0x0010;
+        towerCursorBottomGfx[(i/8)*32 + (i%8)*2 + 16] = 0x0100;
+    }
+    oamSet(&oamSub,
+        7,
+        MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH, MINIMAP_SUB_YOFFSET + 164,
+        0,
+        0,
+        SpriteSize_16x16,
+        SpriteColorFormat_16Color,
+        towerCursorBottomGfx,
+        -1,
+        false,
+        false,
+        false, false,
+        false
+    );
 }
 
 GLTexture *GraphicsResources::LoadSprites(const char *filename) {
@@ -655,6 +747,8 @@ void GraphicsResources::init(void)
     im_image9 = LoadImage("graphics/site3.grf", TEX_WHITE);
     im_image10 = LoadImage("graphics/ending.grf", 256, 192);
     im_image11 = LoadImage("graphics/site4.grf", TEX_WHITE);
+
+    init_minimap_cursor();    
     #else
     LoadVariants("graphics/tiles.png", &im_tiles, &im_tiles_white, &im_tiles_tint);
     LoadVariants("graphics/tiles2.png", &im_tiles2, NULL, &im_tiles2_tint);

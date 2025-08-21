@@ -20,6 +20,7 @@
 #ifdef __NDS__
 #include <nds/arm9/background.h>
 #include <gl2d.h>
+#include <nds/arm9/sprite.h>
 void ScreenSettings_default(struct ScreenSettings* _this)
 {
     _this->windowDisplay = 0;
@@ -59,9 +60,11 @@ void Screen::init(const struct ScreenSettings* settings) {
 
     videoSetModeSub(MODE_3_2D);
     vramSetBankC(VRAM_C_SUB_BG);
+    vramSetBankI(VRAM_I_SUB_SPRITE);
     bgInitSub(BG_LAYER_SUBSCREEN & 0b11, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
     bitmapSub = bgGetGfxPtr(BG_LAYER_SUBSCREEN);
     bgUpdate();
+    oamInit(&oamSub, SpriteMapping_Bmp_1D_128, false);
 
     vramSetBankA(VRAM_A_TEXTURE);
     vramSetBankB(VRAM_B_TEXTURE);
@@ -89,6 +92,8 @@ void Screen::RenderPresent(void) {
     glEnd2D();
     glFlush(0);
     glBegin2D();
+
+    oamUpdate(&oamSub);
 }
 
 void Screen::toggleFullScreen(void) {}

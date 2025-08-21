@@ -349,6 +349,7 @@ public:
     #ifdef __NDS__
     void clear_sub(void);
     void draw_minimap_cell_sub(int cellX, int cellY, bool explored);
+    void draw_cursor_sub(int cellX, int cellY, int r, int g, int b);
     #endif
     
     bool onscreen(int t);

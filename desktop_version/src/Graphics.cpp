@@ -27,6 +27,7 @@
 #ifdef __NDS__
 #include <nds/arm9/background.h>
 #include <gl2d.h>
+#include <nds/arm9/sprite.h>
 #endif
 
 void Graphics::init(void)
@@ -3646,6 +3647,10 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 #ifdef __NDS__
 void Graphics::clear_sub(void) {
     memset(gameScreen.bitmapSub, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16));
+    for (int i = 0; i <= 7; i++) {
+        oamSetAffineIndex(&oamSub, i, -1, false);
+        oamSetHidden(&oamSub, i, true);
+    }
 }
 
 void Graphics::draw_minimap_cell_sub(int cellX, int cellY, bool explored) {
@@ -3653,7 +3658,10 @@ void Graphics::draw_minimap_cell_sub(int cellX, int cellY, bool explored) {
     if (subscreendrawn && cell->state > 0 && cell->state - 1 == explored) return;
 
     MinimapCellGraphic *gfx = explored ? &cell->graphic : &grphx.minimapFogGraphic;
-    u16 *out = &gameScreen.bitmapSub[(8 + cellX * MINIMAP_CELL_WIDTH + (4 + cellY * MINIMAP_CELL_HEIGHT) * SCREEN_WIDTH) / 2];
+    u16 *out = &gameScreen.bitmapSub[(
+        MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH + 
+        (MINIMAP_SUB_YOFFSET + cellY * MINIMAP_CELL_HEIGHT) * SCREEN_WIDTH
+    ) / 2];
 
     for (int row = 0; row < MINIMAP_CELL_HEIGHT; row++) {
         for (int col = 0; col < MINIMAP_CELL_WIDTH; col += 4) {
@@ -3673,6 +3681,35 @@ void Graphics::draw_minimap_cell_sub(int cellX, int cellY, bool explored) {
     }
 
     cell->state = 1 + explored;
+}
+
+void Graphics::draw_cursor_sub(int cellX, int cellY, int r, int g, int b) {
+    SPRITE_PALETTE_SUB[1] = VRAM_COLOR(r, g, b);
+    static bool towerCursorDrawn = false;
+    if (cellX == 9) {
+        if (towerCursorDrawn && subscreendrawn) return;
+        oamSetHidden(&oamSub, 1, false);
+        oamSetHidden(&oamSub, 7, false);
+        for (int i = 2; i < 7; i++) {
+            oamSetAffineIndex(&oamSub, i, 0, true);
+        }
+        oamSetHidden(&oamSub, 0, true);
+        towerCursorDrawn = true;
+    }
+    else {
+        oamSetXY(&oamSub, 0,
+            MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH,
+            MINIMAP_SUB_YOFFSET + cellY * MINIMAP_CELL_HEIGHT
+        );
+        oamSetHidden(&oamSub, 0, false);
+        if (towerCursorDrawn || !subscreendrawn) {
+            for (int i = 1; i <= 7; i++) {
+                oamSetAffineIndex(&oamSub, i, -1, false);
+                oamSetHidden(&oamSub, i, true);
+            }
+            towerCursorDrawn = false;
+        }
+    }
 }
 #endif
 
