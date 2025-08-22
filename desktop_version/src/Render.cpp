@@ -2328,6 +2328,28 @@ static void rendermap_sub(void) {
 
     graphics.draw_cursor_sub(game.roomx - 100, game.roomy - 100, 16, 245 - help.glow, 245 - help.glow);
 
+    static int usedSlots = 0;
+    int slot = 0;
+    for (size_t i = 0; i < map.teleporters.size(); i++) {
+        if (map.showteleporters && map.isexplored(map.teleporters[i].x, map.teleporters[i].y)) {
+            graphics.draw_legend_icon_sub(slot++, map.teleporters[i].x, map.teleporters[i].y, 1);
+        }
+        else if (map.showtargets && !map.isexplored(map.teleporters[i].x, map.teleporters[i].y)) {
+            graphics.draw_legend_icon_sub(slot++, map.teleporters[i].x, map.teleporters[i].y, 0);
+        }
+    }
+    if (map.showtrinkets) {
+        for (size_t i = 0; i < map.shinytrinkets.size(); i++) {
+            if (!obj.collect[i]) {
+                graphics.draw_legend_icon_sub(slot++, map.shinytrinkets[i].x, map.shinytrinkets[i].y, 2);
+            }
+        }
+    }
+    if (usedSlots > slot) {
+        graphics.clear_sprites_sub(slot, usedSlots - slot);
+    }
+    usedSlots = slot;
+
     graphics.subscreendrawn = true;
 }
 #endif

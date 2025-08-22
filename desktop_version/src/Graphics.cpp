@@ -3651,6 +3651,10 @@ void Graphics::clear_sub(void) {
         oamSetAffineIndex(&oamSub, i, -1, false);
         oamSetHidden(&oamSub, i, true);
     }
+    clear_sprites_sub(8, 40);
+}
+void Graphics::clear_sprites_sub(int start, int count) {
+    oamClear(&oamSub, start, count);
 }
 
 void Graphics::draw_minimap_cell_sub(int cellX, int cellY, bool explored) {
@@ -3710,6 +3714,24 @@ void Graphics::draw_cursor_sub(int cellX, int cellY, int r, int g, int b) {
             towerCursorDrawn = false;
         }
     }
+}
+
+void Graphics::draw_legend_icon_sub(int iconSlot, int cellX, int cellY, int tile) {
+    oamSet(&oamSub, 8 + iconSlot,
+        MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH + 2,
+        MINIMAP_SUB_YOFFSET + cellY * MINIMAP_CELL_HEIGHT + 1,
+        0,
+        1,
+        SpriteSize_8x8,
+        SpriteColorFormat_16Color,
+        oamGetGfxPtr(&oamSub, 4 + tile),
+        -1,
+        false,
+        false,
+        false,
+        false,
+        false
+    );
 }
 #endif
 

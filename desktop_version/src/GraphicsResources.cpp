@@ -226,7 +226,7 @@ static void LoadMinimapCursors(const char *filename) {
     oamSet(&oamSub,
         0,
         0, 0,
-        0,
+        1,
         0,
         SpriteSize_16x8,
         SpriteColorFormat_16Color,
@@ -243,7 +243,7 @@ static void LoadMinimapCursors(const char *filename) {
     oamSet(&oamSub,
         1,
         MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH, MINIMAP_SUB_YOFFSET,
-        0,
+        1,
         0,
         SpriteSize_16x16,
         SpriteColorFormat_16Color,
@@ -259,7 +259,7 @@ static void LoadMinimapCursors(const char *filename) {
         oamSet(&oamSub,
             2 + i,
             MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH - 8, MINIMAP_SUB_YOFFSET + 8 + 32 * i,
-            0,
+            1,
             0,
             SpriteSize_16x16,
             SpriteColorFormat_16Color,
@@ -276,7 +276,7 @@ static void LoadMinimapCursors(const char *filename) {
     oamSet(&oamSub,
         7,
         MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH, MINIMAP_SUB_YOFFSET + 164,
-        0,
+        1,
         0,
         SpriteSize_16x16,
         SpriteColorFormat_16Color,
@@ -287,6 +287,22 @@ static void LoadMinimapCursors(const char *filename) {
         false, false,
         false
     );
+
+    VVV_free(gfx);
+    VVV_free(palette);
+}
+
+static void LoadLegend(const char *filename) {
+    GRFHeader header;
+    void *gfx = NULL, *palette = NULL;
+    bool success = LoadGRFFromFILESYSTEM(filename, &header, &gfx, NULL, NULL, NULL, &palette, NULL);
+    if (!success) return;
+
+    int size4th = (header.gfxWidth * header.gfxHeight * header.gfxAttr / 8) / 4;
+    memcpy(oamGetGfxPtr(&oamSub, 4), gfx, size4th);
+    memcpy(oamGetGfxPtr(&oamSub, 5), (u8 *)gfx + size4th, size4th);
+    memcpy(oamGetGfxPtr(&oamSub, 6), (u8 *)gfx + 2*size4th, size4th);
+    memcpy(&SPRITE_PALETTE_SUB[16], palette, header.palAttr);
 
     VVV_free(gfx);
     VVV_free(palette);
@@ -736,7 +752,8 @@ void GraphicsResources::init(void)
     im_image10 = LoadImage("graphics/ending.grf", 256, 192);
     im_image11 = LoadImage("graphics/site4.grf", TEX_WHITE);
 
-    LoadMinimapCursors("graphics/cursors.grf");    
+    LoadMinimapCursors("graphics/cursors.grf");
+    LoadLegend("graphics/legend.grf");
     #else
     LoadVariants("graphics/tiles.png", &im_tiles, &im_tiles_white, &im_tiles_tint);
     LoadVariants("graphics/tiles2.png", &im_tiles2, NULL, &im_tiles2_tint);

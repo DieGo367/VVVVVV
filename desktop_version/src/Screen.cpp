@@ -62,6 +62,7 @@ void Screen::init(const struct ScreenSettings* settings) {
     vramSetBankC(VRAM_C_SUB_BG);
     vramSetBankI(VRAM_I_SUB_SPRITE);
     bgInitSub(BG_LAYER_SUBSCREEN & 0b11, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+    bgSetPriority(BG_LAYER_SUBSCREEN, 3);
     bitmapSub = bgGetGfxPtr(BG_LAYER_SUBSCREEN);
     bgUpdate();
     oamInit(&oamSub, SpriteMapping_Bmp_1D_128, false);
