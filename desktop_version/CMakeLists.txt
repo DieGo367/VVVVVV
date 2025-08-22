@@ -605,6 +605,13 @@ if(NINTENDO_DS)
         add_nitro_files(nitro/graphics/${IMAGE}.grf)
     endforeach()
 
+    add_custom_command(
+        OUTPUT nitro/graphics/cursors.grf
+        DEPENDS ${CMAKE_SOURCE_DIR}/nds_extra/cursors.png
+        COMMAND ${GRIT} ${CMAKE_SOURCE_DIR}/nds_extra/cursors.png -ftr -fh! -gT FF00FF -gt -gB4 -o nitro/graphics/cursors.grf
+    )
+    add_nitro_files(nitro/graphics/cursors.grf)
+
     set(SOUNDS # in the same order as Music.cpp
         jump jump2
         hurt
