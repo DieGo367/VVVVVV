@@ -3716,8 +3716,8 @@ void Graphics::draw_cursor_sub(int cellX, int cellY, int r, int g, int b) {
     }
 }
 
-void Graphics::draw_legend_icon_sub(int iconSlot, int cellX, int cellY, int tile) {
-    oamSet(&oamSub, 8 + iconSlot,
+void Graphics::draw_legend_icon_sub(int spriteSlot, int cellX, int cellY, int tile) {
+    oamSet(&oamSub, spriteSlot,
         MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH + 2,
         MINIMAP_SUB_YOFFSET + cellY * MINIMAP_CELL_HEIGHT + 1,
         0,

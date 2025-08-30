@@ -2332,21 +2332,21 @@ static void rendermap_sub(void) {
     int slot = 0;
     for (size_t i = 0; i < map.teleporters.size(); i++) {
         if (map.showteleporters && map.isexplored(map.teleporters[i].x, map.teleporters[i].y)) {
-            graphics.draw_legend_icon_sub(slot++, map.teleporters[i].x, map.teleporters[i].y, 1);
+            graphics.draw_legend_icon_sub(8 + slot++, map.teleporters[i].x, map.teleporters[i].y, 1);
         }
         else if (map.showtargets && !map.isexplored(map.teleporters[i].x, map.teleporters[i].y)) {
-            graphics.draw_legend_icon_sub(slot++, map.teleporters[i].x, map.teleporters[i].y, 0);
+            graphics.draw_legend_icon_sub(8 + slot++, map.teleporters[i].x, map.teleporters[i].y, 0);
         }
     }
     if (map.showtrinkets) {
         for (size_t i = 0; i < map.shinytrinkets.size(); i++) {
             if (!obj.collect[i]) {
-                graphics.draw_legend_icon_sub(slot++, map.shinytrinkets[i].x, map.shinytrinkets[i].y, 2);
+                graphics.draw_legend_icon_sub(8 + slot++, map.shinytrinkets[i].x, map.shinytrinkets[i].y, 2);
             }
         }
     }
     if (usedSlots > slot) {
-        graphics.clear_sprites_sub(slot, usedSlots - slot);
+        graphics.clear_sprites_sub(8 + slot, usedSlots - slot);
     }
     usedSlots = slot;
 
