@@ -2319,14 +2319,14 @@ static void mode_indicator_text(const int alpha)
 }
 
 #ifdef __NDS__
-static void rendermap_sub(void) {
+static void rendermap_sub(bool blinkCursor) {
     for (int j = 0; j < map.getheight(); j++) {
         for (int i = 0; i < map.getwidth(); i++) {
             graphics.draw_minimap_cell_sub(i, j, map.isexplored(i, j));
         }
     }
 
-    if ((map.cursordelay / 15) % 2 == 0 || game.noflashingmode) {
+    if (game.noflashingmode || !blinkCursor || (map.cursordelay / 15) % 2 == 0) {
         graphics.draw_cursor_sub(game.roomx - 100, game.roomy - 100, 16, 245 - help.glow, 245 - help.glow);
     }
     else {
@@ -2335,25 +2335,27 @@ static void rendermap_sub(void) {
 
     static int usedSlots = 0;
     int slot = 0;
+    const int legendSlotOffset = 10;
     for (size_t i = 0; i < map.teleporters.size(); i++) {
         if (map.showteleporters && map.isexplored(map.teleporters[i].x, map.teleporters[i].y)) {
-            graphics.draw_legend_icon_sub(8 + slot++, map.teleporters[i].x, map.teleporters[i].y, 1);
+            graphics.draw_legend_icon_sub(legendSlotOffset + slot++, map.teleporters[i].x, map.teleporters[i].y, 1);
         }
         else if (map.showtargets && !map.isexplored(map.teleporters[i].x, map.teleporters[i].y)) {
-            graphics.draw_legend_icon_sub(8 + slot++, map.teleporters[i].x, map.teleporters[i].y, 0);
+            graphics.draw_legend_icon_sub(legendSlotOffset + slot++, map.teleporters[i].x, map.teleporters[i].y, 0);
         }
     }
     if (map.showtrinkets) {
         for (size_t i = 0; i < map.shinytrinkets.size(); i++) {
             if (!obj.collect[i]) {
-                graphics.draw_legend_icon_sub(8 + slot++, map.shinytrinkets[i].x, map.shinytrinkets[i].y, 2);
+                graphics.draw_legend_icon_sub(legendSlotOffset + slot++, map.shinytrinkets[i].x, map.shinytrinkets[i].y, 3);
             }
         }
     }
     if (usedSlots > slot) {
-        graphics.clear_sprites_sub(8 + slot, usedSlots - slot);
+        graphics.clear_sprites_sub(legendSlotOffset + slot, usedSlots - slot);
     }
     usedSlots = slot;
+    graphics.clear_sprites_sub(8, 2); // clear teleporter menu sprites in case they were used
 
     graphics.subscreendrawn = true;
 }
@@ -2827,7 +2829,7 @@ void gamerender(void)
 
 
     #ifdef __NDS__
-    rendermap_sub();
+    rendermap_sub(true);
     #endif
 }
 
@@ -3538,7 +3540,7 @@ void maprender(void)
     graphics.renderwithscreeneffects();
 
     #ifdef __NDS__
-    rendermap_sub();
+    rendermap_sub(true);
     #endif
 }
 
@@ -3637,4 +3639,12 @@ void teleporterrender(void)
     }
 
     graphics.render();
+
+    #ifdef __NDS__
+    rendermap_sub(false);
+    graphics.draw_telecursor_sub(telex, teley, 245 - (help.glow * 2), 16, 16);
+    if (game.useteleporter && (help.slowsine % 16 > 8 || game.noflashingmode)) {
+        graphics.draw_legend_icon_sub(9, telex, teley, 2);
+    }
+    #endif
 }

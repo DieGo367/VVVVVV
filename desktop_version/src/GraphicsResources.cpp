@@ -226,7 +226,7 @@ static void LoadMinimapCursors(const char *filename) {
     oamSet(&oamSub,
         0,
         0, 0,
-        1,
+        2,
         0,
         SpriteSize_16x8,
         SpriteColorFormat_16Color,
@@ -243,7 +243,7 @@ static void LoadMinimapCursors(const char *filename) {
     oamSet(&oamSub,
         1,
         MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH, MINIMAP_SUB_YOFFSET,
-        1,
+        2,
         0,
         SpriteSize_16x16,
         SpriteColorFormat_16Color,
@@ -259,7 +259,7 @@ static void LoadMinimapCursors(const char *filename) {
         oamSet(&oamSub,
             2 + i,
             MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH - 8, MINIMAP_SUB_YOFFSET + 8 + 32 * i,
-            1,
+            2,
             0,
             SpriteSize_16x16,
             SpriteColorFormat_16Color,
@@ -276,7 +276,7 @@ static void LoadMinimapCursors(const char *filename) {
     oamSet(&oamSub,
         7,
         MINIMAP_SUB_XOFFSET + 9 * MINIMAP_CELL_WIDTH, MINIMAP_SUB_YOFFSET + 164,
-        1,
+        2,
         0,
         SpriteSize_16x16,
         SpriteColorFormat_16Color,
@@ -302,6 +302,7 @@ static void LoadLegend(const char *filename) {
     memcpy(oamGetGfxPtr(&oamSub, 4), gfx, size4th);
     memcpy(oamGetGfxPtr(&oamSub, 5), (u8 *)gfx + size4th, size4th);
     memcpy(oamGetGfxPtr(&oamSub, 6), (u8 *)gfx + 2*size4th, size4th);
+    memcpy(oamGetGfxPtr(&oamSub, 7), (u8 *)gfx + 3*size4th, size4th);
     memcpy(&SPRITE_PALETTE_SUB[16], palette, header.palAttr);
 
     VVV_free(gfx);

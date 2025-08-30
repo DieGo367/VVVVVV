@@ -3648,7 +3648,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 void Graphics::clear_sub(void) {
     memset(gameScreen.bitmapSub, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16));
     hide_cursor_sub();
-    clear_sprites_sub(8, 40);
+    clear_sprites_sub(8, 2 + 40);
 }
 void Graphics::clear_sprites_sub(int start, int count) {
     oamClear(&oamSub, start, count);
@@ -3717,6 +3717,25 @@ void Graphics::hide_cursor_sub(void) {
         oamSetAffineIndex(&oamSub, i, -1, false);
         oamSetHidden(&oamSub, i, true);
     }
+}
+
+void Graphics::draw_telecursor_sub(int cellX, int cellY, int r, int g, int b) {
+    SPRITE_PALETTE_SUB[33] = VRAM_COLOR(r, g, b);
+    oamSet(&oamSub,
+        8,
+        MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH,
+        MINIMAP_SUB_YOFFSET + cellY * MINIMAP_CELL_HEIGHT,
+        1,
+        2,
+        SpriteSize_16x8,
+        SpriteColorFormat_16Color,
+        oamGetGfxPtr(&oamSub, 0),
+        -1,
+        false,
+        false,
+        false, false,
+        false
+    );
 }
 
 void Graphics::draw_legend_icon_sub(int spriteSlot, int cellX, int cellY, int tile) {
