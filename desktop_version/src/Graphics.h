@@ -351,6 +351,7 @@ public:
     void clear_sprites_sub(int start, int count);
     void draw_minimap_cell_sub(int cellX, int cellY, bool explored);
     void draw_cursor_sub(int cellX, int cellY, int r, int g, int b);
+    void hide_cursor_sub(void);
     void draw_legend_icon_sub(int spriteSlot, int cellX, int cellY, int tile);
     #endif
     

@@ -3647,10 +3647,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 #ifdef __NDS__
 void Graphics::clear_sub(void) {
     memset(gameScreen.bitmapSub, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16));
-    for (int i = 0; i <= 7; i++) {
-        oamSetAffineIndex(&oamSub, i, -1, false);
-        oamSetHidden(&oamSub, i, true);
-    }
+    hide_cursor_sub();
     clear_sprites_sub(8, 40);
 }
 void Graphics::clear_sprites_sub(int start, int count) {
@@ -3713,6 +3710,12 @@ void Graphics::draw_cursor_sub(int cellX, int cellY, int r, int g, int b) {
             }
             towerCursorDrawn = false;
         }
+    }
+}
+void Graphics::hide_cursor_sub(void) {
+    for (int i = 0; i <= 7; i++) {
+        oamSetAffineIndex(&oamSub, i, -1, false);
+        oamSetHidden(&oamSub, i, true);
     }
 }
 

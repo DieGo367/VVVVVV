@@ -174,6 +174,10 @@ void gamerenderfixed(void)
         }
     }
     #endif
+
+    #ifdef __NDS__
+    map.cursordelay++;
+    #endif
 }
 
 void titlerenderfixed(void)

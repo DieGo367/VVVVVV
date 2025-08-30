@@ -2326,7 +2326,12 @@ static void rendermap_sub(void) {
         }
     }
 
-    graphics.draw_cursor_sub(game.roomx - 100, game.roomy - 100, 16, 245 - help.glow, 245 - help.glow);
+    if ((map.cursordelay / 15) % 2 == 0 || game.noflashingmode) {
+        graphics.draw_cursor_sub(game.roomx - 100, game.roomy - 100, 16, 245 - help.glow, 245 - help.glow);
+    }
+    else {
+        graphics.hide_cursor_sub();
+    }
 
     static int usedSlots = 0;
     int slot = 0;
@@ -3531,6 +3536,10 @@ void maprender(void)
 
 
     graphics.renderwithscreeneffects();
+
+    #ifdef __NDS__
+    rendermap_sub();
+    #endif
 }
 
 #undef FLIP_PR_CJK_HIGH
