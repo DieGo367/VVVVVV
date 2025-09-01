@@ -2320,10 +2320,18 @@ static void mode_indicator_text(const int alpha)
 
 #ifdef __NDS__
 static void rendermap_sub(bool blinkCursor) {
+    bool noSignal = map.finalmode || (map.custommode && !map.customshowmm);
     for (int j = 0; j < map.getheight(); j++) {
         for (int i = 0; i < map.getwidth(); i++) {
-            graphics.draw_minimap_cell_sub(i, j, map.isexplored(i, j));
+            graphics.draw_minimap_cell_sub(i, j, !noSignal && map.isexplored(i, j));
         }
+    }
+    
+    if (noSignal) {
+        graphics.hide_cursor_sub();
+        graphics.clear_sprites_sub(8, 2 + 40);
+        graphics.subscreendrawn = true;
+        return;
     }
 
     if (game.noflashingmode || !blinkCursor || (map.cursordelay / 15) % 2 == 0) {
