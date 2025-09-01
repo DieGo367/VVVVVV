@@ -2177,6 +2177,13 @@ void gamecompleterender(void)
     graphics.drawfade();
 
     graphics.render();
+
+    #ifdef __NDS__
+    if (graphics.subscreendrawn) {
+        graphics.clear_sub();
+        graphics.subscreendrawn = false;
+    }
+    #endif
 }
 
 void gamecompleterender2(void)
@@ -2215,6 +2222,13 @@ void gamecompleterender2(void)
     graphics.drawfade();
 
     graphics.render();
+
+    #ifdef __NDS__
+    if (graphics.subscreendrawn) {
+        graphics.clear_sub();
+        graphics.subscreendrawn = false;
+    }
+    #endif
 }
 
 static const char* interact_prompt(
@@ -3650,9 +3664,11 @@ void teleporterrender(void)
 
     #ifdef __NDS__
     rendermap_sub(false);
-    graphics.draw_telecursor_sub(telex, teley, 245 - (help.glow * 2), 16, 16);
-    if (game.useteleporter && (help.slowsine % 16 > 8 || game.noflashingmode)) {
-        graphics.draw_legend_icon_sub(9, telex, teley, 2);
+    if (game.useteleporter) {
+        graphics.draw_telecursor_sub(telex, teley, 245 - (help.glow * 2), 16, 16);
+        if (help.slowsine % 16 > 8 || game.noflashingmode) {
+            graphics.draw_legend_icon_sub(9, telex, teley, 2);
+        }
     }
     #endif
 }
