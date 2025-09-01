@@ -508,6 +508,7 @@ public:
     #ifdef __NDS__
     int active_tileset;
     u16 draw_color;
+    bool towerCursorDrawn;
     #endif
 };
 

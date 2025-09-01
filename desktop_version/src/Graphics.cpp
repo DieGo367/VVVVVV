@@ -165,6 +165,7 @@ void Graphics::init(void)
     #ifdef __NDS__
     active_tileset = -1;
     draw_color = VRAM_COLOR(0, 0, 0);
+    towerCursorDrawn = false;
     #endif
 }
 
@@ -3686,7 +3687,6 @@ void Graphics::draw_minimap_cell_sub(int cellX, int cellY, bool explored) {
 
 void Graphics::draw_cursor_sub(int cellX, int cellY, int r, int g, int b) {
     SPRITE_PALETTE_SUB[1] = VRAM_COLOR(r, g, b);
-    static bool towerCursorDrawn = false;
     if (cellX == 9) {
         if (towerCursorDrawn && subscreendrawn) return;
         oamSetHidden(&oamSub, 1, false);
@@ -3717,6 +3717,7 @@ void Graphics::hide_cursor_sub(void) {
         oamSetAffineIndex(&oamSub, i, -1, false);
         oamSetHidden(&oamSub, i, true);
     }
+    towerCursorDrawn = false;
 }
 
 void Graphics::draw_telecursor_sub(int cellX, int cellY, int r, int g, int b) {
