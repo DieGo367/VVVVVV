@@ -2348,7 +2348,7 @@ static void rendermap_sub(bool blinkCursor) {
         return;
     }
 
-    if (game.noflashingmode || !blinkCursor || (map.cursordelay / 15) % 2 == 0) {
+    if ((!script.running || game.gamestate != GAMEMODE) && (game.noflashingmode || !blinkCursor || (map.cursordelay / 15) % 2 == 0)) {
         graphics.draw_cursor_sub(game.roomx - 100, game.roomy - 100, 16, 245 - help.glow, 245 - help.glow);
     }
     else {

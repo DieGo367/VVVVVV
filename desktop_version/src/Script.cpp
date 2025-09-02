@@ -2515,6 +2515,12 @@ void scriptclass::run(void)
     {
         scriptdelay--;
     }
+
+    #ifdef __NDS__
+    if (!running && !map.finalmode) {
+        map.setexplored(game.roomx - 100, game.roomy - 100, true);
+    }
+    #endif
 }
 
 static void gotoerrorloadinglevel(void)

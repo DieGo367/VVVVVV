@@ -1307,7 +1307,13 @@ void mapclass::loadlevel(int rx, int ry)
     int t;
     if (!finalmode)
     {
+        #ifdef __NDS__
+        if (!script.running || !graphics.showcutscenebars) {
+        #endif
         setexplored(rx - 100, ry - 100, true);
+        #ifdef __NDS__
+        }
+        #endif
         if (rx == 109 && !custommode)
         {
             exploretower();
