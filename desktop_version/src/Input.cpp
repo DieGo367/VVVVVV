@@ -3195,8 +3195,13 @@ void mapinput(void)
             mapmenuactionpress(version2_2);
         }
 
+        #ifdef __NDS__
+        if (game.menupage < 1) game.menupage = 3;
+        if (game.menupage > 3 && game.menupage < 9) game.menupage = 1;
+        #else
         if (game.menupage < 0) game.menupage = 3;
         if (game.menupage > 3 && game.menupage < 9) game.menupage = 0;
+        #endif
 
         if (game.menupage == 9) game.menupage = 11;
         if (game.menupage == 12) game.menupage = 10;

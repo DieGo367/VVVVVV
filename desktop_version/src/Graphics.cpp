@@ -281,7 +281,11 @@ void Graphics::updatetitlecolours(void)
 
 void Graphics::map_tab(int opt, const char* text, bool selected /*= false*/)
 {
+    #ifdef __NDS__
+    int x = (opt-1)*100 + 60;
+    #else
     int x = opt*80 + 40;
+    #endif
     if (selected)
     {
         char buffer[SCREEN_WIDTH_CHARS + 1];

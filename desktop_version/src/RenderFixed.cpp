@@ -274,6 +274,13 @@ void maprenderfixed(void)
 
 void teleporterrenderfixed(void)
 {
+    #ifdef __NDS__
+    if (script.running) {
+        gamerenderfixed();
+        return;
+    }
+    #endif
+
     maprenderfixed();
 
     graphics.cutscenebarstimer();

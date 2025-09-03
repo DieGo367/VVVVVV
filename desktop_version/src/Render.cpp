@@ -3056,7 +3056,9 @@ void maprender(void)
             tab1 = loc::gettext("CREW");
         }
 #define TAB(opt, text) graphics.map_tab(opt, text, game.menupage == opt)
+    #ifndef __NDS__
         TAB(0, loc::gettext("MAP"));
+    #endif
         TAB(1, tab1);
         TAB(2, loc::gettext("STATS"));
         TAB(3, loc::gettext("SAVE"));
@@ -3096,6 +3098,10 @@ void maprender(void)
     switch(game.menupage)
     {
     case 0:
+        #ifdef __NDS__
+        game.menupage = 1;
+        [[fallthrough]]; 
+        #else
         rendermap();
 
         if (map.finalmode || (map.custommode&&!map.customshowmm))
@@ -3117,6 +3123,7 @@ void maprender(void)
             rendermaplegend();
         }
         break;
+        #endif
     case 1:
         if (game.insecretlab)
         {
@@ -3572,6 +3579,13 @@ void maprender(void)
 
 void teleporterrender(void)
 {
+    #ifdef __NDS__
+    if (script.running) {
+        gamerender();
+        return;
+    }
+    #endif
+
     #ifndef __NDS__
     graphics.set_render_target(graphics.menuTexture);
     graphics.clear();
@@ -3585,6 +3599,7 @@ void teleporterrender(void)
     //Background color
     graphics.fill_rect(0, 12, 320, 240, 10, 24, 26);
 
+    #ifndef __NDS__
     rendermap();
     rendermapfog();
     rendermapcursor(false);
@@ -3612,6 +3627,7 @@ void teleporterrender(void)
     {
         font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + data.xoff + (telex * 12 * data.zoom), data.legendyoff + data.yoff + (teley * 9 * data.zoom), "💿", 255, 0, 0);
     }
+    #endif
 
     graphics.cutscenebars();
 
@@ -3626,8 +3642,14 @@ void teleporterrender(void)
         );
 
         //Instructions!
+        #ifdef __NDS__
+        font::print(PR_CEN, -1, 110, loc::gettext("Press Left/Right to choose a Teleporter"), 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        font::print(PR_CEN, -1, 125, final_string, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        font::print(PR_CEN | PR_3X, -1, 210 + (help.slowsine / 8 % 2) * 3, "⏷ ⏷ ⏷", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        #else
         font::print(PR_CEN, -1, 210, loc::gettext("Press Left/Right to choose a Teleporter"), 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
         font::print(PR_CEN, -1, 225, final_string, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        #endif
     }
 
     graphics.drawgui();
