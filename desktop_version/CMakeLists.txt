@@ -466,9 +466,10 @@ if(NINTENDO_DS)
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
     set(RESIZE_FLAG -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
-    foreach(IMAGE ${TILES} ${SPRITES} ${TEXTURES_2BIT} minimap ending ${FONTS_WHITE} ${FONTS_COLOR})
+    foreach(IMAGE ${TILES} ${SPRITES} ${TEXTURES_2BIT} minimap ending cursors legend ${FONTS_WHITE} ${FONTS_COLOR})
         set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
         set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
+        set(IMAGE_DEP "")
 
         if(IMAGE IN_LIST TILES)
             list(APPEND GRIT_FLAGS -gt -gB8 -m)
@@ -506,6 +507,7 @@ if(NINTENDO_DS)
                     # copy one of the treadmill platforms from the first tileset
                     \( data/graphics/tiles.png -crop 32x16+288+0 \) -flatten
                 )
+                set(IMAGE_DEP data/graphics/tiles.png)
             endif()
             if (IMAGE STREQUAL tiles OR IMAGE STREQUAL tiles2)
                 # draw star gfx
@@ -572,6 +574,34 @@ if(NINTENDO_DS)
         elseif(IMAGE STREQUAL ending)
             list(APPEND MAGICK_FLAGS -filter point -resize 256x192 -extent 256x256)
             list(APPEND GRIT_FLAGS -gb -gB4 -pn16)
+        elseif(IMAGE STREQUAL cursors)
+            set(MAGICK_FLAGS
+                -size 16x64 "canvas:#FF00FF"
+                -stroke black -fill none +antialias 
+                -draw "rectangle 1,1 10,7"
+                -draw "rectangle 1,17 10,62"
+            )
+            list(APPEND GRIT_FLAGS -gt -gB4 -pn2)
+        elseif(IMAGE STREQUAL legend)
+            list(PREPEND MAGICK_FLAGS
+                \( ../fonts/font.png -crop 8x8+120+472 -repage +0+0 -fill "#454545" +opaque transparent \)
+                \( ../fonts/font.png -crop 8x8+112+488 -repage +0+8 -fill "#AEFFFF" +opaque transparent \)
+                \( +clone -repage +0+16 -fill "#FF0000" +opaque transparent \)
+                \( ../fonts/font.png -crop 8x8+0+504 -repage +0+24 -fill "#FFFF3C" +opaque transparent \)
+                -background transparent -flatten -extent 8x32
+                -fill black
+                \( +clone -repage -1-1 +opaque transparent \) -insert 0
+                \( +clone -repage +0-1 +opaque transparent \) -insert 0
+                \( +clone -repage +1-1 +opaque transparent \) -insert 0
+                \( +clone -repage -1+0 +opaque transparent \) -insert 0
+                \( +clone -repage +1+0 +opaque transparent \) -insert 0
+                \( +clone -repage -1+1 +opaque transparent \) -insert 0
+                \( +clone -repage +0+1 +opaque transparent \) -insert 0
+                \( +clone -repage +1+1 +opaque transparent \) -insert 0
+                -flatten
+            )
+            list(APPEND GRIT_FLAGS -gt -gB4 -pn16)
+            set(IMAGE_DEP ${CMAKE_SOURCE_DIR}/fonts/font.png)
         elseif(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
             if(IMAGE IN_LIST FONTS_WHITE)
                 set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
@@ -590,6 +620,8 @@ if(NINTENDO_DS)
                 COMMAND ${E} copy_if_different ${CMAKE_SOURCE_DIR}/fonts/${IMAGE}.fontmeta nitro/graphics/${IMAGE}.fontmeta
             )
             add_nitro_files(nitro/graphics/${IMAGE}.fontmeta)
+        elseif(IMAGE STREQUAL cursors OR IMAGE STREQUAL legend)
+            set(IMAGE_SRC "")
         else()
             set(IMAGE_SRC data/graphics/${IMAGE}.png)
             depend_data_files(${IMAGE_SRC})
@@ -597,19 +629,10 @@ if(NINTENDO_DS)
         add_custom_command(
             OUTPUT nitro/graphics/${IMAGE}.grf
             BYPRODUCTS prep nitro/graphics
-            DEPENDS ${IMAGE_SRC}
+            DEPENDS ${IMAGE_SRC} ${IMAGE_DEP}
             COMMAND ${E} make_directory prep/graphics nitro/graphics
             COMMAND ${MAGICK} ${IMAGE_SRC} ${MAGICK_FLAGS} prep/graphics/${IMAGE}.png VERBATIM
             COMMAND ${GRIT} prep/graphics/${IMAGE}.png ${GRIT_FLAGS} -o nitro/graphics/${IMAGE}.grf
-        )
-        add_nitro_files(nitro/graphics/${IMAGE}.grf)
-    endforeach()
-
-    foreach(IMAGE cursors legend)
-        add_custom_command(
-            OUTPUT nitro/graphics/${IMAGE}.grf
-            DEPENDS ${CMAKE_SOURCE_DIR}/nds_extra/${IMAGE}.png
-            COMMAND ${GRIT} ${CMAKE_SOURCE_DIR}/nds_extra/${IMAGE}.png -ftr -fh! -gT FF00FF -gt -gB4 -o nitro/graphics/${IMAGE}.grf
         )
         add_nitro_files(nitro/graphics/${IMAGE}.grf)
     endforeach()
