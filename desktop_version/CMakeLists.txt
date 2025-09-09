@@ -717,17 +717,12 @@ if(NINTENDO_DS)
         COMMAND ${MAGICK} ${CMAKE_SOURCE_DIR}/icon.ico icon.bmp
     )
 
-    # arm7 binary needs to ignore default compile/link flags, but nothing else does,
-    # so it's easiest to give it a subdirectory
-    add_subdirectory(nds_arm7 arm7)
-
     nds_create_rom(VVVVVV
-        ARM7 arm7/VVVVVV_ARM7.elf
         AUTHOR "Terry Cavanagh"
         ICON ${CMAKE_BINARY_DIR}/icon.bmp
         NITROFS ${CMAKE_BINARY_DIR}/nitro
     )
-    add_dependencies(VVVVVV_nds VVVVVV_ARM7 VVVVVV_NITROFS)
+    add_dependencies(VVVVVV_nds VVVVVV_NITROFS)
 endif()
 
 # SDL2 Dependency (Detection pulled from FAudio)
