@@ -744,6 +744,7 @@ if(NINTENDO_DS)
         AUTHOR "Terry Cavanagh"
         ICON ${CMAKE_BINARY_DIR}/icon.bmp
         NITROFS ${CMAKE_BINARY_DIR}/nitro
+        ARM7 ${BLOCKSDS}/sys/arm7/main_core/arm7_maxmod.elf
     )
     add_dependencies(VVVVVV_nds VVVVVV_NITROFS)
 endif()
