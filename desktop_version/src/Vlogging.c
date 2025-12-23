@@ -16,6 +16,10 @@
 #elif defined(__NDS__)
 #   include <nds/debug.h>
 #   include <sys/types.h>
+// hack to enable static_assert in c99 (https://www.pixelbeat.org/programming/gcc/static_assert.html)
+#   define ASSERT_CONCAT_(a, b) a##b
+#   define ASSERT_CONCAT(a, b) ASSERT_CONCAT_(a, b)
+#   define static_assert(e) enum { ASSERT_CONCAT(assert_line_, __COUNTER__) = 1/(!!(e)) }
 #   include <nds/arm9/console.h>
 #elif defined(__unix__) || defined(__APPLE__)
 #   include <unistd.h>
