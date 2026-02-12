@@ -229,7 +229,7 @@ bool cycle_language(bool should_recompute_textboxes)
 #include <nds/arm9/input.h>
 void KeyPoll::Poll() {
     scanKeys();
-    u32 active = keysCurrent();
+    u32 active = keysHeld();
     buttonmap[SDL_CONTROLLER_BUTTON_START]         = active & KEY_START;
     buttonmap[SDL_CONTROLLER_BUTTON_GUIDE]         = active & KEY_SELECT;
     buttonmap[SDL_CONTROLLER_BUTTON_A]             = active & KEY_A;
