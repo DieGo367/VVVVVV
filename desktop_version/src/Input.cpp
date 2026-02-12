@@ -3314,6 +3314,9 @@ static void mapmenuactionpress(const bool version2_2)
         // Graphic options and game options
         music.playef(Sound_VIRIDIAN);
         game.gamestate = TITLEMODE;
+        #ifdef __NDS__
+        graphics.foregrounddrawn = true;
+        #endif
         graphics.flipmode = false;
         game.ingame_titlemode = true;
         graphics.ingame_fademode = graphics.fademode;

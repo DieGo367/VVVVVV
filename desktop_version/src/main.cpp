@@ -7,6 +7,7 @@
 #include <nds/fifocommon.h>
 #include <nds/interrupts.h>
 #include <nds/system.h>
+#include <nds/arm9/background.h>
 #endif
 
 #include "ButtonGlyphs.h"
@@ -881,6 +882,7 @@ int main(int argc, char *argv[])
     {
         #ifdef __NDS__
 	    swiWaitForVBlank();
+        bgUpdate();
         #endif
         f_time = SDL_GetTicks64();
 

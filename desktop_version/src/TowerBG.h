@@ -11,6 +11,9 @@ struct TowerBG
     bool tdrawback;
     int bypos;
     int bscroll;
+    #ifdef __NDS__
+    int tileOffset;
+    #endif
     int colstate;
     int scrolldir;
     int r;

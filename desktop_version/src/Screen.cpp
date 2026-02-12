@@ -49,14 +49,16 @@ void Screen::init(const struct ScreenSettings* settings) {
 	bgSetCenter(BG_LAYER_LEVEL, 0, 0);
 	bgSetScale(BG_LAYER_LEVEL, (5 << 8) / 4, (5 << 8) / 4);
     bgSetPriority(BG_LAYER_LEVEL, 2);
-    bgWrapOff(BG_LAYER_LEVEL);
+    bgWrapOn(BG_LAYER_LEVEL);
     tilemapLevel = bgGetMapPtr(BG_LAYER_LEVEL);
+    bgScrollLevel = 0;
 	bgInit(BG_LAYER_BACKDROP, BgType_ExRotation, BgSize_ER_512x512, 4, 1);
 	bgSetCenter(BG_LAYER_BACKDROP, 0, 0);
 	bgSetScale(BG_LAYER_BACKDROP, (5 << 8) / 4, (5 << 8) / 4);
     bgSetPriority(BG_LAYER_BACKDROP, 3);
-    bgWrapOff(BG_LAYER_BACKDROP);
+    bgWrapOn(BG_LAYER_BACKDROP);
     tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
+    bgScrollBackdrop = 0;
 
     videoSetModeSub(MODE_3_2D);
     vramSetBankC(VRAM_C_SUB_BG);

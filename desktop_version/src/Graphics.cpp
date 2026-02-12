@@ -1008,9 +1008,7 @@ void Graphics::clear_tile(int x, int y, bool background)
 
 void Graphics::clear_tile_layer(bool background) {
     u16 *map = (background ? gameScreen.tilemapBackdrop : gameScreen.tilemapLevel);
-    for (int row = 0; row < SCREEN_HEIGHT_TILES; row++) {
-        memset(&map[row * 64], 0, SCREEN_WIDTH_TILES * sizeof(u16));
-    }
+    memset(map, 0, 64*64*sizeof(u16));
 }
 #else
 void Graphics::drawtile(int x, int y, int t)
@@ -3184,6 +3182,11 @@ void Graphics::updatebackground(int t)
 {
     #ifdef __NDS__
     if (!backgrounddrawn) clear_tile_layer(true);
+    if (gameScreen.bgScrollBackdrop != 0)
+    {
+        gameScreen.bgScrollBackdrop = 0;
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
+    }
     #endif
     switch (t)
     {
@@ -3387,6 +3390,11 @@ void Graphics::drawmap(void)
     {
         #ifdef __NDS__
         use_tileset(map.tileset);
+        if (gameScreen.bgScrollLevel != 0)
+        {
+            gameScreen.bgScrollLevel = 0;
+            bgSetScroll(BG_LAYER_LEVEL, 0, 0);
+        }
         #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
@@ -3464,6 +3472,11 @@ void Graphics::drawfinalmap(void)
     {
         #ifdef __NDS__
         use_tileset(map.tileset);
+        if (gameScreen.bgScrollLevel != 0)
+        {
+            gameScreen.bgScrollLevel = 0;
+            bgSetScroll(BG_LAYER_LEVEL, 0, 0);
+        }
         #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
@@ -3510,8 +3523,19 @@ void Graphics::drawfinalmap(void)
 
 void Graphics::drawtowermap(void)
 {
+    #ifdef __NDS__
+    static int drawn_colstate = -1;
+    const int yoff = map.ypos;
+    gameScreen.bgScrollLevel = map.ypos % 512;
+    bgSetScroll(BG_LAYER_LEVEL, 0, gameScreen.bgScrollLevel);
+
+    if (!foregrounddrawn || drawn_colstate != towerbg.colstate || map.cameramode > 3 || map.cameramode == 0)
+    {
+        for (int j = -1; j < 31; j++)
+    #else
     const int yoff = lerp(map.oldypos, map.ypos);
     for (int j = 0; j < 31; j++)
+    #endif
     {
         for (int i = 0; i < 40; i++)
         {
@@ -3519,18 +3543,47 @@ void Graphics::drawtowermap(void)
             if (temp > 0)
             {
                 #ifdef __NDS__
-                drawtile3(i * 8, j * 8, temp, towerbg.colstate, false);
+                drawtile3(i * 8, (j * 8 + gameScreen.bgScrollLevel + 512) % 512, temp, towerbg.colstate, false);
                 #else
                 drawtile3(i * 8, (j * 8) - (yoff % 8), temp, towerbg.colstate);
                 #endif
             }
             #ifdef __NDS__
-            else clear_tile(i * 8, j * 8, false);
+            else
+            {
+                clear_tile(i * 8, (j * 8 + yoff) % 512, false);\
+            }
             #endif
         }
     }
     #ifdef __NDS__
+    }
+    else
+    {
+        for (int i = 0; i < 40; i++)
+        {
+            int temp = map.tower.at(i, -1, yoff);
+            if (temp > 0)
+            {
+                drawtile3(i * 8, (-1 * 8 + gameScreen.bgScrollLevel + 512) % 512, temp, towerbg.colstate, false);
+            }
+            else
+            {
+                clear_tile(i * 8, (-1 * 8 + gameScreen.bgScrollLevel + 512) % 512, false);
+            }
+            temp = map.tower.at(i, 31, yoff);
+            if (temp > 0)
+            {
+                drawtile3(i * 8, (31 * 8 + gameScreen.bgScrollLevel) % 512, temp, towerbg.colstate, false);
+            }
+            else
+            {
+                clear_tile(i * 8, (31 * 8 + gameScreen.bgScrollLevel) % 512, false);
+            }
+        }
+    }
     foregrounddrawn = true;
+    drawn_colstate = towerbg.colstate;
     #endif
 }
 
@@ -3540,9 +3593,9 @@ void Graphics::drawtowerspikes(void)
     int spikelevelbottom = lerp(map.oldspikelevelbottom, map.spikelevelbottom);
     for (int i = 0; i < 40; i++)
     {
-        #ifdef __NDS__ // NDS_TODO: these will have to be rendered by gl2d
-        drawtile3(i * 8, -8+spikeleveltop, 9, towerbg.colstate, false);
-        drawtile3(i * 8, 230-spikelevelbottom, 8, towerbg.colstate, false, 8 - spikelevelbottom);
+        #ifdef __NDS__ // NDS_TODO: render with gl2d or some other means
+        // drawtile3(i * 8, (-8+spikeleveltop + map.ypos) % 512, 9, towerbg.colstate, false);
+        // drawtile3(i * 8, (242-spikelevelbottom + map.ypos) % 512, 8, towerbg.colstate, false, 8 - spikelevelbottom);
         #else
         drawtile3(i * 8, -8+spikeleveltop, 9, towerbg.colstate);
         drawtile3(i * 8, 230-spikelevelbottom, 8, towerbg.colstate, 8 - spikelevelbottom);
@@ -3564,33 +3617,37 @@ void Graphics::drawtowerbackground(const TowerBG& bg_obj)
 
 void Graphics::updatetowerbackground(TowerBG& bg_obj)
 {
-    if (bg_obj.bypos < 0) bg_obj.bypos += 120 * 8;
+    if (bg_obj.bypos < 0)
+    {
+        bg_obj.bypos += 120 * 8;
+        #ifdef __NDS__
+        bg_obj.tileOffset = (bg_obj.tileOffset + 120) % 64;
+        #endif
+    }
 
     #ifdef __NDS__
+    gameScreen.bgScrollBackdrop = (bg_obj.bypos - bg_obj.tileOffset * 8 + 512) % 512;
+    bgSetScroll(BG_LAYER_BACKDROP, 0, gameScreen.bgScrollBackdrop);
     use_tileset(2);
     #else
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
     set_render_target(bg_obj.texture);
     #endif
 
-    #ifndef __NDS__
     if (bg_obj.tdrawback)
-    #endif
     {
+        #ifndef __NDS__
         int off = bg_obj.scrolldir == 0 ? 0 : bg_obj.bscroll;
         //Draw the whole thing; needed for every colour cycle!
-        #ifdef __NDS__
-        for (int j = 0; j < 31; j++)
-        #else
         clear();
-        for (int j = -1; j < 32; j++)
         #endif
+        for (int j = -1; j < 32; j++)
         {
             for (int i = 0; i < 40; i++)
             {
                 const int temp = map.tower.backat(i, j, bg_obj.bypos);
                 #ifdef __NDS__
-                drawtile3(i * 8, (j * 8) - (bg_obj.bypos % 8) - off, temp, bg_obj.colstate, true);
+                drawtile3(i * 8, (j * 8 + gameScreen.bgScrollBackdrop + 512) % 512, temp, bg_obj.colstate, true);
                 #else
                 drawtile3(i * 8, (j * 8) - (bg_obj.bypos % 8) - off, temp, bg_obj.colstate);
                 #endif
@@ -3599,25 +3656,27 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 
         bg_obj.tdrawback = false;
     }
-    #ifndef __NDS__
     else
     {
         // just update the bottom
+        #ifdef __NDS__
+        for (int i = 0; i < 40; i++)
+        {
+            int temp = map.tower.backat(i, -1, bg_obj.bypos);
+            drawtile3(i * 8, (-1 * 8 + gameScreen.bgScrollBackdrop + 512) % 512, temp, bg_obj.colstate, true);
+            temp = map.tower.backat(i, 31, bg_obj.bypos);
+            drawtile3(i * 8, (31 * 8 + gameScreen.bgScrollBackdrop) % 512, temp, bg_obj.colstate, true);
+        }
+        #else
         scroll_texture(bg_obj.texture, tempScrollingTexture, 0, -bg_obj.bscroll);
         if (bg_obj.scrolldir == 0)
         {
             for (int i = 0; i < 40; i++)
             {
                 int temp = map.tower.backat(i, -1, bg_obj.bypos);
-                #ifdef __NDS__
-                drawtile3(i * 8, -1 * 8 - (bg_obj.bypos % 8), temp, bg_obj.colstate, true);
-                temp = map.tower.backat(i, 0, bg_obj.bypos);
-                drawtile3(i * 8, -(bg_obj.bypos % 8), temp, bg_obj.colstate, true);
-                #else
                 drawtile3(i * 8, -1 * 8 - (bg_obj.bypos % 8), temp, bg_obj.colstate);
                 temp = map.tower.backat(i, 0, bg_obj.bypos);
                 drawtile3(i * 8, -(bg_obj.bypos % 8), temp, bg_obj.colstate);
-                #endif
             }
         }
         else
@@ -3625,15 +3684,6 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
             for (int i = 0; i < 40; i++)
             {
                 int temp = map.tower.backat(i, 29, bg_obj.bypos);
-                #ifdef __NDS__
-                drawtile3(i * 8, 29 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
-                temp = map.tower.backat(i, 30, bg_obj.bypos);
-                drawtile3(i * 8, 30 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
-                temp = map.tower.backat(i, 31, bg_obj.bypos);
-                drawtile3(i * 8, 31 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
-                temp = map.tower.backat(i, 32, bg_obj.bypos);
-                drawtile3(i * 8, 32 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate, true);
-                #else
                 drawtile3(i * 8, 29 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
                 temp = map.tower.backat(i, 30, bg_obj.bypos);
                 drawtile3(i * 8, 30 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
@@ -3641,10 +3691,11 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
                 drawtile3(i * 8, 31 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
                 temp = map.tower.backat(i, 32, bg_obj.bypos);
                 drawtile3(i * 8, 32 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
-                #endif
             }
         }
+        #endif
     }
+    #ifndef __NDS__
     set_render_target(target);
     #endif
 }

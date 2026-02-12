@@ -1929,6 +1929,9 @@ void gamecompleterender(void)
         graphics.clear_tile_layer(false);
         graphics.foregrounddrawn = false;
     }
+    if (game.creditposition == 0) {
+        graphics.titlebg.tdrawback = true;
+    }
     #else
     graphics.clear();
     #endif
