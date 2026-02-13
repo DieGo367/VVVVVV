@@ -4533,9 +4533,9 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     if (t < 1) t = 1;
 
     #ifdef __NDS__
-    u16 palette[] = {VRAM_COLOR(color.r, color.g, color.b), VRAM_COLOR(16, 16, 16)};
+    u16 palette[] = {0, VRAM_COLOR(color.r, color.g, color.b), VRAM_COLOR(16, 16, 16), 0};
     glBindTexture(0, grphx.im_teleporter->id);
-    glColorSubTableEXT(0, 1, 2, 0, 0, palette);
+    glColorSubTableNtr(0, 4, palette);
     draw_texture_part(grphx.im_teleporter, x, y, (t-1)%5 * telerect.w, (t-1)/5 * telerect.h, telerect.w, telerect.h, 1, 1);
     #else
     draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
