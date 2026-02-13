@@ -43,8 +43,6 @@ public:
     u16 *tilemapLevel;
     u16 *tilemapBackdrop;
     u16 *bitmapSub;
-    int bgScrollLevel;
-    int bgScrollBackdrop;
     #else
     SDL_Window *m_window;
     SDL_Renderer *m_renderer;
