@@ -3647,6 +3647,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     gameScreen.bgScrollBackdrop = (bg_obj.bypos - bg_obj.tileOffset * 8 + 512) % 512;
     bgSetScroll(BG_LAYER_BACKDROP, 0, gameScreen.bgScrollBackdrop);
     use_tileset(2);
+    if (!game.menustart) return;
     #else
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
     set_render_target(bg_obj.texture);
