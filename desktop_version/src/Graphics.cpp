@@ -3591,11 +3591,29 @@ void Graphics::drawtowerspikes(void)
 {
     int spikeleveltop = lerp(map.oldspikeleveltop, map.spikeleveltop);
     int spikelevelbottom = lerp(map.oldspikelevelbottom, map.spikelevelbottom);
+    #ifdef __NDS__
+    int tileID = grphx.im_tiles3->map[8 + 30*towerbg.colstate] & 0x03FF;
+    u8 *tileGfx = &((u8 *)grphx.im_tiles3->gfx)[tileID * 8*8];
+    u16 color = grphx.im_tiles3->palette[tileGfx[4*8 + 4]];
+    #endif
     for (int i = 0; i < 40; i++)
     {
-        #ifdef __NDS__ // NDS_TODO: render with gl2d or some other means
-        // drawtile3(i * 8, (-8+spikeleveltop + map.ypos) % 512, 9, towerbg.colstate, false);
-        // drawtile3(i * 8, (242-spikelevelbottom + map.ypos) % 512, 8, towerbg.colstate, false, 8 - spikelevelbottom);
+        #ifdef __NDS__
+        int x = i * 8;
+        int y = (-10 + spikeleveltop);
+        glTriangleFilled(
+            RENDER_SCALE(x),     RENDER_SCALE(y),
+            RENDER_SCALE(x + 8), RENDER_SCALE(y),
+            RENDER_SCALE(x + 4), RENDER_SCALE(y + 8),
+            color
+        );
+        y = (230 - spikelevelbottom);
+        glTriangleFilled(
+            RENDER_SCALE(x + 4), RENDER_SCALE(y),
+            RENDER_SCALE(x + 8), RENDER_SCALE(y + 8),
+            RENDER_SCALE(x),     RENDER_SCALE(y + 8),
+            color
+        );
         #else
         drawtile3(i * 8, -8+spikeleveltop, 9, towerbg.colstate);
         drawtile3(i * 8, 230-spikelevelbottom, 8, towerbg.colstate, 8 - spikelevelbottom);
