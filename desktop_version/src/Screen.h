@@ -40,8 +40,10 @@ public:
     bool vsync;
 
     #ifdef __NDS__
+    void setBackdropBGType(bool bitmap);
     u16 *tilemapLevel;
     u16 *tilemapBackdrop;
+    u16 *bitmapBackdrop;
     u16 *bitmapSub;
     #else
     SDL_Window *m_window;

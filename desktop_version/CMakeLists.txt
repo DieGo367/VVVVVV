@@ -474,22 +474,7 @@ if(NINTENDO_DS)
         if(IMAGE IN_LIST TILES)
             list(APPEND GRIT_FLAGS -gt -gB8 -m)
             if (IMAGE STREQUAL tiles2)
-                # generate some custom tiles for the warp zone bgs
-                set(INSTRUCTIONS
-                    \( -clone 0 -crop 16x72+0+0
-                        -fill "%[pixel: p{0,0}]" -draw "rectangle 0,32 7,39"
-                        -fill "%[pixel: p{0,7}]" -draw "rectangle 8,32 15,39"
-                    \)
-                )
                 list(APPEND MAGICK_FLAGS
-                    -repage -0-144! ${INSTRUCTIONS} -repage +0+144!
-                    -repage -24-144! ${INSTRUCTIONS} -repage +24+144!
-                    -repage -48-144! ${INSTRUCTIONS} -repage +48+144!
-                    -repage -72-144! ${INSTRUCTIONS} -repage +72+144!
-                    -repage -96-144! ${INSTRUCTIONS} -repage +96+144!
-                    -repage -120-144! ${INSTRUCTIONS} -repage +120+144!
-                    -repage -144-144! ${INSTRUCTIONS} -repage +144+144!
-                    -flatten
                     # draw some custom tiles for the lab bg
                     -fill "rgb(54,26,18)"
                         -draw "rectangle 192,96 231,135"

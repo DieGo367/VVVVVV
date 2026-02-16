@@ -51,12 +51,9 @@ void Screen::init(const struct ScreenSettings* settings) {
     bgSetPriority(BG_LAYER_LEVEL, 2);
     bgWrapOn(BG_LAYER_LEVEL);
     tilemapLevel = bgGetMapPtr(BG_LAYER_LEVEL);
-	bgInit(BG_LAYER_BACKDROP, BgType_ExRotation, BgSize_ER_512x512, 4, 1);
-	bgSetCenter(BG_LAYER_BACKDROP, 0, 0);
-	bgSetScale(BG_LAYER_BACKDROP, (5 << 8) / 4, (5 << 8) / 4);
-    bgSetPriority(BG_LAYER_BACKDROP, 3);
-    bgWrapOn(BG_LAYER_BACKDROP);
-    tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
+    tilemapBackdrop = NULL;
+    bitmapBackdrop = NULL;
+	setBackdropBGType(false);
 
     videoSetModeSub(MODE_3_2D);
     vramSetBankC(VRAM_C_SUB_BG);
@@ -106,6 +103,30 @@ void Screen::recacheTextures(void) {}
 
 bool Screen::isForcedFullscreen(void) {
     return true;
+}
+
+void Screen::setBackdropBGType(bool bitmap) {
+    if (bitmap) {
+        if (bitmapBackdrop) return;
+        // Important! This overlaps the level layer and the tile data!
+        // We can only really use 8KiB starting from 0x2000 to draw anything.
+        // That is only enough for 32 scanlines, or 1/6th of the screen.
+        bgInit(BG_LAYER_BACKDROP, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 32);
+        bgSetScale(BG_LAYER_BACKDROP, 1 << 8, (float)(1<<8)/6);
+        bitmapBackdrop = bgGetGfxPtr(BG_LAYER_BACKDROP) + (0x2000 / sizeof(u16));
+        tilemapBackdrop = NULL;
+    }
+    else {
+        if (tilemapBackdrop) return;
+        bgInit(BG_LAYER_BACKDROP, BgType_ExRotation, BgSize_ER_512x512, 4, 1);
+        bgSetCenter(BG_LAYER_BACKDROP, 0, 0);
+        bgSetScale(BG_LAYER_BACKDROP, (5 << 8) / 4, (5 << 8) / 4);
+        bgWrapOn(BG_LAYER_BACKDROP);
+        tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
+        bitmapBackdrop = NULL;
+    }
+    bgSetPriority(BG_LAYER_BACKDROP, 3);
 }
 #else
 void ScreenSettings_default(struct ScreenSettings* _this)

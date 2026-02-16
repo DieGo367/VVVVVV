@@ -2763,6 +2763,26 @@ void Graphics::drawentity(const int i, const int yoff)
     }
 }
 
+static void bmp8_set_pixel(u16 *gfx, int x, int y, u8 value) {
+    gfx[(x + y*SCREEN_WIDTH)/2] &= x % 2 ? 0x00FF : 0xFF00;
+    gfx[(x + y*SCREEN_WIDTH)/2] |= value << (x % 2 ? 8 : 0);
+}
+static void bmp8_fill_row(u16 *gfx, int x, int y, u8 value, int count) {
+    while (count > 0 && x % 4 != 0) {
+        bmp8_set_pixel(gfx, x++, y, value);
+        count--;
+    }
+    if (count <= 0) return;
+
+    int words = count / 4;
+    memset(&gfx[(x + y*SCREEN_WIDTH)/2], value, words * 4);
+    x += words * 4;
+    count -= words * 4;
+    while (count-- > 0) {
+        bmp8_set_pixel(gfx, x++, y, value);
+    }
+}
+
 void Graphics::drawbackground( int t )
 {
     switch(t)
@@ -3025,22 +3045,10 @@ void Graphics::drawbackground( int t )
     {
         // Warp zone, central
         #ifdef __NDS__
-        // choppier, tile-based version of the background using some custom tiles
-        int warpbTile = 880 + 3*rcol;
-        int warpfTile = 881 + 3*rcol;
-
-        for (int y = 0; y < SCREEN_HEIGHT_TILES/2; y++) {
-            int distY = SCREEN_HEIGHT_TILES/2 - y;
-            for (int x = 0; x < SCREEN_WIDTH_TILES/2; x++) {
-                int distX = SCREEN_WIDTH_TILES/2 - x;
-                int dist = distY > distX ? distY : distX;
-                int tile = ((dist + (2 - backoffset/8) + warpskip*2) % 4 < 2) ? warpbTile : warpfTile;
-                drawtile2(x*8, y*8, tile, true);
-                drawtile2((SCREEN_WIDTH_TILES - x - 1)*8, y*8, tile, true);
-                drawtile2((SCREEN_WIDTH_TILES - x - 1)*8, (SCREEN_HEIGHT_TILES - y - 1)*8, tile, true);
-                drawtile2(x*8, (SCREEN_HEIGHT_TILES - y - 1)*8, tile, true);
-            }
-        }
+        int tileID = grphx.im_tiles2->map[720 + 3*rcol] & 0x03FF;
+        u8 *tileGfx = &((u8 *)grphx.im_tiles2->gfx)[tileID * 8*8];
+        u8 warpbValue = tileGfx[0]; // top-left pixel
+        u8 warpfValue = tileGfx[63]; // bottom-right pixel
         #else
         SDL_Color warpbcol;
         SDL_Color warpfcol;
@@ -3080,10 +3088,38 @@ void Graphics::drawbackground( int t )
             warpbcol = getRGB(0xFF, 0xFF, 0xFF);
             warpfcol = getRGB(0xFF, 0xFF, 0xFF);
         }
+        #endif
 
         for (int i = 10; i >= 0; i--)
         {
             const int temp = (i * 16) + backoffset;
+            #ifdef __NDS__
+            int rx = RENDER_SCALE(160 - temp);
+            int ry = RENDER_SCALE(120 - temp);
+            if (rx < 0) rx = 0;
+            if (ry < 0) ry = 0;
+            int xend = SCREEN_WIDTH - 1 - rx;
+            int yend = SCREEN_HEIGHT - 1 - ry;
+            int rw = SCREEN_WIDTH - rx - rx;
+            const int squash = 6;
+            u8 fill = i % 2 == warpskip ? warpbValue : warpfValue;
+            
+            if (!backgrounddrawn) {
+                for (int row = ry; row <= yend; row += squash) {
+                    bmp8_fill_row(gameScreen.bitmapBackdrop, rx, row/squash, fill, rw);
+                }
+            }
+            else {
+                bmp8_fill_row(gameScreen.bitmapBackdrop, rx, ry/squash, fill, rw);
+                
+                for (int row = ry; row <= yend; row += squash) {
+                    bmp8_set_pixel(gameScreen.bitmapBackdrop, rx, row/squash, fill);
+                    bmp8_set_pixel(gameScreen.bitmapBackdrop, xend, row/squash, fill);
+                }
+                
+                bmp8_fill_row(gameScreen.bitmapBackdrop, rx, yend/squash, fill, rw);
+            }
+            #else
             const SDL_Rect warprect = {160 - temp, 120 - temp, temp * 2, temp * 2};
             if (i % 2 == warpskip)
             {
@@ -3093,7 +3129,10 @@ void Graphics::drawbackground( int t )
             {
                 fill_rect(&warprect, warpfcol);
             }
+            #endif
         }
+        #ifdef __NDS__
+        backgrounddrawn = true;
         #endif
         break;
     }
@@ -3189,6 +3228,7 @@ void Graphics::updatebackground(int t)
     case 1:
         // Starfield
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         #endif
         for (int i = 0; i < numstars; i++)
@@ -3205,6 +3245,7 @@ void Graphics::updatebackground(int t)
     case 2:
         // Lab
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         #endif
         if (rcol == 6)
@@ -3251,6 +3292,7 @@ void Graphics::updatebackground(int t)
         if (backoffset >= 16) backoffset -= 16;
 
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
         bgSetScroll(BG_LAYER_BACKDROP, backoffset, 0);
         if (!backgrounddrawn)
         #else
@@ -3313,6 +3355,7 @@ void Graphics::updatebackground(int t)
         if (backoffset >= 16) backoffset -= 16;
 
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, backoffset);
         if (!backgrounddrawn)
         #else
@@ -3368,7 +3411,7 @@ void Graphics::updatebackground(int t)
     case 5:
         // Warp zone, central
         #ifdef __NDS__
-        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
+        gameScreen.setBackdropBGType(true);
         #endif
 
         backoffset++;
@@ -3381,6 +3424,7 @@ void Graphics::updatebackground(int t)
     case 6:
         // Final Starfield
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         #endif
         for (int i = 0; i < numstars; i++)
@@ -3648,6 +3692,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     }
 
     #ifdef __NDS__
+    gameScreen.setBackdropBGType(false);
     int yoff = (bg_obj.bypos - bg_obj.tileOffset * 8 + 512) % 512;
     bgSetScroll(BG_LAYER_BACKDROP, 0, yoff);
     use_tileset(2);
