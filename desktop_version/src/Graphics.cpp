@@ -2763,6 +2763,15 @@ void Graphics::drawentity(const int i, const int yoff)
     }
 }
 
+static void hblank_mirror_effect(void) {
+    if (REG_VCOUNT < 10) { // catches lagged frames
+        REG_BG3PD = ((float)(1<<8)*125/400);
+    }
+    if (REG_VCOUNT >= SCREEN_HEIGHT/2 - 1 && REG_VCOUNT < SCREEN_HEIGHT) {
+        REG_BG3PD = -((float)(1<<8)*125/400);
+    }
+}
+
 static void bmp8_set_pixel(u16 *gfx, int x, int y, u8 value) {
     gfx[(x + y*SCREEN_WIDTH)/2] &= x % 2 ? 0x00FF : 0xFF00;
     gfx[(x + y*SCREEN_WIDTH)/2] |= value << (x % 2 ? 8 : 0);
@@ -3094,14 +3103,15 @@ void Graphics::drawbackground( int t )
         {
             const int temp = (i * 16) + backoffset;
             #ifdef __NDS__
+            bgSetScale(BG_LAYER_BACKDROP, 1 << 8, ((float)(1<<8)*125/400));
             int rx = RENDER_SCALE(160 - temp);
             int ry = RENDER_SCALE(120 - temp);
             if (rx < 0) rx = 0;
             if (ry < 0) ry = 0;
             int xend = SCREEN_WIDTH - 1 - rx;
-            int yend = SCREEN_HEIGHT - 1 - ry;
+            int yend = SCREEN_HEIGHT/2 - 1;
             int rw = SCREEN_WIDTH - rx - rx;
-            const int squash = 6;
+            const int squash = 3;
             u8 fill = i % 2 == warpskip ? warpbValue : warpfValue;
             
             if (!backgrounddrawn) {
@@ -3116,8 +3126,6 @@ void Graphics::drawbackground( int t )
                     bmp8_set_pixel(gameScreen.bitmapBackdrop, rx, row/squash, fill);
                     bmp8_set_pixel(gameScreen.bitmapBackdrop, xend, row/squash, fill);
                 }
-                
-                bmp8_fill_row(gameScreen.bitmapBackdrop, rx, yend/squash, fill, rw);
             }
             #else
             const SDL_Rect warprect = {160 - temp, 120 - temp, temp * 2, temp * 2};
@@ -3223,6 +3231,12 @@ void Graphics::drawbackground( int t )
 
 void Graphics::updatebackground(int t)
 {
+    #ifdef __NDS__
+    if (t != 5 && hblankEnabled) {
+        hblankEnabled = false;
+        irqDisable(IRQ_HBLANK);
+    }
+    #endif
     switch (t)
     {
     case 1:
@@ -3412,6 +3426,11 @@ void Graphics::updatebackground(int t)
         // Warp zone, central
         #ifdef __NDS__
         gameScreen.setBackdropBGType(true);
+        if (!hblankEnabled) {
+            irqSet(IRQ_HBLANK, hblank_mirror_effect);
+            irqEnable(IRQ_HBLANK);
+            hblankEnabled = true;
+        }
         #endif
 
         backoffset++;
@@ -3692,6 +3711,10 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     }
 
     #ifdef __NDS__
+    if (hblankEnabled) {
+        hblankEnabled = false;
+        irqDisable(IRQ_HBLANK);
+    }
     gameScreen.setBackdropBGType(false);
     int yoff = (bg_obj.bypos - bg_obj.tileOffset * 8 + 512) % 512;
     bgSetScroll(BG_LAYER_BACKDROP, 0, yoff);

@@ -113,7 +113,6 @@ void Screen::setBackdropBGType(bool bitmap) {
         // That is only enough for 32 scanlines, or 1/6th of the screen.
         bgInit(BG_LAYER_BACKDROP, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
         bgSetScroll(BG_LAYER_BACKDROP, 0, 32);
-        bgSetScale(BG_LAYER_BACKDROP, 1 << 8, (float)(1<<8)/6);
         bitmapBackdrop = bgGetGfxPtr(BG_LAYER_BACKDROP) + (0x2000 / sizeof(u16));
         tilemapBackdrop = NULL;
     }

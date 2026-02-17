@@ -432,6 +432,7 @@ public:
     bool backgrounddrawn, foregrounddrawn;
     #ifdef __NDS__
     bool subscreendrawn;
+    bool hblankEnabled;
     #endif
 
     int menuoffset;
