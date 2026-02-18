@@ -2763,6 +2763,7 @@ void Graphics::drawentity(const int i, const int yoff)
     }
 }
 
+#ifdef __NDS__
 static void hblank_mirror_effect(void) {
     if (REG_VCOUNT < 10) { // catches lagged frames
         REG_BG3PD = ((float)(1<<8)*125/400);
@@ -2791,6 +2792,7 @@ static void bmp8_fill_row(u16 *gfx, int x, int y, u8 value, int count) {
         bmp8_set_pixel(gfx, x++, y, value);
     }
 }
+#endif
 
 void Graphics::drawbackground( int t )
 {
