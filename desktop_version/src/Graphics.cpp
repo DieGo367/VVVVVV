@@ -114,7 +114,10 @@ void Graphics::init(void)
     // initialize everything else to zero
     m = 0;
     linedelay = 0;
-    #ifndef __NDS__
+    #ifdef __NDS__
+    glScrollX = 0;
+    glScrollY = 0;
+    #else
     gameTexture = NULL;
     gameplayTexture = NULL;
     menuTexture = NULL;
@@ -548,7 +551,7 @@ int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Re
 
     int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
     if (dest) {
-        destX = RENDER_SCALE(dest->x), destY = RENDER_SCALE(dest->y);
+        destX = RENDER_SCALE(dest->x + glScrollX), destY = RENDER_SCALE(dest->y + glScrollY);
         destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
     }
 
@@ -757,7 +760,7 @@ int Graphics::fill_rect(const SDL_Rect* rect)
     #ifdef __NDS__
     int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
     if (rect) {
-        rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
+        rx = RENDER_SCALE(rect->x + glScrollX), ry = RENDER_SCALE(rect->y + glScrollY), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
     }
     glBoxFilled(rx, ry, rx + rw - 1, ry + rh - 1, draw_color);
     return 0;
@@ -818,7 +821,7 @@ int Graphics::draw_rect(const SDL_Rect* rect)
     #ifdef __NDS__
     int rx = 0, ry = 0, rw = SCREEN_WIDTH, rh = SCREEN_HEIGHT;
     if (rect) {
-        rx = RENDER_SCALE(rect->x), ry = RENDER_SCALE(rect->y), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
+        rx = RENDER_SCALE(rect->x + glScrollX), ry = RENDER_SCALE(rect->y + glScrollY), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
     }
     glBox(rx, ry, rx + rw - 1, ry + rh - 1, draw_color);
     return 0;
@@ -867,7 +870,7 @@ int Graphics::draw_rect(const int x, const int y, const int w, const int h, cons
 int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
 {
     #ifdef __NDS__
-    glLine(RENDER_SCALE(x), RENDER_SCALE(y), RENDER_SCALE(x2), RENDER_SCALE(y2), draw_color);
+    glLine(RENDER_SCALE(x + glScrollX), RENDER_SCALE(y + glScrollY), RENDER_SCALE(x2), RENDER_SCALE(y2), draw_color);
     return 0;
     #else
     const int result = SDL_RenderDrawLine(gameScreen.m_renderer, x, y, x2, y2);
@@ -883,7 +886,7 @@ int Graphics::draw_points(const SDL_Point* points, const int count)
 {
     #ifdef __NDS__
     for (int i = 0; i < count; i++) {
-        glPutPixel(RENDER_SCALE(points[i].x), RENDER_SCALE(points[i].y), draw_color);
+        glPutPixel(RENDER_SCALE(points[i].x + glScrollX), RENDER_SCALE(points[i].y + glScrollY), draw_color);
     }
     return 0;
     #else
@@ -923,9 +926,10 @@ void Graphics::draw_flipsprite(const int x, const int y, const int t, const SDL_
     draw_sprite(x, y, t, color);
 }
 
-void Graphics::scroll_texture(GLTexture *texture, GLTexture *temp, const int x, const int y)
+void Graphics::scroll_gl(const int x, const int y)
 {
-    // NDS_TODO
+    glScrollX = x;
+    glScrollY = y;
 }
 #else
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
@@ -1652,7 +1656,7 @@ void Graphics::drawpixeltextbox(
     u16 color = VRAM_COLOR(r, g, b);
     u16 darker = VRAM_COLOR(r/6, g/6, b/6);
 
-    int rx = RENDER_SCALE(x), ry = RENDER_SCALE(y), rw = RENDER_SCALE(w), rh = RENDER_SCALE(h);
+    int rx = RENDER_SCALE(x + glScrollX), ry = RENDER_SCALE(y + glScrollY), rw = RENDER_SCALE(w), rh = RENDER_SCALE(h);
 
     glBoxFilled(rx,     ry,     rx + rw,     ry + rh,     darker);
     glBoxFilled(rx + 1, ry + 1, rx + rw - 1, ry + rh - 1, color);

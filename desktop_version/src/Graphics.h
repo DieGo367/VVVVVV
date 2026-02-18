@@ -187,7 +187,7 @@ public:
     void draw_sprite(int x, int y, int t, SDL_Color color);
     void draw_flipsprite(int x, int y, int t, SDL_Color color);
 
-    void scroll_texture(GLTexture *texture, GLTexture *temp, int x, int y);
+    void scroll_gl(int x, int y);
     #else
     void draw_sprite(int x, int y, int t, int r, int g, int b);
     void draw_sprite(int x, int y, int t, SDL_Color color);
@@ -405,7 +405,10 @@ public:
     bool setflipmode;
     bool notextoutline;
 
-    #ifndef __NDS__
+    #ifdef __NDS__
+    int glScrollX;
+    int glScrollY;
+    #else
     SDL_Texture* gameTexture;
     SDL_Texture* tempShakeTexture;
     SDL_Texture* gameplayTexture;

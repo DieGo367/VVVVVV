@@ -3021,7 +3021,10 @@ static void rendermapcursor(const bool flashing)
 
 void maprender(void)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    graphics.scroll_gl(0, graphics.lerp(graphics.oldmenuoffset, graphics.menuoffset));
+    graphics.fill_rect(0, 0, 320, 12, 0, 0, 0);
+    #else
     graphics.set_render_target(graphics.menuTexture);
     graphics.clear();
     #endif
@@ -3542,7 +3545,9 @@ void maprender(void)
 
     }
 
-    #ifndef __NDS__
+    #ifdef __NDS__
+    graphics.scroll_gl(0, 0);
+    #else
     graphics.set_render_target(graphics.gameTexture);
     #endif
 
@@ -3587,6 +3592,8 @@ void teleporterrender(void)
         gamerender();
         return;
     }
+    graphics.scroll_gl(0, graphics.lerp(graphics.oldmenuoffset, graphics.menuoffset));
+    graphics.fill_rect(0, 0, 320, 12, 0, 0, 0);
     #endif
 
     #ifndef __NDS__
@@ -3670,7 +3677,9 @@ void teleporterrender(void)
         font::print(PR_CEN | PR_BOR, -1, graphics.flipmode ? 228 : 5, buffer_adv, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
     }
 
-    #ifndef __NDS__
+    #ifdef __NDS__
+    graphics.scroll_gl(0, 0);
+    #else
     graphics.set_render_target(graphics.gameTexture);
     #endif
 
