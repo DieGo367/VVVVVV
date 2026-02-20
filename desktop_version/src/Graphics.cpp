@@ -26,8 +26,9 @@
 
 #ifdef __NDS__
 #include <nds/arm9/background.h>
-#include <gl2d.h>
 #include <nds/arm9/sprite.h>
+#include <nds/arm9/window.h>
+#include <gl2d.h>
 #endif
 
 void Graphics::init(void)
@@ -1553,8 +1554,14 @@ void Graphics::cutscenebars(void)
     const int usethispos = lerp(oldcutscenebarspos, cutscenebarspos);
     if (showcutscenebars)
     {
+        #ifdef __NDS__
+        // bigger box to make screenshake effect not look bad
+        fill_rect(-2, -2, usethispos + 4, 18, 0, 0, 0);
+        fill_rect(358 - usethispos, 224, usethispos + 4, 18, 0, 0, 0);
+        #else
         fill_rect(0, 0, usethispos, 16, 0, 0, 0);
         fill_rect(360 - usethispos, 224, usethispos, 16, 0, 0, 0);
+        #endif
     }
     else if (cutscenebarspos > 0) //disappearing
     {
@@ -3472,7 +3479,7 @@ void Graphics::drawmap(void)
     {
         #ifdef __NDS__
         use_tileset(map.tileset);
-        bgSetScroll(BG_LAYER_LEVEL, 0, 0);
+        if (game.screenshake == 0) bgSetScroll(BG_LAYER_LEVEL, 0, 0);
         #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
@@ -3550,7 +3557,7 @@ void Graphics::drawfinalmap(void)
     {
         #ifdef __NDS__
         use_tileset(map.tileset);
-        bgSetScroll(BG_LAYER_LEVEL, 0, 0);
+        if (game.screenshake == 0) bgSetScroll(BG_LAYER_LEVEL, 0, 0);
         #else
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
 
@@ -4369,6 +4376,20 @@ void Graphics::flashlight(void)
     fill_rect(NULL, 0xBB, 0xBB, 0xBB, 0xBB);
 }
 
+#ifdef __NDS__
+void Graphics::screenshakescroll(void)
+{
+    bgSetScroll(BG_LAYER_LEVEL, RENDER_SCALE(screenshake_x), RENDER_SCALE(screenshake_y));
+    // BG scroll lags by one frame, so use the older values for everything else
+    glScrollX = screenshake_x_old;
+    glScrollY = screenshake_y_old;
+    int rx = RENDER_SCALE(screenshake_x_old);
+    int ry = RENDER_SCALE(screenshake_y_old);
+    windowSetBounds(WINDOW_0, rx < 0 ? 0 : rx, ry < 0 ? 0 : ry, SCREEN_WIDTH - 1 + (rx < 0 ? rx : 0), SCREEN_HEIGHT - 1 + (ry < 0 ? rx : 0));
+    windowEnable(WINDOW_0);
+}
+#endif
+
 void Graphics::screenshake(void)
 {
     #ifndef __NDS__
@@ -4380,11 +4401,9 @@ void Graphics::screenshake(void)
     set_render_target(tempShakeTexture);
     set_blendmode(SDL_BLENDMODE_NONE);
     clear();
-    #endif
 
     const SDL_Rect shake = {screenshake_x, screenshake_y, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
 
-    #ifndef __NDS__
     copy_texture(gameTexture, NULL, &shake);
     #endif
 
@@ -4407,7 +4426,9 @@ void Graphics::screenshake(void)
         #endif
     }
 
-    #ifndef __NDS__
+    #ifdef __NDS__
+    scroll_gl(0, 0);
+    #else
     set_render_target(NULL);
     set_blendmode(SDL_BLENDMODE_NONE);
     draw_window_background();
@@ -4421,9 +4442,24 @@ void Graphics::screenshake(void)
 
 void Graphics::updatescreenshake(void)
 {
+    #ifdef __NDS__
+    screenshake_x_old = screenshake_x;
+    screenshake_y_old = screenshake_y;
+    #endif
     screenshake_x =  static_cast<Sint32>((fRandom() * 7) - 4);
     screenshake_y =  static_cast<Sint32>((fRandom() * 7) - 4);
 }
+
+#ifdef __NDS__
+void Graphics::screenshakefinish(void) {
+    bgSetScroll(BG_LAYER_LEVEL, 0, 0);
+    windowDisable(WINDOW_0);
+    screenshake_x = 0;
+    screenshake_x_old = 0;
+    screenshake_y = 0;
+    screenshake_y_old = 0;
+}
+#endif
 
 #ifndef __NDS__
 void Graphics::draw_window_background(void)
@@ -4522,6 +4558,11 @@ void Graphics::renderwithscreeneffects(void)
     }
     else
     {
+        #ifdef __NDS__
+        if (game.screenshake == 0 && (screenshake_x != 0 || screenshake_y != 0)) {
+            screenshakefinish();
+        }
+        #endif
         render();
     }
 }

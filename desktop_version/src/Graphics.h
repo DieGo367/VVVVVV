@@ -285,9 +285,17 @@ public:
     void flashlight(void);
     void screenshake(void);
     void updatescreenshake(void);
+    #ifdef __NDS__
+    void screenshakescroll(void);
+    void screenshakefinish(void);
+    #endif
 
     int screenshake_x;
     int screenshake_y;
+    #ifdef __NDS__
+    int screenshake_x_old;
+    int screenshake_y_old;
+    #endif
 
     #ifndef __NDS__
     void draw_window_background(void);

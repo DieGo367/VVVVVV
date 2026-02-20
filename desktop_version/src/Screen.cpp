@@ -19,8 +19,9 @@
 
 #ifdef __NDS__
 #include <nds/arm9/background.h>
-#include <gl2d.h>
 #include <nds/arm9/sprite.h>
+#include <nds/arm9/window.h>
+#include <gl2d.h>
 void ScreenSettings_default(struct ScreenSettings* _this)
 {
     _this->windowDisplay = 0;
@@ -45,11 +46,15 @@ void Screen::init(const struct ScreenSettings* settings) {
 	videoSetMode(MODE_5_3D);
     vramSetBankE(VRAM_E_MAIN_BG);
     vramSetBankF(VRAM_F_MAIN_BG_0x06010000);
+    bgWindowEnable(0, WINDOW_0);
+    bgWindowDisable(0, WINDOW_OUT);
 	bgInit(BG_LAYER_LEVEL, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
 	bgSetCenter(BG_LAYER_LEVEL, 0, 0);
 	bgSetScale(BG_LAYER_LEVEL, (5 << 8) / 4, (5 << 8) / 4);
     bgSetPriority(BG_LAYER_LEVEL, 2);
     bgWrapOn(BG_LAYER_LEVEL);
+    bgWindowEnable(BG_LAYER_LEVEL, WINDOW_0);
+    bgWindowDisable(BG_LAYER_LEVEL, WINDOW_OUT);
     tilemapLevel = bgGetMapPtr(BG_LAYER_LEVEL);
     tilemapBackdrop = NULL;
     bitmapBackdrop = NULL;
@@ -125,6 +130,8 @@ void Screen::setBackdropBGType(bool bitmap) {
         tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
         bitmapBackdrop = NULL;
     }
+    bgWindowEnable(BG_LAYER_BACKDROP, WINDOW_0);
+    bgWindowDisable(BG_LAYER_BACKDROP, WINDOW_OUT);
     bgSetPriority(BG_LAYER_BACKDROP, 3);
 }
 #else

@@ -2388,7 +2388,12 @@ static void rendermap_sub(bool blinkCursor) {
 
 void gamerender(void)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    if (game.screenshake > 0 && !game.noflashingmode)
+    {
+        graphics.screenshakescroll();
+    }
+    #else
     graphics.set_render_target(graphics.gameplayTexture);
     #endif
     graphics.set_color(0, 0, 0, 255);
