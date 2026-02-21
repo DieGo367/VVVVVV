@@ -3185,7 +3185,7 @@ void mapinput(void)
 
         //In the menu system, all keypresses are single taps rather than holds. Therefore this test has to be done for all presses
         #ifdef __NDS__
-        if (!game.press_confirm && !game.press_action && !game.press_left && !game.press_right)
+        if (!game.press_confirm && !game.press_action && !game.press_left && !game.press_right && !key.isDown(game.controllerButton_esc))
         #else
         if (!game.press_action && !game.press_left && !game.press_right)
         #endif
@@ -3215,7 +3215,7 @@ void mapinput(void)
     if (!game.jumpheld)
     {
         #ifdef __NDS__
-        if (game.press_confirm || game.press_action || game.press_left || game.press_right || game.press_map)
+        if (game.press_confirm || game.press_action || game.press_left || game.press_right || game.press_map || key.isDown(game.controllerButton_esc))
         #else
         if (game.press_action || game.press_left || game.press_right || game.press_map)
         #endif
@@ -3237,7 +3237,7 @@ void mapinput(void)
         }
 
         #ifdef __NDS__
-        if ((game.menupage > 3 && game.press_confirm) || (game.menupage <= 3 && game.press_action))
+        if ((game.menupage < 10 && game.press_action) || (game.menupage >= 10 && game.press_confirm))
         #else
         if (game.press_action)
         #endif
@@ -3261,6 +3261,14 @@ void mapinput(void)
 
         if (game.menupage == 29) game.menupage = 32;
         if (game.menupage == 33) game.menupage = 30;
+
+        #ifdef __NDS__
+        if (game.menupage >= 30 && game.menupage < 40 && key.isDown(game.controllerButton_esc))
+        {
+            graphics.resumegamemode = true;
+            music.playef(Sound_VIRIDIAN);
+        }
+        #endif
     }
 }
 
