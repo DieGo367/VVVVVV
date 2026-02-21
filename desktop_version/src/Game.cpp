@@ -391,7 +391,41 @@ void Game::setdefaultcontrollerbuttons(void)
 {
     if (controllerButton_flip.size() < 1)
     {
+        #ifdef __NDS__
+        bool mappedA = false;
+        bool mappedB = false;
+        for (size_t i = 0; i < controllerButton_map.size(); i++)
+        {
+            if (controllerButton_map[i] == SDL_CONTROLLER_BUTTON_A) mappedA = true;
+            if (controllerButton_map[i] == SDL_CONTROLLER_BUTTON_B) mappedB = true;
+        }
+        if (!mappedA || !mappedB) for (size_t i = 0; i < controllerButton_esc.size(); i++)
+        {
+            if (controllerButton_esc[i] == SDL_CONTROLLER_BUTTON_A) mappedA = true;
+            if (controllerButton_esc[i] == SDL_CONTROLLER_BUTTON_B) mappedB = true;
+        }
+        if (!mappedA || !mappedB) for (size_t i = 0; i < controllerButton_restart.size(); i++)
+        {
+            if (controllerButton_restart[i] == SDL_CONTROLLER_BUTTON_A) mappedA = true;
+            if (controllerButton_restart[i] == SDL_CONTROLLER_BUTTON_B) mappedB = true;
+        }
+        if (!mappedA || !mappedB) for (size_t i = 0; i < controllerButton_interact.size(); i++)
+        {
+            if (controllerButton_interact[i] == SDL_CONTROLLER_BUTTON_A) mappedA = true;
+            if (controllerButton_interact[i] == SDL_CONTROLLER_BUTTON_B) mappedB = true;
+        }
+
+        if (!mappedA || mappedB)
+        {
+            controllerButton_flip.push_back(SDL_CONTROLLER_BUTTON_A);
+        }
+        if (!mappedB)
+        {
+            controllerButton_flip.push_back(SDL_CONTROLLER_BUTTON_B);
+        }
+        #else
         controllerButton_flip.push_back(SDL_CONTROLLER_BUTTON_A);
+        #endif
     }
     if (controllerButton_map.size() < 1)
     {
@@ -399,7 +433,11 @@ void Game::setdefaultcontrollerbuttons(void)
     }
     if (controllerButton_esc.size() < 1)
     {
+        #ifdef __NDS__
+        controllerButton_esc.push_back(SDL_CONTROLLER_BUTTON_START);
+        #else
         controllerButton_esc.push_back(SDL_CONTROLLER_BUTTON_B);
+        #endif
     }
     if (controllerButton_restart.size() < 1)
     {
