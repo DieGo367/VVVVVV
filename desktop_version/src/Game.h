@@ -508,6 +508,9 @@ public:
     bool press_left, press_right, press_action, press_map, press_interact;
     bool interactheld;
     bool separate_interact;
+    #ifdef __NDS__
+    bool press_confirm, press_back;
+    #endif
 
     //Some stats:
     int totalflips;

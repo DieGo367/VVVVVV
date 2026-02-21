@@ -344,7 +344,11 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
         case Action_Menu_Accept:
             if (show_controller)
             {
+                #ifdef __NDS__
+                return sdlbutton_to_glyph(SDL_CONTROLLER_BUTTON_A);
+                #else
                 return glyph_for_vector(game.controllerButton_flip, binding);
+                #endif
             }
             return loc::gettext("ACTION");
         }

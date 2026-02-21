@@ -179,6 +179,10 @@ void Game::init(void)
     interactheld = false;
     separate_interact = false;
     mapheld = false;
+    #ifdef __NDS__
+    press_confirm = false;
+    press_back = false;
+    #endif
 
 
     pausescript = false;

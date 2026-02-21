@@ -2300,6 +2300,10 @@ void titleinput(void)
     game.press_action = false;
     game.press_map = false;
     game.press_interact = false;
+    #ifdef __NDS__
+    game.press_confirm = false;
+    game.press_back = false;
+    #endif
 
     bool lang_press_horizontal = false;
 
@@ -2361,14 +2365,26 @@ void titleinput(void)
     if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip)) game.press_action = true;
     //|| key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN)) game.press_action = true; //on menus, up and down don't work as action
     if (key.isDown(KEYBOARD_ENTER)) game.press_map = true;
+    #ifdef __NDS__
+    if (key.isDown(SDL_CONTROLLER_BUTTON_A)) game.press_confirm = true;
+    if (key.isDown(SDL_CONTROLLER_BUTTON_B)) game.press_back = true;
+    #endif
 
     //In the menu system, all keypresses are single taps rather than holds. Therefore this test has to be done for all presses
+    #ifdef __NDS__
+    if (!game.press_confirm && !game.press_left && !game.press_right && !game.press_back) game.jumpheld = false;
+    #else
     if (!game.press_action && !game.press_left && !game.press_right && !key.isDown(27) && !key.isDown(game.controllerButton_esc)) game.jumpheld = false;
+    #endif
     if (!game.press_map) game.mapheld = false;
 
     if (!game.jumpheld && graphics.fademode == FADE_NONE)
     {
+        #ifdef __NDS__
+        if (game.press_confirm || game.press_left || game.press_right || game.press_map || game.press_back)
+        #else
         if (game.press_action || game.press_left || game.press_right || game.press_map || key.isDown(27) || key.isDown(game.controllerButton_esc))
+        #endif
         {
             game.jumpheld = true;
         }
@@ -2387,7 +2403,11 @@ void titleinput(void)
 
         if (game.menustart
         && game.menucountdown <= 0
+        #ifdef __NDS__
+        && game.press_back)
+        #else
         && (key.isDown(27) || key.isDown(game.controllerButton_esc)))
+        #endif
         {
             if (game.currentmenuname == Menu::language && loc::pre_title_lang_menu)
             {
@@ -2523,7 +2543,11 @@ void titleinput(void)
         if (game.currentmenuoption < 0) game.currentmenuoption = game.menuoptions.size()-1;
         if (game.currentmenuoption >= (int) game.menuoptions.size() ) game.currentmenuoption = 0;
 
+        #ifdef __NDS__
+        if (game.press_confirm)
+        #else
         if (game.press_action)
+        #endif
         {
             if (!game.menustart)
             {
@@ -3014,6 +3038,10 @@ void mapinput(void)
     game.press_action = false;
     game.press_map = false;
     game.press_interact = false;
+    #ifdef __NDS__
+    game.press_confirm = false;
+    game.press_back = false;
+    #endif
 
     if (version2_2 && graphics.fademode == FADE_FULLY_BLACK && graphics.menuoffset == 0)
     {
@@ -3116,6 +3144,16 @@ void mapinput(void)
         {
             game.press_action = true;
         }
+        #ifdef __NDS__
+        if (key.isDown(SDL_CONTROLLER_BUTTON_A))
+        {
+            game.press_confirm = true;
+        }
+        if (key.isDown(SDL_CONTROLLER_BUTTON_B))
+        {
+            game.press_back = true;
+        }
+        #endif
         if (game.menupage < 12
         || (game.menupage >= 20 && game.menupage <= 21)
         || (game.menupage >= 30 && game.menupage <= 32))
@@ -3146,7 +3184,11 @@ void mapinput(void)
         }
 
         //In the menu system, all keypresses are single taps rather than holds. Therefore this test has to be done for all presses
+        #ifdef __NDS__
+        if (!game.press_confirm && !game.press_action && !game.press_left && !game.press_right)
+        #else
         if (!game.press_action && !game.press_left && !game.press_right)
+        #endif
         {
             game.jumpheld = false;
         }
@@ -3172,7 +3214,11 @@ void mapinput(void)
 
     if (!game.jumpheld)
     {
+        #ifdef __NDS__
+        if (game.press_confirm || game.press_action || game.press_left || game.press_right || game.press_map)
+        #else
         if (game.press_action || game.press_left || game.press_right || game.press_map)
+        #endif
         {
             game.jumpheld = true;
         }
@@ -3190,7 +3236,11 @@ void mapinput(void)
             game.menupage++;
         }
 
+        #ifdef __NDS__
+        if ((game.menupage > 3 && game.press_confirm) || (game.menupage <= 3 && game.press_action))
+        #else
         if (game.press_action)
+        #endif
         {
             mapmenuactionpress(version2_2);
         }

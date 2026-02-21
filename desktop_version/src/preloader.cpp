@@ -21,6 +21,19 @@ static int pre_temprectx=0, pre_temprecty=0, pre_temprectw=320, pre_temprecth=16
 
 void preloaderinput(void)
 {
+  #ifdef __NDS__
+  game.press_confirm = false;
+
+  if (key.isDown(SDL_CONTROLLER_BUTTON_A)) {
+    game.press_confirm = true;
+  }
+
+  if (game.press_confirm) {
+    //Skip to TITLEMODE immediately
+    game.gamestate = TITLEMODE;
+    game.jumpheld = true;
+  }
+  #else
   game.press_action = false;
 
   if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip)) {
@@ -32,6 +45,7 @@ void preloaderinput(void)
     game.gamestate = TITLEMODE;
     game.jumpheld = true;
   }
+  #endif
 }
 
 void preloaderrenderfixed(void)
