@@ -4,7 +4,8 @@
 #include <SDL.h>
 #ifdef __NDS__
 #include <maxmod9.h>
-#define MM_MAX_VOLUME 1024
+#define MM_MAX_EFFECT_VOLUME 1024
+#define MM_MAX_STREAM_VOLUME 127
 #else
 #include <FAudio.h>
 #include <physfsrwops.h>
@@ -743,7 +744,8 @@ typedef struct WAVHeader {
 } WAVHeader;
 
 static u8 *soundbank = NULL;
-static mm_word effectVolume = MM_MAX_VOLUME;
+static mm_word effectVolume = MM_MAX_EFFECT_VOLUME;
+static mm_word streamVolume = MM_MAX_STREAM_VOLUME;
 
 #define Music_COUNT 16
 static int wavFileStatus[Music_COUNT] = {0};
@@ -841,8 +843,7 @@ mm_word streamCallback(mm_word length, mm_addr dest, mm_stream_formats format) {
         memcpy((u8 *)dest + bufferRightSize, streamBuffer, streamBufferOut);
     }
     s8 *samples = (s8 *)dest;
-    if (music.user_music_volume == 0) memset(samples, 0, requestLength);
-    else for (int i = 0; i < requestLength; i++) {
+    for (int i = 0; i < requestLength; i++) {
         samples[i] = samples[i] - 128;
     }
     return length;
@@ -1564,10 +1565,15 @@ void musicclass::updatemutestate(void)
     else
     {
         #ifdef __NDS__
-        mm_word targetVolume = MM_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX;
+        mm_word targetVolume = MM_MAX_EFFECT_VOLUME * user_sound_volume / USER_VOLUME_MAX;
         if (effectVolume != targetVolume) {
             mmSetEffectsVolume(targetVolume);
             effectVolume = targetVolume;
+        }
+        targetVolume = MM_MAX_STREAM_VOLUME * user_music_volume / USER_VOLUME_MAX;
+        if (streamVolume != targetVolume) {
+            mmStreamVolume(targetVolume);
+            streamVolume = targetVolume;
         }
         #else
         SoundTrack::SetVolume(VVV_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX);
