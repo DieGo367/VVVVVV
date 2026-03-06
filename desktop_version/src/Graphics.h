@@ -482,11 +482,18 @@ public:
     int warpskip;
 
     bool translucentroomname;
+    #ifdef __NDS__
+    bool lerp_freeze = false;
+    #endif
 
 #ifndef GAME_DEFINITION
     float inline lerp(const float v0, const float v1)
     {
+        #ifdef __NDS__
+        if (game.physics_frozen() || lerp_freeze)
+        #else
         if (game.physics_frozen())
+        #endif
         {
             return v1;
         }

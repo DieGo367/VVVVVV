@@ -3044,6 +3044,7 @@ void maprender(void)
 {
     #ifdef __NDS__
     if (graphics.menuoffset > 0) {
+        graphics.lerp_freeze = true;
         if (map.towermode)
         {
             if (!graphics.backgrounddrawn)
@@ -3087,6 +3088,12 @@ void maprender(void)
                 }
             }
         }
+        graphics.drawentities();
+        if (map.towermode)
+        {
+            graphics.drawtowerspikes();
+        }
+        graphics.lerp_freeze = false;
     }
     graphics.scroll_gl(0, graphics.lerp(graphics.oldmenuoffset, graphics.menuoffset));
     graphics.fill_rect(0, 0, 320, 12, 0, 0, 0);
@@ -3657,6 +3664,16 @@ void teleporterrender(void)
     if (script.running) {
         gamerender();
         return;
+    }
+    if (graphics.menuoffset > 0)
+    {
+        graphics.lerp_freeze = true;
+        graphics.drawentities();
+        if (map.towermode)
+        {
+            graphics.drawtowerspikes();
+        }
+        graphics.lerp_freeze = false;
     }
     graphics.scroll_gl(0, graphics.lerp(graphics.oldmenuoffset, graphics.menuoffset));
     graphics.fill_rect(0, 0, 320, 12, 0, 0, 0);
