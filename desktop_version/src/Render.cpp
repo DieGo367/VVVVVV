@@ -1886,7 +1886,16 @@ void titlerender(void)
     }
     else
     {
+        #ifdef __NDS__
+        if(!game.colourblindmode && game.gamestate != GAMEMODE) {
+            graphics.drawtowerbackground(graphics.titlebg);
+        }
+        else {
+            graphics.clear_tile_layer(true);
+        }
+        #else
         if(!game.colourblindmode) graphics.drawtowerbackground(graphics.titlebg);
+        #endif
 
         tr = graphics.col_tr;
         tg = graphics.col_tg;
@@ -1937,6 +1946,9 @@ void gamecompleterender(void)
     #endif
 
     if(!game.colourblindmode) graphics.drawtowerbackground(graphics.titlebg);
+    #ifdef __NDS__
+    else graphics.clear_tile_layer(true);
+    #endif
 
     tr = graphics.col_tr;
     tg = graphics.col_tg;
@@ -2408,7 +2420,9 @@ void gamerender(void)
             }
             else
             {
-                #ifndef __NDS__
+                #ifdef __NDS__
+                graphics.clear_tile_layer(true);
+                #else
                 graphics.clear();
                 #endif
             }
@@ -2422,7 +2436,9 @@ void gamerender(void)
             }
             else
             {
-                #ifndef __NDS__
+                #ifdef __NDS__
+                graphics.clear_tile_layer(true);
+                #else
                 graphics.clear();
                 #endif
             }
@@ -3027,6 +3043,51 @@ static void rendermapcursor(const bool flashing)
 void maprender(void)
 {
     #ifdef __NDS__
+    if (graphics.menuoffset > 0) {
+        if (map.towermode)
+        {
+            if (!graphics.backgrounddrawn)
+            {
+                if (game.colourblindmode)
+                {
+                    graphics.clear_tile_layer(true);
+                }
+                else
+                {
+                    graphics.drawtowerbackground(graphics.towerbg);
+                }
+            }
+            if (!graphics.foregrounddrawn)
+            {
+                graphics.drawtowermap();
+            }
+        }
+        else
+        {
+            if (!graphics.backgrounddrawn)
+            {
+                if (game.colourblindmode)
+                {
+                    graphics.clear_tile_layer(true);
+                }
+                else
+                {
+                    graphics.drawbackground(map.background);
+                }
+            }
+            if (!graphics.foregrounddrawn)
+            {
+                if ((map.finalmode || map.custommode) && map.final_colormode)
+                {
+                    graphics.drawfinalmap();
+                }
+                else
+                {
+                    graphics.drawmap();
+                }
+            }
+        }
+    }
     graphics.scroll_gl(0, graphics.lerp(graphics.oldmenuoffset, graphics.menuoffset));
     graphics.fill_rect(0, 0, 320, 12, 0, 0, 0);
     #else

@@ -2807,11 +2807,29 @@ static void bmp8_fill_row(u16 *gfx, int x, int y, u8 value, int count) {
 
 void Graphics::drawbackground( int t )
 {
+    #ifdef __NDS__
+    if (t == 5)
+    {
+        if (!hblankEnabled)
+        {
+            irqSet(IRQ_HBLANK, hblank_mirror_effect);
+            irqEnable(IRQ_HBLANK);
+            hblankEnabled = true;
+        }
+    }
+    else if (hblankEnabled)
+    {
+        hblankEnabled = false;
+        irqDisable(IRQ_HBLANK);
+    }
+    #endif
     switch(t)
     {
     case 1:
         // Starfield
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         clear_tile_layer(true);
         #else
         fill_rect(0, 0, 0);
@@ -3001,6 +3019,8 @@ void Graphics::drawbackground( int t )
             #endif
         }
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         const u16 tileGfxIdx = grphx.im_tiles2->map[546] & 0x03FF;
         const u8 firstPixel = ((u8 *)grphx.im_tiles2->gfx)[tileGfxIdx * 64];
         const u8 lastPixel = ((u8 *)grphx.im_tiles2->gfx)[(tileGfxIdx+1) * 64 - 1];
@@ -3041,7 +3061,25 @@ void Graphics::drawbackground( int t )
     }
     case 3: //Warp zone (horizontal)
     {
-        #ifndef __NDS__
+        #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
+        bgSetScroll(BG_LAYER_BACKDROP, backoffset, 0);
+        if (!backgrounddrawn)
+        {
+            const int temp = 680 + (rcol * 3);
+            for (int j = 0; j < 15; j++)
+            {
+                for (int i = 0; i < 31; i++)
+                {
+                    drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40, true);
+                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41, true);
+                    drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80, true);
+                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81, true);
+                }
+            }
+            backgrounddrawn = true;
+        }
+        #else
         clear();
 
         const int offset = (int) lerp(-3, 0);
@@ -3053,7 +3091,25 @@ void Graphics::drawbackground( int t )
     }
     case 4: //Warp zone (vertical)
     {
-        #ifndef __NDS__
+        #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, backoffset);
+        if (!backgrounddrawn)
+        {
+            const int temp = 760 + (rcol * 3);
+            for (int j = 0; j < 31; j++)
+            {
+                for (int i = 0; i < 21; i++)
+                {
+                    drawtile2((i * 16), (j * 16) - backoffset - 1, temp + 40, true);
+                    drawtile2((i * 16) + 8, (j * 16) - backoffset - 1, temp + 41, true);
+                    drawtile2((i * 16), (j * 16) - backoffset + 8 - 1, temp + 80, true);
+                    drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 1, temp + 81, true);
+                }
+            }
+            backgrounddrawn = true;
+        }
+        #else
         clear();
 
         const int offset = (int) lerp(-3, 0);
@@ -3067,6 +3123,8 @@ void Graphics::drawbackground( int t )
     {
         // Warp zone, central
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(true);
+
         int tileID = grphx.im_tiles2->map[720 + 3*rcol] & 0x03FF;
         u8 *tileGfx = &((u8 *)grphx.im_tiles2->gfx)[tileID * 8*8];
         u8 warpbValue = tileGfx[0]; // top-left pixel
@@ -3160,6 +3218,8 @@ void Graphics::drawbackground( int t )
     case 6:
         // Final Starfield
         #ifdef __NDS__
+        gameScreen.setBackdropBGType(false);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         clear_tile_layer(true);
         #else
         fill_rect(0, 0, 0);
@@ -3244,20 +3304,10 @@ void Graphics::drawbackground( int t )
 
 void Graphics::updatebackground(int t)
 {
-    #ifdef __NDS__
-    if (t != 5 && hblankEnabled) {
-        hblankEnabled = false;
-        irqDisable(IRQ_HBLANK);
-    }
-    #endif
     switch (t)
     {
     case 1:
         // Starfield
-        #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
-        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
-        #endif
         for (int i = 0; i < numstars; i++)
         {
             stars[i].x -= starsspeed[i];
@@ -3271,10 +3321,6 @@ void Graphics::updatebackground(int t)
         break;
     case 2:
         // Lab
-        #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
-        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
-        #endif
         if (rcol == 6)
         {
             // crazy caze
@@ -3314,15 +3360,13 @@ void Graphics::updatebackground(int t)
         break;
     case 3: // Warp zone (horizontal)
     {
+        #ifndef __NDS__
         const int temp = 680 + (rcol * 3);
+        #endif
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
-        #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
-        bgSetScroll(BG_LAYER_BACKDROP, backoffset, 0);
-        if (!backgrounddrawn)
-        #else
+        #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
         
@@ -3341,24 +3385,12 @@ void Graphics::updatebackground(int t)
             }
         }
         else
-        #endif
         {
             // draw the whole thing for the first time!
-            #ifndef __NDS__
             backoffset = 0;
             clear();
-            #endif
             for (int j = 0; j < 15; j++)
             {
-                #ifdef __NDS__
-                for (int i = 0; i < 31; i++)
-                {
-                    drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40, true);
-                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41, true);
-                    drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80, true);
-                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81, true);
-                }
-                #else
                 for (int i = 0; i < 21; i++)
                 {
                     drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40);
@@ -3366,26 +3398,22 @@ void Graphics::updatebackground(int t)
                     drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80);
                     drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81);
                 }
-                #endif
             }
             backgrounddrawn = true;
         }
-        #ifndef __NDS__
         set_render_target(target);
         #endif
         break;
     }
     case 4: // Warp zone (vertical)
     {
+        #ifndef __NDS__
         const int temp = 760 + (rcol * 3);
+        #endif
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
-        #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
-        bgSetScroll(BG_LAYER_BACKDROP, 0, backoffset);
-        if (!backgrounddrawn)
-        #else
+        #ifndef __NDS__
         SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
         set_render_target(backgroundTexture);
         
@@ -3404,47 +3432,28 @@ void Graphics::updatebackground(int t)
             }
         }
         else
-        #endif
         {
             // draw the whole thing for the first time!
-            #ifndef __NDS__
             backoffset = 0;
             clear();
-            #endif
             for (int j = 0; j < 31; j++)
             {
                 for (int i = 0; i < 21; i++)
                 {
-                    #ifdef __NDS__
-                    drawtile2((i * 16), (j * 16) - backoffset - 1, temp + 40, true);
-                    drawtile2((i * 16) + 8, (j * 16) - backoffset - 1, temp + 41, true);
-                    drawtile2((i * 16), (j * 16) - backoffset + 8 - 1, temp + 80, true);
-                    drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 1, temp + 81, true);
-                    #else
                     drawtile2((i * 16), (j * 16) - backoffset - 3, temp + 40);
                     drawtile2((i * 16) + 8, (j * 16) - backoffset - 3, temp + 41);
                     drawtile2((i * 16), (j * 16) - backoffset + 8 - 3, temp + 80);
                     drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 3, temp + 81);
-                    #endif
                 }
             }
             backgrounddrawn = true;
         }
-        #ifndef __NDS__
         set_render_target(target);
         #endif
         break;
     }
     case 5:
         // Warp zone, central
-        #ifdef __NDS__
-        gameScreen.setBackdropBGType(true);
-        if (!hblankEnabled) {
-            irqSet(IRQ_HBLANK, hblank_mirror_effect);
-            irqEnable(IRQ_HBLANK);
-            hblankEnabled = true;
-        }
-        #endif
 
         backoffset++;
         if (backoffset >= 16)
@@ -3455,10 +3464,6 @@ void Graphics::updatebackground(int t)
         break;
     case 6:
         // Final Starfield
-        #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
-        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
-        #endif
         for (int i = 0; i < numstars; i++)
         {
             stars[i].y -= starsspeed[i];
@@ -3703,7 +3708,41 @@ void Graphics::drawtowerspikes(void)
 
 void Graphics::drawtowerbackground(const TowerBG& bg_obj)
 {
-    #ifndef __NDS__
+    #ifdef __NDS__
+    if (hblankEnabled) {
+        hblankEnabled = false;
+        irqDisable(IRQ_HBLANK);
+    }
+    gameScreen.setBackdropBGType(false);
+    int yoff = (bg_obj.bypos - bg_obj.tileOffset * 8 + 512) % 512;
+    bgSetScroll(BG_LAYER_BACKDROP, 0, yoff);
+    use_tileset(2);
+
+    if (!backgrounddrawn)
+    {
+        for (int j = -1; j < 32; j++)
+        {
+            for (int i = 0; i < 40; i++)
+            {
+                const int temp = map.tower.backat(i, j, bg_obj.bypos);
+                drawtile3(i * 8, (j * 8 + yoff + 512) % 512, temp, bg_obj.colstate, true);
+            }
+        }
+
+        backgrounddrawn = true;
+    }
+    else
+    {
+        // just draw the top and bottom
+        for (int i = 0; i < 40; i++)
+        {
+            int temp = map.tower.backat(i, -1, bg_obj.bypos);
+            drawtile3(i * 8, (-1 * 8 + yoff + 512) % 512, temp, bg_obj.colstate, true);
+            temp = map.tower.backat(i, 31, bg_obj.bypos);
+            drawtile3(i * 8, (31 * 8 + yoff) % 512, temp, bg_obj.colstate, true);
+        }
+    }
+    #else
     clear();
 
     const int offset = (int) lerp(-bg_obj.bscroll, 0);
@@ -3724,37 +3763,26 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     }
 
     #ifdef __NDS__
-    if (hblankEnabled) {
-        hblankEnabled = false;
-        irqDisable(IRQ_HBLANK);
+    if (bg_obj.tdrawback)
+    {
+        backgrounddrawn = false;
+        bg_obj.tdrawback = false;
     }
-    gameScreen.setBackdropBGType(false);
-    int yoff = (bg_obj.bypos - bg_obj.tileOffset * 8 + 512) % 512;
-    bgSetScroll(BG_LAYER_BACKDROP, 0, yoff);
-    use_tileset(2);
-    if (!game.menustart) return;
     #else
     SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
     set_render_target(bg_obj.texture);
-    #endif
 
     if (bg_obj.tdrawback)
     {
-        #ifndef __NDS__
         int off = bg_obj.scrolldir == 0 ? 0 : bg_obj.bscroll;
         //Draw the whole thing; needed for every colour cycle!
         clear();
-        #endif
         for (int j = -1; j < 32; j++)
         {
             for (int i = 0; i < 40; i++)
             {
                 const int temp = map.tower.backat(i, j, bg_obj.bypos);
-                #ifdef __NDS__
-                drawtile3(i * 8, (j * 8 + yoff + 512) % 512, temp, bg_obj.colstate, true);
-                #else
                 drawtile3(i * 8, (j * 8) - (bg_obj.bypos % 8) - off, temp, bg_obj.colstate);
-                #endif
             }
         }
 
@@ -3763,15 +3791,6 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
     else
     {
         // just update the bottom
-        #ifdef __NDS__
-        for (int i = 0; i < 40; i++)
-        {
-            int temp = map.tower.backat(i, -1, bg_obj.bypos);
-            drawtile3(i * 8, (-1 * 8 + yoff + 512) % 512, temp, bg_obj.colstate, true);
-            temp = map.tower.backat(i, 31, bg_obj.bypos);
-            drawtile3(i * 8, (31 * 8 + yoff) % 512, temp, bg_obj.colstate, true);
-        }
-        #else
         scroll_texture(bg_obj.texture, tempScrollingTexture, 0, -bg_obj.bscroll);
         if (bg_obj.scrolldir == 0)
         {
@@ -3797,9 +3816,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
                 drawtile3(i * 8, 32 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
             }
         }
-        #endif
     }
-    #ifndef __NDS__
     set_render_target(target);
     #endif
 }
