@@ -947,7 +947,7 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b, const int width, const int height, const int scale)
 {
     set_texture_color_mod(grphx.im_sprites, r, g, b);
-    if (t < 24 || (t >= 144 && t < 156)) {
+    if (scale <= 1 && (t < 24 || (t >= 144 && t < 156))) {
         draw_texture_part_perfect(grphx.im_sprites, RENDER_SCALE(x), RENDER_SCALE(y), 384 + ((t%120)%4)*26, ((t%120)/4)*26, 26, 26, scale, scale);
     }
     else draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, scale, scale);
