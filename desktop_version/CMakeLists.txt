@@ -542,7 +542,10 @@ if(NINTENDO_DS)
                 )
                 list(APPEND GRIT_FLAGS -gb -gB2 -pn3)
             else()
-                set(MAGICK_FLAGS -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS} ${RESIZE_FLAG})
+                set(MAGICK_FLAGS
+                    -background none ../nds/sprites_small.png +append
+                    -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS} ${RESIZE_FLAG}
+                )
                 list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
             endif()
         elseif(IMAGE IN_LIST TEXTURES_2BIT)

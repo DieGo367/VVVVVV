@@ -570,7 +570,44 @@ int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Re
 
 int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
 {
+    // NDS_TODO: flip modes
     return copy_texture(texture, src, dest);
+}
+
+int Graphics::copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest)
+{
+    if (!texture) {
+        WHINE_ONCE("Could not copy texture");
+        return -1;
+    }
+
+    int srcX = 0, srcY = 0, srcW = texture->width, srcH = texture->height;
+    if (src) {
+        srcX = src->x, srcY = src->y, srcW = src->w, srcH = src->h;
+    }
+
+    int destX = 0, destY = 0, destW = SCREEN_WIDTH, destH = SCREEN_HEIGHT;
+    if (dest) {
+        destX = dest->x + glScrollX, destY = dest->y + glScrollY;
+        destW = dest->w, destH = dest->h;
+    }
+
+    glImage glImg = {
+        srcW,
+        srcH,
+        srcX, srcY,
+        texture->id
+    };
+    glColor(texture->colorMod);
+    glSpriteScaleXY(destX, destY, floattof32(1.0 * destW / srcW), floattof32(1.0 * destH / srcH), GL_FLIP_NONE, &glImg);
+
+    return 0;
+}
+
+int Graphics::copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
+{
+    // NDS_TODO: flip modes
+    return copy_texture_perfect(texture, src, dest);
 }
 
 int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
@@ -910,7 +947,10 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b, const int width, const int height, const int scale)
 {
     set_texture_color_mod(grphx.im_sprites, r, g, b);
-    draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, scale, scale);
+    if (t < 24 || (t >= 144 && t < 156)) {
+        draw_texture_part_perfect(grphx.im_sprites, RENDER_SCALE(x), RENDER_SCALE(y), 384 + ((t%120)%4)*26, ((t%120)/4)*26, 26, 26, scale, scale);
+    }
+    else draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, scale, scale);
 }
 
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
@@ -1436,6 +1476,26 @@ void Graphics::draw_texture_part(GLTexture *image, const int x, const int y, con
     const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
 
     copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
+}
+
+void Graphics::draw_texture_part_perfect(GLTexture *image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)
+{
+    const SDL_Rect srcrect = {x2, y2, w, h};
+
+    int flip = SDL_FLIP_NONE;
+
+    if (scalex < 0)
+    {
+        flip |= SDL_FLIP_HORIZONTAL;
+    }
+    if (scaley < 0)
+    {
+        flip |= SDL_FLIP_VERTICAL;
+    }
+
+    const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
+
+    copy_texture_perfect(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
 }
 #else
 void Graphics::draw_texture(SDL_Texture* image, const int x, const int y)
