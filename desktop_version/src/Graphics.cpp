@@ -3185,6 +3185,7 @@ void Graphics::drawbackground( int t )
         #ifdef __NDS__
         gameScreen.setBackdropBGType(true);
 
+        static int drawn_color = -1;
         int tileID = grphx.im_tiles2->map[720 + 3*rcol] & 0x03FF;
         u8 *tileGfx = &((u8 *)grphx.im_tiles2->gfx)[tileID * 8*8];
         u8 warpbValue = tileGfx[0]; // top-left pixel
@@ -3245,7 +3246,7 @@ void Graphics::drawbackground( int t )
             const int squash = 3;
             u8 fill = i % 2 == warpskip ? warpbValue : warpfValue;
             
-            if (!backgrounddrawn) {
+            if (!backgrounddrawn || drawn_color != rcol) {
                 for (int row = ry; row <= yend; row += squash) {
                     bmp8_fill_row(gameScreen.bitmapBackdrop, rx, row/squash, fill, rw);
                 }
@@ -3272,6 +3273,7 @@ void Graphics::drawbackground( int t )
         }
         #ifdef __NDS__
         backgrounddrawn = true;
+        drawn_color = rcol;
         #endif
         break;
     }
