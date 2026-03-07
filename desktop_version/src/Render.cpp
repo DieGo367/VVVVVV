@@ -1339,7 +1339,7 @@ static void menurender(void)
             );
             for (int i = 0; i < 6; i++)
             {
-                graphics.drawcrewman(169-(3*42)+(i*42), 95-20, summary->crewstats[i], true);
+                graphics.drawcrewman(169-(3*42)+(i*42), 95-20, i, summary->crewstats[i], true);
             }
             font::print(
                 0, 59, 132-20,
@@ -1370,7 +1370,7 @@ static void menurender(void)
 
         for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
         {
-            graphics.drawcrewman(169-(3*42)+(i*42), 68, game.ndmresultcrewstats[i], true);
+            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, game.ndmresultcrewstats[i], true);
         }
         char buffer[2*SCREEN_WIDTH_CHARS + 1];
         loc::gettext_plural_fill(
@@ -1435,7 +1435,7 @@ static void menurender(void)
 
         for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
         {
-            graphics.drawcrewman(169-(3*42)+(i*42), 68, game.ndmresultcrewstats[i], true);
+            graphics.drawcrewman(169-(3*42)+(i*42), 68, i, game.ndmresultcrewstats[i], true);
         }
         font::print(PR_CEN, -1, 100, loc::gettext("You rescued all the crewmates!"), tr, tg, tb);
 
@@ -3492,7 +3492,7 @@ void maprender(void)
             {
                 /* Crewmates are annoying. Their height is 21 pixels, but to flip them,
                  * we also have to account for their 2-pixel y-offset (and multiply it by 2). */
-                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), game.crewstats[i], true);
+                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), i, game.crewstats[i], true);
             }
         }
 
