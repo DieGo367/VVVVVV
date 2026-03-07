@@ -231,7 +231,7 @@ void KeyPoll::Poll() {
     scanKeys();
     u32 active = keysHeld();
     buttonmap[SDL_CONTROLLER_BUTTON_START]         = active & KEY_START;
-    buttonmap[SDL_CONTROLLER_BUTTON_GUIDE]         = active & KEY_SELECT;
+    buttonmap[SDL_CONTROLLER_BUTTON_BACK]          = active & KEY_SELECT;
     buttonmap[SDL_CONTROLLER_BUTTON_A]             = active & KEY_A;
     buttonmap[SDL_CONTROLLER_BUTTON_B]             = active & KEY_B;
     buttonmap[SDL_CONTROLLER_BUTTON_X]             = active & KEY_X;
