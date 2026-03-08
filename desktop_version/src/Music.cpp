@@ -1354,12 +1354,8 @@ void musicclass::fadeMusicVolumeOut(const int fadeout_ms)
     m_doFadeOutVol = true;
 
     fade.step_ms = 0;
-    #ifdef __NDS__
-    fade.duration_ms = 0; // NDS_TODO: renable fading once I can control stream volume
-    #else
     /* Duration is proportional to current volume. */
     fade.duration_ms = fadeout_ms * musicVolume / VVV_MAX_VOLUME;
-    #endif
     fade.start_volume = musicVolume;
     fade.end_volume = 0;
 }
@@ -1570,7 +1566,7 @@ void musicclass::updatemutestate(void)
             mmSetEffectsVolume(targetVolume);
             effectVolume = targetVolume;
         }
-        targetVolume = MM_MAX_STREAM_VOLUME * user_music_volume / USER_VOLUME_MAX;
+        targetVolume = (MM_MAX_STREAM_VOLUME * musicVolume / VVV_MAX_VOLUME) * user_music_volume / USER_VOLUME_MAX;
         if (streamVolume != targetVolume) {
             mmStreamVolume(targetVolume);
             streamVolume = targetVolume;
