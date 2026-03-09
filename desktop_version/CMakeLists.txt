@@ -455,7 +455,7 @@ if(NINTENDO_DS)
     endmacro()
 
     set(TILES tiles tiles2 tiles3)
-    set(SPRITES sprites teleporter)
+    set(SPRITES sprites flipsprites)
     set(TEXTURES_2BIT
         elephant
         gamecomplete
@@ -466,7 +466,7 @@ if(NINTENDO_DS)
     set(FONTS_WHITE font)
     set(FONTS_COLOR buttons_8x8)
     set(RESIZE_FLAG -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
-    foreach(IMAGE ${TILES} ${SPRITES} ${TEXTURES_2BIT} minimap ending cursors legend ${FONTS_WHITE} ${FONTS_COLOR})
+    foreach(IMAGE ${TILES} ${SPRITES} ${TEXTURES_2BIT} teleporter minimap ending cursors legend ${FONTS_WHITE} ${FONTS_COLOR})
         set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
         set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
         set(IMAGE_DEP "")
@@ -527,31 +527,30 @@ if(NINTENDO_DS)
                 )
             endif()
         elseif(IMAGE IN_LIST SPRITES)
-            if(IMAGE STREQUAL teleporter)
-                set(MAGICK_FLAGS -background "#FF00FF" -crop 96x96 +repage
-                    \( -clone 0,1 -flatten \)
-                    \( -clone 0,2 -flatten \)
-                    \( -clone 0,3 -flatten \)
-                    \( -clone 0,4 -flatten \)
-                    \( -clone 0,5 -flatten \)
-                    \( -clone 0,6 -flatten \)
-                    \( -clone 0,7 -flatten \)
-                    \( -clone 0,8 -flatten \)
-                    \( -clone 0,9 -flatten \)
-                    -delete 0-9 +append +repage -crop 480x96 -append ${RESIZE_FLAG}
-                )
-                list(APPEND GRIT_FLAGS -gb -gB2 -pn3)
-            else()
-                set(MAGICK_FLAGS
-                    -background none ../nds/sprites_small.png +append
-                    -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS} ${RESIZE_FLAG}
-                )
-                list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
-            endif()
+            set(MAGICK_FLAGS
+                -background none ${CMAKE_SOURCE_DIR}/nds/sprites_small.png +append
+                -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS} ${RESIZE_FLAG}
+            )
+            list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
+            set(IMAGE_DEP ${CMAKE_SOURCE_DIR}/nds/sprites_small.png)
         elseif(IMAGE IN_LIST TEXTURES_2BIT)
             list(APPEND MAGICK_FLAGS ${RESIZE_FLAG})
             set(PN $<IF:$<STREQUAL:${IMAGE},covered>,-pn3,-pn2>)
             list(APPEND GRIT_FLAGS -gb -gB2 ${PN})
+        elseif(IMAGE STREQUAL teleporter)
+            set(MAGICK_FLAGS -background "#FF00FF" -crop 96x96 +repage
+                \( -clone 0,1 -flatten \)
+                \( -clone 0,2 -flatten \)
+                \( -clone 0,3 -flatten \)
+                \( -clone 0,4 -flatten \)
+                \( -clone 0,5 -flatten \)
+                \( -clone 0,6 -flatten \)
+                \( -clone 0,7 -flatten \)
+                \( -clone 0,8 -flatten \)
+                \( -clone 0,9 -flatten \)
+                -delete 0-9 +append +repage -crop 480x96 -append ${RESIZE_FLAG}
+            )
+            list(APPEND GRIT_FLAGS -gb -gB2 -pn3)
         elseif(IMAGE STREQUAL minimap)
             list(APPEND MAGICK_FLAGS ${RESIZE_FLAG})
             list(APPEND GRIT_FLAGS -gb -gB8 -pn23)
@@ -568,10 +567,10 @@ if(NINTENDO_DS)
             list(APPEND GRIT_FLAGS -gt -gB4 -pn2)
         elseif(IMAGE STREQUAL legend)
             list(PREPEND MAGICK_FLAGS
-                \( ../fonts/font.png -crop 8x8+120+472 -repage +0+0 -fill "#454545" +opaque transparent \)
-                \( ../fonts/font.png -crop 8x8+112+488 -repage +0+8 -fill "#AEFFFF" +opaque transparent \)
+                \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+120+472 -repage +0+0 -fill "#454545" +opaque transparent \)
+                \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+112+488 -repage +0+8 -fill "#AEFFFF" +opaque transparent \)
                 \( +clone -repage +0+16 -fill "#FF0000" +opaque transparent \)
-                \( ../fonts/font.png -crop 8x8+0+504 -repage +0+24 -fill "#FFFF3C" +opaque transparent \)
+                \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+0+504 -repage +0+24 -fill "#FFFF3C" +opaque transparent \)
                 -background transparent -flatten -extent 8x32
                 -fill black
                 \( +clone -repage -1-1 +opaque transparent \) -insert 0

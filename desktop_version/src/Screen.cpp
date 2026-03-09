@@ -43,29 +43,24 @@ void Screen::init(const struct ScreenSettings* settings) {
     badSignalEffect = settings->badSignal;
     vsync = settings->useVsync;
 
+    if (graphics.setflipmode) lcdMainOnBottom();
+
 	videoSetMode(MODE_5_3D);
     vramSetBankE(VRAM_E_MAIN_BG);
     vramSetBankF(VRAM_F_MAIN_BG_0x06010000);
     bgWindowEnable(0, WINDOW_0);
     bgWindowDisable(0, WINDOW_OUT);
-	bgInit(BG_LAYER_LEVEL, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
-	bgSetCenter(BG_LAYER_LEVEL, 0, 0);
-	bgSetScale(BG_LAYER_LEVEL, (5 << 8) / 4, (5 << 8) / 4);
-    bgSetPriority(BG_LAYER_LEVEL, 2);
-    bgWrapOn(BG_LAYER_LEVEL);
-    bgWindowEnable(BG_LAYER_LEVEL, WINDOW_0);
-    bgWindowDisable(BG_LAYER_LEVEL, WINDOW_OUT);
-    tilemapLevel = bgGetMapPtr(BG_LAYER_LEVEL);
+    tilemapLevel = NULL;
     tilemapBackdrop = NULL;
     bitmapBackdrop = NULL;
-	setBackdropBGType(false);
+    setupLevelLayer(false);
+	setupBackdropLayer(false, false);
 
     videoSetModeSub(MODE_3_2D);
     vramSetBankC(VRAM_C_SUB_BG);
     vramSetBankI(VRAM_I_SUB_SPRITE);
-    bgInitSub(BG_LAYER_SUBSCREEN & 0b11, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
-    bgSetPriority(BG_LAYER_SUBSCREEN, 3);
-    bitmapSub = bgGetGfxPtr(BG_LAYER_SUBSCREEN);
+    bitmapSub = NULL;
+    setupSubscreenLayer(false);
     bgUpdate();
     oamInit(&oamSub, SpriteMapping_Bmp_1D_128, false);
 
@@ -110,7 +105,19 @@ bool Screen::isForcedFullscreen(void) {
     return true;
 }
 
-void Screen::setBackdropBGType(bool bitmap) {
+void Screen::setupLevelLayer(bool flip) {
+    if (tilemapLevel == NULL) {
+        bgInit(BG_LAYER_LEVEL, BgType_ExRotation, BgSize_ER_512x512, 0, 1);
+        bgSetPriority(BG_LAYER_LEVEL, 2);
+        bgWrapOn(BG_LAYER_LEVEL);
+        bgWindowEnable(BG_LAYER_LEVEL, WINDOW_0);
+        bgWindowDisable(BG_LAYER_LEVEL, WINDOW_OUT);
+        tilemapLevel = bgGetMapPtr(BG_LAYER_LEVEL);
+    }
+    bgSetCenter(BG_LAYER_LEVEL, 0, flip ? SCREEN_HEIGHT - 1 : 0);
+    bgSetScale(BG_LAYER_LEVEL, (5 << 8) / 4, (flip ? -1 : 1) * (5 << 8) / 4);
+}
+void Screen::setupBackdropLayer(bool flip, bool bitmap) {
     if (bitmap) {
         if (bitmapBackdrop) return;
         // Important! This overlaps the level layer and the tile data!
@@ -122,17 +129,27 @@ void Screen::setBackdropBGType(bool bitmap) {
         tilemapBackdrop = NULL;
     }
     else {
-        if (tilemapBackdrop) return;
-        bgInit(BG_LAYER_BACKDROP, BgType_ExRotation, BgSize_ER_512x512, 4, 1);
-        bgSetCenter(BG_LAYER_BACKDROP, 0, 0);
-        bgSetScale(BG_LAYER_BACKDROP, (5 << 8) / 4, (5 << 8) / 4);
-        bgWrapOn(BG_LAYER_BACKDROP);
-        tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
-        bitmapBackdrop = NULL;
+        if (tilemapBackdrop == NULL) {
+            bgInit(BG_LAYER_BACKDROP, BgType_ExRotation, BgSize_ER_512x512, 4, 1);
+            bgWrapOn(BG_LAYER_BACKDROP);
+            tilemapBackdrop = bgGetMapPtr(BG_LAYER_BACKDROP);
+            bitmapBackdrop = NULL;
+        }
+        bgSetCenter(BG_LAYER_BACKDROP, 0, flip ? SCREEN_HEIGHT - 1 : 0);
+        bgSetScale(BG_LAYER_BACKDROP, (5 << 8) / 4, (flip ? -1 : 1) * (5 << 8) / 4);
     }
     bgWindowEnable(BG_LAYER_BACKDROP, WINDOW_0);
     bgWindowDisable(BG_LAYER_BACKDROP, WINDOW_OUT);
     bgSetPriority(BG_LAYER_BACKDROP, 3);
+}
+void Screen::setupSubscreenLayer(bool flip) {
+    if (bitmapSub == NULL) {
+        bgInitSub(BG_LAYER_SUBSCREEN & 0b11, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+        bgSetPriority(BG_LAYER_SUBSCREEN, 3);
+        bitmapSub = bgGetGfxPtr(BG_LAYER_SUBSCREEN);
+    }
+    bgSetCenter(BG_LAYER_SUBSCREEN, 0, flip ? SCREEN_HEIGHT - 1 : 0);
+    bgSetScale(BG_LAYER_SUBSCREEN, (1 << 8), (flip ? -1 : 1) * (1 << 8));
 }
 #else
 void ScreenSettings_default(struct ScreenSettings* _this)

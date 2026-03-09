@@ -1204,7 +1204,11 @@ static int print_char(
         f_glyph->glyph_w,
         f_glyph->glyph_h,
         scale,
+        #ifdef __NDS__
+        scale
+        #else
         scale * (graphics.flipmode ? -1 : 1)
+        #endif
     );
     graphics.set_texture_color_mod(f_glyph->image, 255, 255, 255);
     #else

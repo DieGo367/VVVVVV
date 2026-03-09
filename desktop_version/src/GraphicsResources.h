@@ -73,8 +73,10 @@ public:
 
     u16 *im_sprites_translated;
     u16 *im_flipsprites_translated;
+
+    void ReloadSprites(void);
 private:
-    GLTexture *LoadSprites(const char *filename);
+    GLTexture *LoadSprites(const char *filename, bool loadHitmaps);
     #else
     SDL_Surface* im_sprites_surf;
     SDL_Surface* im_flipsprites_surf;

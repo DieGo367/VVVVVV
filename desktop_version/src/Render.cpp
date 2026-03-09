@@ -2349,6 +2349,7 @@ static void mode_indicator_text(const int alpha)
 
 #ifdef __NDS__
 static void rendermap_sub(bool blinkCursor) {
+    gameScreen.setupSubscreenLayer(graphics.flipmode);
     bool noSignal = map.finalmode || (map.custommode && !map.customshowmm);
     for (int j = 0; j < map.getheight(); j++) {
         for (int i = 0; i < map.getwidth(); i++) {
@@ -3738,7 +3739,7 @@ void teleporterrender(void)
         #ifdef __NDS__
         font::print(PR_CEN, -1, 110, loc::gettext("Press Left/Right to choose a Teleporter"), 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
         font::print(PR_CEN, -1, 125, final_string, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
-        font::print(PR_CEN | PR_3X, -1, 210 + (help.slowsine / 8 % 2) * 3, "⏷ ⏷ ⏷", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        font::print(PR_CEN | PR_3X, -1, 210 + (help.slowsine / 8 % 2) * 3, graphics.flipmode ? "⏶ ⏶ ⏶": "⏷ ⏷ ⏷", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
         #else
         font::print(PR_CEN, -1, 210, loc::gettext("Press Left/Right to choose a Teleporter"), 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
         font::print(PR_CEN, -1, 225, final_string, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));

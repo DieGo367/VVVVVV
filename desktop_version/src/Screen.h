@@ -40,7 +40,9 @@ public:
     bool vsync;
 
     #ifdef __NDS__
-    void setBackdropBGType(bool bitmap);
+    void setupLevelLayer(bool flip);
+    void setupBackdropLayer(bool flip, bool bitmap);
+    void setupSubscreenLayer(bool flip);
     u16 *tilemapLevel;
     u16 *tilemapBackdrop;
     u16 *bitmapBackdrop;

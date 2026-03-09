@@ -240,9 +240,7 @@ public:
     void post_substitute(GLTexture *subst);
 
     int copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest);
-    int copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
     int copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest);
-    int copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
     #else
     bool substitute(SDL_Texture** texture);
     void post_substitute(SDL_Texture* subst);

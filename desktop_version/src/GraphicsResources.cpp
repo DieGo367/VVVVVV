@@ -309,26 +309,28 @@ static void LoadLegend(const char *filename) {
     VVV_free(palette);
 }
 
-GLTexture *GraphicsResources::LoadSprites(const char *filename) {
+GLTexture *GraphicsResources::LoadSprites(const char *filename, bool loadHitmaps) {
     u8 *gfx;
     GLTexture *tex = LoadImage(filename, TEX_WHITE, &gfx);
     if (tex == NULL) return NULL;
 
-    for (int id = 0; id < 12*16; id++) {
-        u8 *spriteTopLeft = &gfx[(id/12 * tex->width*32 + id%12 * 32) / 4];
-        for (int row = 0; row < 32; row++) {
-            for (int col = 0; col < 32; col += 8) {
-                u16 srcPixels = *(u16 *)&spriteTopLeft[(row * tex->width + col) / 4];
-                spriteHitmaps[id][(row * 32 + col) / 8] = (
-                    (srcPixels & 0b11       ? BIT(0) : 0) |
-                    (srcPixels & 0b11 <<  2 ? BIT(1) : 0) |
-                    (srcPixels & 0b11 <<  4 ? BIT(2) : 0) |
-                    (srcPixels & 0b11 <<  6 ? BIT(3) : 0) |
-                    (srcPixels & 0b11 <<  8 ? BIT(4) : 0) |
-                    (srcPixels & 0b11 << 10 ? BIT(5) : 0) |
-                    (srcPixels & 0b11 << 12 ? BIT(6) : 0) |
-                    (srcPixels & 0b11 << 14 ? BIT(7) : 0)
-                );
+    if (loadHitmaps) {
+        for (int id = 0; id < 12*16; id++) {
+            u8 *spriteTopLeft = &gfx[(id/12 * tex->width*32 + id%12 * 32) / 4];
+            for (int row = 0; row < 32; row++) {
+                for (int col = 0; col < 32; col += 8) {
+                    u16 srcPixels = *(u16 *)&spriteTopLeft[(row * tex->width + col) / 4];
+                    spriteHitmaps[id][(row * 32 + col) / 8] = (
+                        (srcPixels & 0b11       ? BIT(0) : 0) |
+                        (srcPixels & 0b11 <<  2 ? BIT(1) : 0) |
+                        (srcPixels & 0b11 <<  4 ? BIT(2) : 0) |
+                        (srcPixels & 0b11 <<  6 ? BIT(3) : 0) |
+                        (srcPixels & 0b11 <<  8 ? BIT(4) : 0) |
+                        (srcPixels & 0b11 << 10 ? BIT(5) : 0) |
+                        (srcPixels & 0b11 << 12 ? BIT(6) : 0) |
+                        (srcPixels & 0b11 << 14 ? BIT(7) : 0)
+                    );
+                }
             }
         }
     }
@@ -735,7 +737,8 @@ void GraphicsResources::init(void)
     im_tiles2 = LoadTileset("graphics/tiles2.grf");
     im_tiles3 = LoadTileset("graphics/tiles3.grf");
 
-    im_sprites = LoadSprites("graphics/sprites.grf");
+    im_sprites = LoadSprites("graphics/sprites.grf", true);
+    if (graphics.setflipmode) ReloadSprites();
     im_flipsprites = im_sprites;
 
     im_teleporter = LoadImage("graphics/teleporter.grf");
@@ -796,6 +799,14 @@ void GraphicsResources::init(void)
     }
     #endif
 }
+
+#ifdef __NDS__
+void GraphicsResources::ReloadSprites(void)
+{
+    VVV_freefunc(DestroyImage, im_sprites);
+    im_sprites = LoadSprites(graphics.setflipmode ? "graphics/flipsprites.grf" : "graphics/sprites.grf", false);
+}
+#endif
 
 
 void GraphicsResources::destroy(void)

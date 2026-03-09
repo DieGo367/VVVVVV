@@ -555,6 +555,9 @@ int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Re
         destX = RENDER_SCALE(dest->x + glScrollX), destY = RENDER_SCALE(dest->y + glScrollY);
         destW = RENDER_SCALE(dest->w), destH = RENDER_SCALE(dest->h);
     }
+    if (flipmode) {
+        destY = SCREEN_HEIGHT - destY - destH;
+    }
 
     glImage glImg = {
         srcW,
@@ -566,12 +569,6 @@ int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Re
     glSpriteScaleXY(destX, destY, floattof32(1.0 * destW / srcW), floattof32(1.0 * destH / srcH), GL_FLIP_NONE, &glImg);
 
     return 0;
-}
-
-int Graphics::copy_texture(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
-{
-    // NDS_TODO: flip modes
-    return copy_texture(texture, src, dest);
 }
 
 int Graphics::copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest)
@@ -591,6 +588,9 @@ int Graphics::copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, cons
         destX = dest->x + glScrollX, destY = dest->y + glScrollY;
         destW = dest->w, destH = dest->h;
     }
+    if (flipmode) {
+        destY = SCREEN_HEIGHT - destY - destH;
+    }
 
     glImage glImg = {
         srcW,
@@ -602,12 +602,6 @@ int Graphics::copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, cons
     glSpriteScaleXY(destX, destY, floattof32(1.0 * destW / srcW), floattof32(1.0 * destH / srcH), GL_FLIP_NONE, &glImg);
 
     return 0;
-}
-
-int Graphics::copy_texture_perfect(GLTexture *texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
-{
-    // NDS_TODO: flip modes
-    return copy_texture_perfect(texture, src, dest);
 }
 
 int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
@@ -800,6 +794,9 @@ int Graphics::fill_rect(const SDL_Rect* rect)
     if (rect) {
         rx = RENDER_SCALE(rect->x + glScrollX), ry = RENDER_SCALE(rect->y + glScrollY), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
     }
+    if (flipmode) {
+        ry = SCREEN_HEIGHT - ry - rh;
+    }
     glBoxFilled(rx, ry, rx + rw - 1, ry + rh - 1, draw_color);
     return 0;
     #else
@@ -861,6 +858,9 @@ int Graphics::draw_rect(const SDL_Rect* rect)
     if (rect) {
         rx = RENDER_SCALE(rect->x + glScrollX), ry = RENDER_SCALE(rect->y + glScrollY), rw = RENDER_SCALE(rect->w), rh = RENDER_SCALE(rect->h);
     }
+    if (flipmode) {
+        ry = SCREEN_HEIGHT - ry - rh;
+    }
     glBox(rx, ry, rx + rw - 1, ry + rh - 1, draw_color);
     return 0;
     #else
@@ -908,7 +908,12 @@ int Graphics::draw_rect(const int x, const int y, const int w, const int h, cons
 int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
 {
     #ifdef __NDS__
-    glLine(RENDER_SCALE(x + glScrollX), RENDER_SCALE(y + glScrollY), RENDER_SCALE(x2), RENDER_SCALE(y2), draw_color);
+    if (flipmode) {
+        glLine(RENDER_SCALE(x + glScrollX), SCREEN_HEIGHT - RENDER_SCALE(y + glScrollY), RENDER_SCALE(x2 + glScrollX), SCREEN_HEIGHT - RENDER_SCALE(y2 + glScrollY), draw_color);
+    }
+    else {
+        glLine(RENDER_SCALE(x + glScrollX), RENDER_SCALE(y + glScrollY), RENDER_SCALE(x2 + glScrollX), RENDER_SCALE(y2 + glScrollY), draw_color);
+    }
     return 0;
     #else
     const int result = SDL_RenderDrawLine(gameScreen.m_renderer, x, y, x2, y2);
@@ -923,8 +928,15 @@ int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
 int Graphics::draw_points(const SDL_Point* points, const int count)
 {
     #ifdef __NDS__
-    for (int i = 0; i < count; i++) {
-        glPutPixel(RENDER_SCALE(points[i].x + glScrollX), RENDER_SCALE(points[i].y + glScrollY), draw_color);
+    if (flipmode) {
+        for (int i = 0; i < count; i++) {
+            glPutPixel(RENDER_SCALE(points[i].x + glScrollX), SCREEN_HEIGHT - RENDER_SCALE(points[i].y + glScrollY), draw_color);
+        }
+    }
+    else {
+        for (int i = 0; i < count; i++) {
+            glPutPixel(RENDER_SCALE(points[i].x + glScrollX), RENDER_SCALE(points[i].y + glScrollY), draw_color);
+        }
     }
     return 0;
     #else
@@ -946,11 +958,12 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 #ifdef __NDS__
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b, const int width, const int height, const int scale)
 {
+    int sy = flipmode ? scale * -1 : scale;
     set_texture_color_mod(grphx.im_sprites, r, g, b);
     if (scale <= 1 && (t < 24 || (t >= 144 && t < 156))) {
-        draw_texture_part_perfect(grphx.im_sprites, RENDER_SCALE(x), RENDER_SCALE(y), 384 + ((t%120)%4)*26, ((t%120)/4)*26, 26, 26, scale, scale);
+        draw_texture_part_perfect(grphx.im_sprites, RENDER_SCALE(x), RENDER_SCALE(y), 384 + ((t%120)%4)*26, ((t%120)/4)*26, 26, 26, scale, sy);
     }
-    else draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, scale, scale);
+    else draw_texture_part(grphx.im_sprites, x, y, (t%12)*32, (t/12)*32, width, height, scale, sy);
 }
 
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
@@ -1460,42 +1473,42 @@ void Graphics::draw_texture(GLTexture *image, const int x, const int y)
 
 void Graphics::draw_texture_part(GLTexture *image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)
 {
-    const SDL_Rect srcrect = {x2, y2, w, h};
-
-    int flip = SDL_FLIP_NONE;
-
+    SDL_Rect srcrect = {x2, y2, w, h};
+    
     if (scalex < 0)
     {
-        flip |= SDL_FLIP_HORIZONTAL;
+        srcrect.x += srcrect.w - 1;
+        srcrect.w *= -1;
     }
     if (scaley < 0)
     {
-        flip |= SDL_FLIP_VERTICAL;
+        srcrect.y += srcrect.h - 1;
+        srcrect.h *= -1;
     }
 
     const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
 
-    copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
+    copy_texture(image, &srcrect, &dstrect);
 }
 
 void Graphics::draw_texture_part_perfect(GLTexture *image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)
 {
-    const SDL_Rect srcrect = {x2, y2, w, h};
-
-    int flip = SDL_FLIP_NONE;
-
+    SDL_Rect srcrect = {x2, y2, w, h};
+    
     if (scalex < 0)
     {
-        flip |= SDL_FLIP_HORIZONTAL;
+        srcrect.x += srcrect.w - 1;
+        srcrect.w *= -1;
     }
     if (scaley < 0)
     {
-        flip |= SDL_FLIP_VERTICAL;
+        srcrect.y += srcrect.h - 1;
+        srcrect.h *= -1;
     }
 
     const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
 
-    copy_texture_perfect(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
+    copy_texture_perfect(image, &srcrect, &dstrect);
 }
 #else
 void Graphics::draw_texture(SDL_Texture* image, const int x, const int y)
@@ -1724,6 +1737,9 @@ void Graphics::drawpixeltextbox(
     u16 darker = VRAM_COLOR(r/6, g/6, b/6);
 
     int rx = RENDER_SCALE(x + glScrollX), ry = RENDER_SCALE(y + glScrollY), rw = RENDER_SCALE(w), rh = RENDER_SCALE(h);
+    if (flipmode) {
+        ry = SCREEN_HEIGHT - ry - rh;
+    }
 
     glBoxFilled(rx,     ry,     rx + rw,     ry + rh,     darker);
     glBoxFilled(rx + 1, ry + 1, rx + rw - 1, ry + rh - 1, color);
@@ -2888,7 +2904,7 @@ void Graphics::drawbackground( int t )
     case 1:
         // Starfield
         #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
+        gameScreen.setupBackdropLayer(flipmode, false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         clear_tile_layer(true);
         #else
@@ -3079,7 +3095,7 @@ void Graphics::drawbackground( int t )
             #endif
         }
         #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
+        gameScreen.setupBackdropLayer(flipmode, false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         const u16 tileGfxIdx = grphx.im_tiles2->map[546] & 0x03FF;
         const u8 firstPixel = ((u8 *)grphx.im_tiles2->gfx)[tileGfxIdx * 64];
@@ -3122,7 +3138,7 @@ void Graphics::drawbackground( int t )
     case 3: //Warp zone (horizontal)
     {
         #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
+        gameScreen.setupBackdropLayer(flipmode, false);
         bgSetScroll(BG_LAYER_BACKDROP, backoffset, 0);
         if (!backgrounddrawn)
         {
@@ -3152,7 +3168,7 @@ void Graphics::drawbackground( int t )
     case 4: //Warp zone (vertical)
     {
         #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
+        gameScreen.setupBackdropLayer(flipmode, false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, backoffset);
         if (!backgrounddrawn)
         {
@@ -3183,7 +3199,7 @@ void Graphics::drawbackground( int t )
     {
         // Warp zone, central
         #ifdef __NDS__
-        gameScreen.setBackdropBGType(true);
+        gameScreen.setupBackdropLayer(flipmode, true);
 
         static int drawn_color = -1;
         int tileID = grphx.im_tiles2->map[720 + 3*rcol] & 0x03FF;
@@ -3280,7 +3296,7 @@ void Graphics::drawbackground( int t )
     case 6:
         // Final Starfield
         #ifdef __NDS__
-        gameScreen.setBackdropBGType(false);
+        gameScreen.setupBackdropLayer(flipmode, false);
         bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
         clear_tile_layer(true);
         #else
@@ -3545,6 +3561,7 @@ void Graphics::drawmap(void)
     if (!foregrounddrawn)
     {
         #ifdef __NDS__
+        gameScreen.setupLevelLayer(flipmode);
         use_tileset(map.tileset);
         if (game.screenshake == 0) bgSetScroll(BG_LAYER_LEVEL, 0, 0);
         #else
@@ -3623,6 +3640,7 @@ void Graphics::drawfinalmap(void)
     if (!foregrounddrawn)
     {
         #ifdef __NDS__
+        gameScreen.setupLevelLayer(flipmode);
         use_tileset(map.tileset);
         if (game.screenshake == 0) bgSetScroll(BG_LAYER_LEVEL, 0, 0);
         #else
@@ -3674,6 +3692,7 @@ void Graphics::drawtowermap(void)
     #ifdef __NDS__
     static int drawn_colstate = -1;
     const int yoff = map.ypos;
+    gameScreen.setupLevelLayer(flipmode);
     bgSetScroll(BG_LAYER_LEVEL, 0, map.ypos % 512);
 
     if (!foregrounddrawn || drawn_colstate != towerbg.colstate || map.cameramode > 3 || map.cameramode == 0)
@@ -3747,14 +3766,14 @@ void Graphics::drawtowerspikes(void)
     {
         #ifdef __NDS__
         int x = i * 8;
-        int y = (-10 + spikeleveltop);
+        int y = flipmode ? (spikelevelbottom) : (-10 + spikeleveltop);
         glTriangleFilled(
             RENDER_SCALE(x),     RENDER_SCALE(y),
             RENDER_SCALE(x + 8), RENDER_SCALE(y),
             RENDER_SCALE(x + 4), RENDER_SCALE(y + 8),
             color
         );
-        y = (230 - spikelevelbottom);
+        y = flipmode ? (240 - spikeleveltop) : (230 - spikelevelbottom);
         glTriangleFilled(
             RENDER_SCALE(x + 4), RENDER_SCALE(y),
             RENDER_SCALE(x + 8), RENDER_SCALE(y + 8),
@@ -3775,7 +3794,7 @@ void Graphics::drawtowerbackground(const TowerBG& bg_obj)
         hblankEnabled = false;
         irqDisable(IRQ_HBLANK);
     }
-    gameScreen.setBackdropBGType(false);
+    gameScreen.setupBackdropLayer(flipmode, false);
     int yoff = (bg_obj.bypos - bg_obj.tileOffset * 8 + 512) % 512;
     bgSetScroll(BG_LAYER_BACKDROP, 0, yoff);
     use_tileset(2);
@@ -3936,6 +3955,7 @@ void Graphics::draw_cursor_sub(int cellX, int cellY, int r, int g, int b) {
         towerCursorDrawn = true;
     }
     else {
+        if (flipmode) cellY = 19 - cellY;
         oamSetXY(&oamSub, 0,
             MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH,
             MINIMAP_SUB_YOFFSET + cellY * MINIMAP_CELL_HEIGHT
@@ -3960,6 +3980,7 @@ void Graphics::hide_cursor_sub(void) {
 
 void Graphics::draw_telecursor_sub(int cellX, int cellY, int r, int g, int b) {
     SPRITE_PALETTE_SUB[33] = VRAM_COLOR(r, g, b);
+    if (flipmode) cellY = 19 - cellY;
     oamSet(&oamSub,
         8,
         MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH,
@@ -3978,6 +3999,7 @@ void Graphics::draw_telecursor_sub(int cellX, int cellY, int r, int g, int b) {
 }
 
 void Graphics::draw_legend_icon_sub(int spriteSlot, int cellX, int cellY, int tile) {
+    if (flipmode) cellY = 19 - cellY;
     oamSet(&oamSub, spriteSlot,
         MINIMAP_SUB_XOFFSET + cellX * MINIMAP_CELL_WIDTH + 2,
         MINIMAP_SUB_YOFFSET + cellY * MINIMAP_CELL_HEIGHT + 1,

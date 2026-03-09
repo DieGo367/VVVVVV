@@ -25,6 +25,9 @@
 #include "Script.h"
 #include "UtilityClass.h"
 #include "Vlogging.h"
+#ifdef __NDS__
+#include "nds/system.h"
+#endif
 
 static void updatebuttonmappings(int bind)
 {
@@ -284,16 +287,25 @@ void recomputetextboxes(void)
 static void toggleflipmode(void)
 {
     graphics.setflipmode = !graphics.setflipmode;
+    #ifdef __NDS__
+    graphics.grphx.ReloadSprites();
+    #endif
     game.savestatsandsettings_menu();
     if (graphics.setflipmode)
     {
         music.playef(Sound_GAMESAVED);
         game.screenshake = 10;
         game.flashlight = 5;
+        #ifdef __NDS__
+        lcdMainOnBottom();
+        #endif
     }
     else
     {
         music.playef(Sound_VIRIDIAN);
+        #ifdef __NDS__
+        lcdMainOnTop();
+        #endif
     }
 
     /* Some text boxes change depending on Flip Mode, so update text boxes. */

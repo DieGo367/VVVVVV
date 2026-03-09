@@ -23,7 +23,7 @@
 #define BG_LAYER_SUBSCREEN 7
 
 #define MINIMAP_SUB_XOFFSET 8
-#define MINIMAP_SUB_YOFFSET 4
+#define MINIMAP_SUB_YOFFSET 6
 #endif
 
 #endif /* CONSTANTS_H */
