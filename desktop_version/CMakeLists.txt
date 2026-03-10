@@ -448,177 +448,231 @@ if(NINTENDO_DS)
     set(MMUTIL ${BLOCKSDS}/tools/mmutil/mmutil)
 
     macro(depend_data_files)
-        list(APPEND DATA_FILES ${ARGV})
+        foreach(FILE ${ARGV})
+            if (NOT FILE IN_LIST DATA_FILES)
+                # filter out any files that aren't actually from the data directory
+                string(FIND ${FILE} "data/" IDX)
+                if(IDX EQUAL 0)
+                    list(APPEND DATA_FILES ${FILE})
+                endif()
+            endif()
+        endforeach()
     endmacro()
-    macro(add_nitro_files)
-        list(APPEND NITRO_FILES ${ARGV})
+    macro(output_nitro_files)
+        foreach(FILE ${ARGV})
+            if (NOT FILE IN_LIST NITRO_FILES)
+                list(APPEND NITRO_FILES ${FILE})
+            endif()
+        endforeach()
+    endmacro()
+    macro(add_nitro_file COPY_SOURCE COPY_OUTPUT)
+        set(OUT_PATH ${COPY_OUTPUT})
+        cmake_path(REMOVE_FILENAME OUT_PATH)
+        add_custom_command(
+            OUTPUT ${COPY_OUTPUT}
+            BYPRODUCTS ${OUT_PATH}
+            COMMAND ${E} make_directory ${OUT_PATH}
+            COMMAND ${E} copy_if_different ${COPY_SOURCE} ${COPY_OUTPUT}
+        )
+        depend_data_files(${COPY_SOURCE})
+        output_nitro_files(${COPY_OUTPUT})
+    endmacro()
+    macro(add_nitro_graphic)
+        cmake_parse_arguments(IMG "" "SOURCE;OUTPUT" "DEPENDS;MAGICK_ARGS;GRIT_FLAGS" ${ARGV})
+        string(REPLACE "nitro/" "prep/" PREP_IMG ${IMG_OUTPUT})
+        cmake_path(REPLACE_EXTENSION PREP_IMG ".png")
+        cmake_path(REMOVE_FILENAME PREP_IMG OUTPUT_VARIABLE PREP_PATH)
+        cmake_path(REMOVE_FILENAME IMG_OUTPUT OUTPUT_VARIABLE OUT_PATH)
+        add_custom_command(
+            OUTPUT ${IMG_OUTPUT}
+            BYPRODUCTS ${PREP_PATH} ${OUT_PATH} ${PREP_IMG}
+            DEPENDS ${IMG_SOURCE} ${IMG_DEPENDS}
+            COMMAND ${E} make_directory ${PREP_PATH} ${OUT_PATH}
+            COMMAND ${MAGICK} ${IMG_SOURCE} ${IMG_MAGICK_ARGS} ${PREP_IMG} VERBATIM
+            COMMAND ${GRIT} ${PREP_IMG} ${IMG_GRIT_FLAGS} -o ${IMG_OUTPUT}
+        )
+        depend_data_files(${IMG_SOURCE} ${IMG_DEPENDS})
+        output_nitro_files(${IMG_OUTPUT})
     endmacro()
 
-    set(TILES tiles tiles2 tiles3)
-    set(SPRITES sprites flipsprites)
-    set(TEXTURES_2BIT
+    set(COMMON_MAGICK_ARGS -background "#FF00FF" -alpha remove)
+    set(COMMON_GRIT_FLAGS -ftr -fh! -gT FF00FF)
+    set(RESIZE_FLAG -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
+
+    # instructions to draw star gfx
+    set(INSTR_1
+        \( +clone -crop 72x24+0+0
+            -fill "#FF00FF" -stroke none
+                -draw "rectangle 0,0 31,23"
+                -draw "rectangle 40,16 71,23"
+    )
+    # splitting into 2 parts to set a new fill (see below)
+    set(INSTR_2
+                -draw "rectangle 0,0 1,1"
+                -draw "rectangle 10,0 11,1"
+                -draw "rectangle 20,0 21,1"
+                -draw "rectangle 30,0 31,1"
+                
+                -draw "rectangle 0,10 1,11"
+                -draw "rectangle 10,10 11,11"
+                -draw "rectangle 20,10 21,11"
+                -draw "rectangle 30,10 31,11"
+                
+                -draw "rectangle 0,20 1,21"
+                -draw "rectangle 10,20 11,21"
+                -draw "rectangle 20,20 21,21"
+                -draw "rectangle 30,20 31,21"
+
+                -draw "rectangle 40,22 41,23"
+                -draw "rectangle 50,22 51,23"
+                -draw "rectangle 60,22 61,23"
+                -draw "rectangle 70,22 71,23"
+        \)
+    )
+    set(DRAW_STARS
+        -repage -104-216 ${INSTR_1} -fill "#555555" ${INSTR_2} -repage +104+216! -flatten
+        -repage -176-216 ${INSTR_1} -fill "#222222" ${INSTR_2} -repage +176+216! -flatten
+    )
+
+    # tilesets
+    add_nitro_graphic(
+        SOURCE data/graphics/tiles.png
+        OUTPUT nitro/graphics/tiles.grf
+        MAGICK_ARGS ${COMMON_MAGICK_ARGS} ${DRAW_STARS}
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gt -gB8 -m
+    )
+    add_nitro_graphic(
+        SOURCE data/graphics/tiles2.png
+        OUTPUT nitro/graphics/tiles2.grf
+        DEPENDS data/graphics/tiles.png
+        MAGICK_ARGS
+            ${COMMON_MAGICK_ARGS} ${DRAW_STARS}
+            # draw some custom tiles for the lab bg
+            -fill "rgb(54,26,18)"
+                -draw "rectangle 192,96 231,135"
+            -fill none -stroke "rgb(215,157,141)" +antialias
+                -draw "rectangle 196,100 227,131"
+                -draw "rectangle 197,101 226,130"
+                -draw "rectangle 200,100 223,131"
+                -draw "rectangle 201,101 222,130"
+                -draw "rectangle 196,104 227,127"
+                -draw "rectangle 197,105 226,126"
+            # copy one of the treadmill platforms from the first tileset
+            \( data/graphics/tiles.png -crop 32x16+288+0 \) -flatten
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gt -gB8 -m
+    )
+    add_nitro_graphic(
+        SOURCE data/graphics/tiles3.png
+        OUTPUT nitro/graphics/tiles3.grf
+        MAGICK_ARGS ${COMMON_MAGICK_ARGS}
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gt -gB8 -m
+    )
+    # sprite sheets
+    foreach(SPRITES sprites flipsprites)
+        add_nitro_graphic(
+            SOURCE data/graphics/${SPRITES}.png
+            OUTPUT nitro/graphics/${SPRITES}.grf
+            DEPENDS ${CMAKE_SOURCE_DIR}/nds/sprites_small.png
+            MAGICK_ARGS
+                -background none ${CMAKE_SOURCE_DIR}/nds/sprites_small.png +append
+                -channel RGB -brightness-contrast 100
+                ${COMMON_MAGICK_ARGS} ${RESIZE_FLAG}
+            GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB2 -pn2
+        )
+    endforeach()
+    # textures
+    foreach(TEXTURE_2BIT
         elephant
         gamecomplete
         levelcomplete
         site site2 site3 site4
         covered
     )
-    set(FONTS_WHITE font)
-    set(FONTS_COLOR buttons_8x8)
-    set(RESIZE_FLAG -extent "%[fx:2^ceil(log(w)/log(2))]x%[fx:2^ceil(log(h)/log(2))]")
-    foreach(IMAGE ${TILES} ${SPRITES} ${TEXTURES_2BIT} teleporter minimap ending cursors legend ${FONTS_WHITE} ${FONTS_COLOR})
-        set(MAGICK_FLAGS -background "#FF00FF" -alpha remove)
-        set(GRIT_FLAGS -ftr -fh! -gT FF00FF)
-        set(IMAGE_DEP "")
-
-        if(IMAGE IN_LIST TILES)
-            list(APPEND GRIT_FLAGS -gt -gB8 -m)
-            if (IMAGE STREQUAL tiles2)
-                list(APPEND MAGICK_FLAGS
-                    # draw some custom tiles for the lab bg
-                    -fill "rgb(54,26,18)"
-                        -draw "rectangle 192,96 231,135"
-                    -fill none -stroke "rgb(215,157,141)" +antialias
-                        -draw "rectangle 196,100 227,131"
-                        -draw "rectangle 197,101 226,130"
-                        -draw "rectangle 200,100 223,131"
-                        -draw "rectangle 201,101 222,130"
-                        -draw "rectangle 196,104 227,127"
-                        -draw "rectangle 197,105 226,126"
-                    # copy one of the treadmill platforms from the first tileset
-                    \( data/graphics/tiles.png -crop 32x16+288+0 \) -flatten
-                )
-                set(IMAGE_DEP data/graphics/tiles.png)
-            endif()
-            if (IMAGE STREQUAL tiles OR IMAGE STREQUAL tiles2)
-                # draw star gfx
-                set(INSTR_1
-                    \( +clone -crop 72x24+0+0
-                        -fill "#FF00FF" -stroke none
-                            -draw "rectangle 0,0 31,23"
-                            -draw "rectangle 40,16 71,23"
-                )
-                # splitting into 2 parts to set a new fill (see below)
-                set(INSTR_2
-                            -draw "rectangle 0,0 1,1"
-                            -draw "rectangle 10,0 11,1"
-                            -draw "rectangle 20,0 21,1"
-                            -draw "rectangle 30,0 31,1"
-                            
-                            -draw "rectangle 0,10 1,11"
-                            -draw "rectangle 10,10 11,11"
-                            -draw "rectangle 20,10 21,11"
-                            -draw "rectangle 30,10 31,11"
-                            
-                            -draw "rectangle 0,20 1,21"
-                            -draw "rectangle 10,20 11,21"
-                            -draw "rectangle 20,20 21,21"
-                            -draw "rectangle 30,20 31,21"
-
-                            -draw "rectangle 40,22 41,23"
-                            -draw "rectangle 50,22 51,23"
-                            -draw "rectangle 60,22 61,23"
-                            -draw "rectangle 70,22 71,23"
-                    \)
-                )
-                list(APPEND MAGICK_FLAGS
-                    -repage -104-216 ${INSTR_1} -fill "#555555" ${INSTR_2} -repage +104+216! -flatten
-                    -repage -176-216 ${INSTR_1} -fill "#222222" ${INSTR_2} -repage +176+216! -flatten
-                )
-            endif()
-        elseif(IMAGE IN_LIST SPRITES)
-            set(MAGICK_FLAGS
-                -background none ${CMAKE_SOURCE_DIR}/nds/sprites_small.png +append
-                -channel RGB -brightness-contrast 100 ${MAGICK_FLAGS} ${RESIZE_FLAG}
-            )
-            list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
-            set(IMAGE_DEP ${CMAKE_SOURCE_DIR}/nds/sprites_small.png)
-        elseif(IMAGE IN_LIST TEXTURES_2BIT)
-            list(APPEND MAGICK_FLAGS ${RESIZE_FLAG})
-            set(PN $<IF:$<STREQUAL:${IMAGE},covered>,-pn3,-pn2>)
-            list(APPEND GRIT_FLAGS -gb -gB2 ${PN})
-        elseif(IMAGE STREQUAL teleporter)
-            set(MAGICK_FLAGS -background "#FF00FF" -crop 96x96 +repage
-                \( -clone 0,1 -flatten \)
-                \( -clone 0,2 -flatten \)
-                \( -clone 0,3 -flatten \)
-                \( -clone 0,4 -flatten \)
-                \( -clone 0,5 -flatten \)
-                \( -clone 0,6 -flatten \)
-                \( -clone 0,7 -flatten \)
-                \( -clone 0,8 -flatten \)
-                \( -clone 0,9 -flatten \)
-                -delete 0-9 +append +repage -crop 480x96 -append ${RESIZE_FLAG}
-            )
-            list(APPEND GRIT_FLAGS -gb -gB2 -pn3)
-        elseif(IMAGE STREQUAL minimap)
-            list(APPEND MAGICK_FLAGS ${RESIZE_FLAG})
-            list(APPEND GRIT_FLAGS -gb -gB8 -pn23)
-        elseif(IMAGE STREQUAL ending)
-            list(APPEND MAGICK_FLAGS -filter point -resize 256x192 -extent 256x256)
-            list(APPEND GRIT_FLAGS -gb -gB4 -pn16)
-        elseif(IMAGE STREQUAL cursors)
-            set(MAGICK_FLAGS
-                -size 16x64 "canvas:#FF00FF"
-                -stroke black -fill none +antialias 
-                -draw "rectangle 1,1 10,7"
-                -draw "rectangle 1,17 10,62"
-            )
-            list(APPEND GRIT_FLAGS -gt -gB4 -pn2)
-        elseif(IMAGE STREQUAL legend)
-            list(PREPEND MAGICK_FLAGS
-                \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+120+472 -repage +0+0 -fill "#454545" +opaque transparent \)
-                \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+112+488 -repage +0+8 -fill "#AEFFFF" +opaque transparent \)
-                \( +clone -repage +0+16 -fill "#FF0000" +opaque transparent \)
-                \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+0+504 -repage +0+24 -fill "#FFFF3C" +opaque transparent \)
-                -background transparent -flatten -extent 8x32
-                -fill black
-                \( +clone -repage -1-1 +opaque transparent \) -insert 0
-                \( +clone -repage +0-1 +opaque transparent \) -insert 0
-                \( +clone -repage +1-1 +opaque transparent \) -insert 0
-                \( +clone -repage -1+0 +opaque transparent \) -insert 0
-                \( +clone -repage +1+0 +opaque transparent \) -insert 0
-                \( +clone -repage -1+1 +opaque transparent \) -insert 0
-                \( +clone -repage +0+1 +opaque transparent \) -insert 0
-                \( +clone -repage +1+1 +opaque transparent \) -insert 0
-                -flatten
-            )
-            list(APPEND GRIT_FLAGS -gt -gB4 -pn16)
-            set(IMAGE_DEP ${CMAKE_SOURCE_DIR}/fonts/font.png)
-        elseif(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
-            if(IMAGE IN_LIST FONTS_WHITE)
-                set(MAGICK_FLAGS -colors 2 ${MAGICK_FLAGS})
-                list(APPEND GRIT_FLAGS -gb -gB2 -pn2)
-            else()
-                list(APPEND GRIT_FLAGS -gb -gB8 -pn25)
-            endif()
-            list(APPEND MAGICK_FLAGS ${RESIZE_FLAG})
-        endif()
-
-        if(IMAGE IN_LIST FONTS_WHITE OR IMAGE IN_LIST FONTS_COLOR)
-            set(IMAGE_SRC ${CMAKE_SOURCE_DIR}/fonts/${IMAGE}.png)
-            add_custom_command(
-                OUTPUT nitro/graphics/${IMAGE}.fontmeta
-                DEPENDS ${CMAKE_SOURCE_DIR}/fonts/${IMAGE}.fontmeta
-                COMMAND ${E} copy_if_different ${CMAKE_SOURCE_DIR}/fonts/${IMAGE}.fontmeta nitro/graphics/${IMAGE}.fontmeta
-            )
-            add_nitro_files(nitro/graphics/${IMAGE}.fontmeta)
-        elseif(IMAGE STREQUAL cursors OR IMAGE STREQUAL legend)
-            set(IMAGE_SRC "")
-        else()
-            set(IMAGE_SRC data/graphics/${IMAGE}.png)
-            depend_data_files(${IMAGE_SRC})
-        endif()
-        add_custom_command(
-            OUTPUT nitro/graphics/${IMAGE}.grf
-            BYPRODUCTS prep nitro/graphics
-            DEPENDS ${IMAGE_SRC} ${IMAGE_DEP}
-            COMMAND ${E} make_directory prep/graphics nitro/graphics
-            COMMAND ${MAGICK} ${IMAGE_SRC} ${MAGICK_FLAGS} prep/graphics/${IMAGE}.png VERBATIM
-            COMMAND ${GRIT} prep/graphics/${IMAGE}.png ${GRIT_FLAGS} -o nitro/graphics/${IMAGE}.grf
+        set(PN $<IF:$<STREQUAL:${TEXTURE_2BIT},covered>,-pn3,-pn2>)
+        add_nitro_graphic(
+            SOURCE data/graphics/${TEXTURE_2BIT}.png
+            OUTPUT nitro/graphics/${TEXTURE_2BIT}.grf
+            MAGICK_ARGS ${COMMON_MAGICK_ARGS} ${RESIZE_FLAG}
+            GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB2 ${PN}
         )
-        add_nitro_files(nitro/graphics/${IMAGE}.grf)
     endforeach()
+    add_nitro_graphic(
+        SOURCE data/graphics/teleporter.png
+        OUTPUT nitro/graphics/teleporter.grf
+        MAGICK_ARGS
+            -background "#FF00FF" -crop 96x96 +repage
+            \( -clone 0,1 -flatten \)
+            \( -clone 0,2 -flatten \)
+            \( -clone 0,3 -flatten \)
+            \( -clone 0,4 -flatten \)
+            \( -clone 0,5 -flatten \)
+            \( -clone 0,6 -flatten \)
+            \( -clone 0,7 -flatten \)
+            \( -clone 0,8 -flatten \)
+            \( -clone 0,9 -flatten \)
+            -delete 0-9 +append +repage -crop 480x96 -append ${RESIZE_FLAG}
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB2 -pn3
+    )
+    add_nitro_graphic(
+        SOURCE data/graphics/minimap.png
+        OUTPUT nitro/graphics/minimap.grf
+        MAGICK_ARGS ${COMMON_MAGICK_ARGS} ${RESIZE_FLAG}
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB8 -pn23
+    )
+    add_nitro_graphic(
+        SOURCE data/graphics/ending.png
+        OUTPUT nitro/graphics/ending.grf
+        MAGICK_ARGS ${COMMON_MAGICK_ARGS} -filter point -resize 256x192 -extent 256x256
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB4 -pn16
+    )
+    add_nitro_graphic(
+        SOURCE ""
+        OUTPUT nitro/graphics/cursors.grf
+        MAGICK_ARGS
+            -size 16x64 "canvas:#FF00FF"
+            -stroke black -fill none +antialias 
+            -draw "rectangle 1,1 10,7"
+            -draw "rectangle 1,17 10,62"
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gt -gB4 -pn2
+    )
+    add_nitro_graphic(
+        SOURCE ""
+        OUTPUT nitro/graphics/legend.grf
+        DEPENDS ${CMAKE_SOURCE_DIR}/fonts/font.png
+        MAGICK_ARGS
+            \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+120+472 -repage +0+0 -fill "#454545" +opaque transparent \)
+            \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+112+488 -repage +0+8 -fill "#AEFFFF" +opaque transparent \)
+            \( +clone -repage +0+16 -fill "#FF0000" +opaque transparent \)
+            \( ${CMAKE_SOURCE_DIR}/fonts/font.png -crop 8x8+0+504 -repage +0+24 -fill "#FFFF3C" +opaque transparent \)
+            -background transparent -flatten -extent 8x32
+            -fill black
+            \( +clone -repage -1-1 +opaque transparent \) -insert 0
+            \( +clone -repage +0-1 +opaque transparent \) -insert 0
+            \( +clone -repage +1-1 +opaque transparent \) -insert 0
+            \( +clone -repage -1+0 +opaque transparent \) -insert 0
+            \( +clone -repage +1+0 +opaque transparent \) -insert 0
+            \( +clone -repage -1+1 +opaque transparent \) -insert 0
+            \( +clone -repage +0+1 +opaque transparent \) -insert 0
+            \( +clone -repage +1+1 +opaque transparent \) -insert 0
+            -flatten
+            ${COMMON_MAGICK_ARGS}
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gt -gB4 -pn16
+    )
+    # fonts
+    add_nitro_graphic(
+        SOURCE ${CMAKE_SOURCE_DIR}/fonts/font.png
+        OUTPUT nitro/graphics/font.grf
+        MAGICK_ARGS -colors 2 ${COMMON_MAGICK_ARGS} ${RESIZE_FLAG}
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB2 -pn2
+    )
+    add_nitro_graphic(
+        SOURCE ${CMAKE_SOURCE_DIR}/fonts/buttons_8x8.png
+        OUTPUT nitro/graphics/buttons_8x8.grf
+        MAGICK_ARGS ${COMMON_MAGICK_ARGS} ${RESIZE_FLAG}
+        GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB8 -pn25
+    )
+    add_nitro_file(${CMAKE_SOURCE_DIR}/fonts/font.fontmeta nitro/graphics/font.fontmeta)
+    add_nitro_file(${CMAKE_SOURCE_DIR}/fonts/buttons_8x8.fontmeta nitro/graphics/buttons_8x8.fontmeta)
 
     set(SOUNDS # in the same order as Music.cpp
         jump jump2
@@ -660,7 +714,7 @@ if(NINTENDO_DS)
         COMMAND ${MMUTIL} ${SOUNDS_PREPPED} -d -onitro/soundbank.bin
     )
     depend_data_files(${SOUNDS_SRC})
-    add_nitro_files(nitro/soundbank.bin)
+    output_nitro_files(nitro/soundbank.bin)
 
     set(MUSIC_TRACKS
         0levelcomplete
@@ -694,7 +748,7 @@ if(NINTENDO_DS)
             COMMAND ${FFMPEG} -hide_banner -loglevel error -y -i data/music/${TRACK}.ogg -acodec pcm_u8 -ar 8000 ${USE_MONO} -bitexact nitro/music/${TRACK_ID}.wav
         )
         list(APPEND MUSIC_TRACK_SRC data/music/${TRACK}.ogg)
-        add_nitro_files(nitro/music/${TRACK_ID}.wav)
+        output_nitro_files(nitro/music/${TRACK_ID}.wav)
     endforeach()
     add_custom_command(
         OUTPUT ${MUSIC_TRACK_SRC}
