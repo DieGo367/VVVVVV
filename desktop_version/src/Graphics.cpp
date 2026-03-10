@@ -3332,6 +3332,10 @@ void Graphics::drawbackground( int t )
         break;
     case 7:
         // Static, unscrolling section of the tower
+        #ifdef __NDS__
+        gameScreen.setupBackdropLayer(flipmode, false);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
+        #endif
         for (int j = 0; j < 30; j++)
         {
             for (int i = 0; i < 40; i++)
@@ -3346,6 +3350,10 @@ void Graphics::drawbackground( int t )
         break;
     case 8:
         // Static, unscrolling section of the tower
+        #ifdef __NDS__
+        gameScreen.setupBackdropLayer(flipmode, false);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
+        #endif
         for (int j = 0; j < 30; j++)
         {
             for (int i = 0; i < 40; i++)
@@ -3360,6 +3368,10 @@ void Graphics::drawbackground( int t )
         break;
     case 9:
         // Static, unscrolling section of the tower
+        #ifdef __NDS__
+        gameScreen.setupBackdropLayer(flipmode, false);
+        bgSetScroll(BG_LAYER_BACKDROP, 0, 0);
+        #endif
         for (int j = 0; j < 30; j++)
         {
             for (int i = 0; i < 40; i++)
