@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#ifdef __NDS__
+#include <nds/ndstypes.h>
+#endif
 
 /* The translator menu will appear in any of the following circumstances:
  * - The "lang" folder is NOT next to data.zip, but it is found in "desktop_version" within which the game is running
@@ -33,7 +36,11 @@ struct LangMeta
     uint8_t font_idx;
 };
 
+#ifdef __NDS__
+struct PACKED TextboxFormat
+#else
 struct TextboxFormat
+#endif
 {
     const char* text;
     unsigned short wraplimit; // = 36*8-pad_left-pad_right; no effect if tt or !langmeta.autowordwrap

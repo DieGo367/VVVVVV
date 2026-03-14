@@ -71,4 +71,17 @@ bool FILESYSTEM_openDirectory(const char *dname);
 bool FILESYSTEM_delete(const char *name);
 void FILESYSTEM_deleteLevelSaves(void);
 
+#ifdef __NDS__
+typedef void lazyxml_handle;
+lazyxml_handle *lazyxml_open(const char *filename);
+lazyxml_handle *lazyxml_openAsset(const char *filename);
+void lazyxml_close(lazyxml_handle *handle);
+bool lazyxml_find_next_tag(lazyxml_handle *handle, tinyxml2::XMLDocument& doc);
+#define WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, elem) \
+    while ( \
+        lazyxml_find_next_tag(handle, doc) && \
+        (elem = hDoc.FirstChildElement().ToElement()) != NULL \
+    )
+#endif
+
 #endif /* FILESYSTEMUTILS_H */

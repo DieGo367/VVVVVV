@@ -1418,3 +1418,110 @@ void FILESYSTEM_deleteLevelSaves(void)
         );
     }
 }
+
+#ifdef __NDS__
+lazyxml_handle *lazyxml_open(const char *filename)
+{
+    return PHYSFS_openRead(filename);
+}
+lazyxml_handle *lazyxml_openAsset(const char *filename)
+{
+    char path[PATH_MAX];
+    getMountedPath(path, sizeof(path), filename);
+    return PHYSFS_openRead(filename);
+}
+void lazyxml_close(lazyxml_handle *handle)
+{
+    if (handle) PHYSFS_close((PHYSFS_File *)handle);
+}
+#define LAZYXML_BUF_SIZE 640
+#define LAZYXML_READ_SIZE 32
+bool lazyxml_find_next_tag(lazyxml_handle *handle, tinyxml2::XMLDocument& doc)
+{
+    char workbuf[LAZYXML_BUF_SIZE];
+    size_t available = 0;
+    size_t written = 0;
+    bool opened = false;
+    bool inString = false;
+    int comment = 0;
+    bool closed = false;
+    PHYSFS_File *file = (PHYSFS_File *)handle;
+
+    while (!PHYSFS_eof(file) && !closed)
+    {
+        if (written >= LAZYXML_BUF_SIZE - 3)
+        {
+            vlog_warn("Ran out of tag buffer space!");
+            return false;
+        }
+        PHYSFS_sint64 filePos = PHYSFS_tell(file);
+        available = PHYSFS_readBytes(
+            file,
+            &workbuf[written],
+            std::min((size_t) LAZYXML_READ_SIZE, LAZYXML_BUF_SIZE - written)
+        );
+        if (available < 0) return false; // file error
+        char *readptr = &workbuf[written];
+        for (size_t i = 0; i < available && written < LAZYXML_BUF_SIZE - 3 && !closed; i++)
+        {
+            char ch = readptr[i];
+            switch (ch)
+            {
+            case '<':
+                if (!opened && !inString && !comment) opened = true;
+                break;
+            case '/':
+                if (opened && !inString && !comment)
+                {
+                    workbuf[written++] = '/';
+                    workbuf[written++] = '>';
+                    workbuf[written] = '\0';
+                    PHYSFS_seek(file, filePos + i + 2);
+                    closed = true;
+                    break;
+                }
+                break;
+            case '>':
+                if (opened && !inString && !comment)
+                {
+                    workbuf[written++] = '/';
+                    workbuf[written++] = '>';
+                    workbuf[written] = '\0';
+                    PHYSFS_seek(file, filePos + i + 1);
+                    closed = true;
+                    break;
+                }
+                if (comment == 1) comment = 0;
+                break;
+            case '"':
+                if (!comment) inString = !inString;
+                break;
+            case '?':
+            case '!':
+                if (opened && written == 1)
+                {
+                    opened = false;
+                    written = 0;
+                    if (ch == '!') comment = 3;
+                }
+                break;
+            case '-':
+                if (comment > 1) comment--;
+                break;
+            }
+            if (closed) break;
+            if (opened) workbuf[written++] = ch;
+            if (comment > 0 && ch != '-') comment = 3;
+        }
+    }
+
+    if (closed)
+    {
+        if (strncmp(workbuf, "</>", 3) == 0) return false;
+        doc.Parse(workbuf);
+        return !doc.Error();
+    }
+    return false;
+}
+
+#endif

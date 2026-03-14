@@ -55,6 +55,26 @@ bool load_lang_doc(
     return true;
 }
 
+#ifdef __NDS__
+static lazyxml_handle *open_lang_doc(
+    const std::string& cat,
+    const std::string& langcode = lang,
+    const std::string& asset_cat = ""
+)
+{
+    lazyxml_handle *handle = NULL;
+    if (!asset_cat.empty())
+    {
+        handle = lazyxml_openAsset(("lang/" + langcode + "/" + asset_cat + ".xml").c_str());
+    }
+    if (!handle)
+    {
+        handle = lazyxml_open(("lang/" + langcode + "/" + cat + ".xml").c_str());
+    }
+    return handle;
+}
+#endif
+
 static void loadmeta(LangMeta& meta, const std::string& langcode = lang)
 {
     meta.active = true;
@@ -428,12 +448,21 @@ static void loadtext_strings(bool check_max)
     tinyxml2::XMLHandle hDoc(&doc);
     tinyxml2::XMLElement* pElem;
 
+    #ifdef __NDS__
+    lazyxml_handle *handle = open_lang_doc("strings");
+    if (handle == NULL)
+    #else
     if (!load_lang_doc("strings", doc))
+    #endif
     {
         return;
     }
 
+    #ifdef __NDS__
+    WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
+    #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
+    #endif
     {
         EXPECT_ELEM(pElem, "string");
 
@@ -482,6 +511,9 @@ static void loadtext_strings(bool check_max)
             VVV_free(filled);
         }
     }
+    #ifdef __NDS__
+    lazyxml_close(handle);
+    #endif
 }
 
 static void loadtext_strings_plural(bool check_max)
@@ -490,12 +522,21 @@ static void loadtext_strings_plural(bool check_max)
     tinyxml2::XMLHandle hDoc(&doc);
     tinyxml2::XMLElement* pElem;
 
+    #ifdef __NDS__
+    lazyxml_handle *handle = open_lang_doc("strings_plural");
+    if (handle == NULL)
+    #else
     if (!load_lang_doc("strings_plural", doc))
+    #endif
     {
         return;
     }
 
+    #ifdef __NDS__
+    WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
+    #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
+    #endif
     {
         EXPECT_ELEM(pElem, "string");
 
@@ -506,7 +547,11 @@ static void loadtext_strings_plural(bool check_max)
         }
 
         tinyxml2::XMLElement* subElem;
+        #ifdef __NDS__
+        WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, subElem)
+        #else
         FOR_EACH_XML_SUB_ELEMENT(pElem, subElem)
+        #endif
         {
             EXPECT_ELEM(subElem, "translation");
 
@@ -537,6 +582,9 @@ static void loadtext_strings_plural(bool check_max)
             }
         }
     }
+    #ifdef __NDS__
+    lazyxml_close(handle);
+    #endif
 }
 
 static bool get_level_lang_path(bool custom_level, const char* cat, std::string& doc_path, std::string& doc_path_asset)
@@ -621,7 +669,12 @@ static void loadtext_cutscenes(bool custom_level)
     {
         return;
     }
+    #ifdef __NDS__
+    lazyxml_handle *handle = open_lang_doc(doc_path, get_level_lang_code(custom_level), doc_path_asset);
+    if (handle == NULL)
+    #else
     if (!load_lang_doc(doc_path, doc, get_level_lang_code(custom_level), doc_path_asset))
+    #endif
     {
         return;
     }
@@ -639,9 +692,16 @@ static void loadtext_cutscenes(bool custom_level)
         map = map_translation_cutscene;
     }
 
+    #ifdef __NDS__
+    lazyxml_find_next_tag(handle, doc);
+    #endif
     const char* original = get_level_original_lang(hDoc);
-
+    
+    #ifdef __NDS__
+    WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
+    #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
+    #endif
     {
         EXPECT_ELEM(pElem, "cutscene");
 
@@ -662,7 +722,11 @@ static void loadtext_cutscenes(bool custom_level)
         );
 
         tinyxml2::XMLElement* subElem;
+        #ifdef __NDS__
+        WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, subElem)
+        #else
         FOR_EACH_XML_SUB_ELEMENT(pElem, subElem)
+        #endif
         {
             EXPECT_ELEM(subElem, "dialogue");
 
@@ -718,6 +782,9 @@ static void loadtext_cutscenes(bool custom_level)
             hashmap_set(cutscene_map, tb_eng, SDL_strlen(tb_eng), (uintptr_t) tb_format);
         }
     }
+    #ifdef __NDS__
+    lazyxml_close(handle);
+    #endif
 }
 
 static void loadtext_numbers(void)
@@ -726,12 +793,21 @@ static void loadtext_numbers(void)
     tinyxml2::XMLHandle hDoc(&doc);
     tinyxml2::XMLElement* pElem;
 
+    #ifdef __NDS__
+    lazyxml_handle *handle = open_lang_doc("numbers");
+    if (handle == NULL)
+    #else
     if (!load_lang_doc("numbers", doc))
+    #endif
     {
         return;
     }
 
+    #ifdef __NDS__
+    WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
+    #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
+    #endif
     {
         EXPECT_ELEM(pElem, "number");
 
@@ -766,6 +842,9 @@ static void loadtext_numbers(void)
             }
         }
     }
+    #ifdef __NDS__
+    lazyxml_close(handle);
+    #endif
 }
 
 bool fix_room_coords(bool custom_level, int* roomx, int* roomy)
@@ -942,14 +1021,26 @@ static void loadtext_roomnames(bool custom_level, bool check_max)
     {
         return;
     }
+    #ifdef __NDS__
+    lazyxml_handle *handle = open_lang_doc(doc_path, get_level_lang_code(custom_level), doc_path_asset);
+    if (handle == NULL)
+    #else
     if (!load_lang_doc(doc_path, doc, get_level_lang_code(custom_level), doc_path_asset))
+    #endif
     {
         return;
     }
 
+    #ifdef __NDS__
+    lazyxml_find_next_tag(handle, doc);
+    #endif
     const char* original = get_level_original_lang(hDoc);
 
+    #ifdef __NDS__
+    WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
+    #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
+    #endif
     {
         EXPECT_ELEM(pElem, "roomname");
 
@@ -994,6 +1085,9 @@ static void loadtext_roomnames(bool custom_level, bool check_max)
             show_translator_menu ? pElem->Attribute("explanation") : NULL
         );
     }
+    #ifdef __NDS__
+    lazyxml_close(handle);
+    #endif
 }
 
 static void loadtext_roomnames_special(bool check_max)
@@ -1002,12 +1096,21 @@ static void loadtext_roomnames_special(bool check_max)
     tinyxml2::XMLHandle hDoc(&doc);
     tinyxml2::XMLElement* pElem;
 
+    #ifdef __NDS__
+    lazyxml_handle *handle = open_lang_doc("roomnames_special");
+    if (handle == NULL)
+    #else
     if (!load_lang_doc("roomnames_special", doc))
+    #endif
     {
         return;
     }
 
+    #ifdef __NDS__
+    WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
+    #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
+    #endif
     {
         EXPECT_ELEM(pElem, "roomname");
 
@@ -1025,6 +1128,9 @@ static void loadtext_roomnames_special(bool check_max)
 
         tally_untranslated(pElem->Attribute("translation"), &n_untranslated[UNTRANSLATED_ROOMNAMES_SPECIAL]);
     }
+    #ifdef __NDS__
+    lazyxml_close(handle);
+    #endif
 }
 
 void loadtext_custom(const char* custom_path)
