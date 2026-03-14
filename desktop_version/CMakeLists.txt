@@ -674,6 +674,47 @@ if(NINTENDO_DS)
     add_nitro_file(${CMAKE_SOURCE_DIR}/fonts/font.fontmeta nitro/graphics/font.fontmeta)
     add_nitro_file(${CMAKE_SOURCE_DIR}/fonts/buttons_8x8.fontmeta nitro/graphics/buttons_8x8.fontmeta)
 
+    # language files/graphics
+    set(LANGS_WITH_SMALL_SPRITES ar eo ga pl szl tr uk)
+    foreach(LANG ar ca cy de en eo es es_419 es_AR fr ga it ja ko nl pl pt_BR pt_PT ru szl tr uk zh zh_TW)
+        if(NOT LANG STREQUAL en)
+            foreach(SPRITES sprites flipsprites)
+                set(IMG_TRANSLATED ${CMAKE_SOURCE_DIR}/lang/${LANG}/graphics/${SPRITES}.png)
+                if(LANG IN_LIST LANGS_WITH_SMALL_SPRITES)
+                    set(IMG_TRANSLATED_SMALL ${CMAKE_SOURCE_DIR}/lang/${LANG}/graphics/${SPRITES}_small.png)
+                    set(COMPOSE_SMALL
+                        \( ${IMG_TRANSLATED_SMALL} -resize "x%[fx:h/26]" -resize 2600% -channel A -threshold 1 \)
+                        -gravity northeast
+                        -compose dst-out -composite
+                        \( ${IMG_TRANSLATED_SMALL} \)
+                        -compose src-over -composite
+                        -gravity northwest
+                    )
+                else()
+                    set(COMPOSE_SMALL)
+                    set(IMG_TRANSLATED_SMALL)
+                endif()
+                add_nitro_graphic(
+                    SOURCE data/graphics/${SPRITES}.png
+                    OUTPUT nitro/lang/${LANG}/graphics/${SPRITES}.grf
+                    DEPENDS ${IMG_TRANSLATED} ${CMAKE_SOURCE_DIR}/nds/sprites_small.png ${IMG_TRANSLATED_SMALL}
+                    MAGICK_ARGS
+                        -background none ${CMAKE_SOURCE_DIR}/nds/sprites_small.png +append
+                        \( ${IMG_TRANSLATED} -filter box -resize "x%[fx:h/32]" -resize 3200% -channel A -threshold 1 \)
+                        -compose dst-out -composite
+                        ${IMG_TRANSLATED} -compose src-over -composite
+                        ${COMPOSE_SMALL}
+                        -channel RGB -brightness-contrast 100
+                        ${COMMON_MAGICK_ARGS} ${RESIZE_FLAG}
+                    GRIT_FLAGS ${COMMON_GRIT_FLAGS} -gb -gB2 -pn2
+                )
+            endforeach()
+        endif()
+        foreach(XML cutscenes meta numbers roomnames roomnames_special strings strings_plural)
+            add_nitro_file(${CMAKE_SOURCE_DIR}/lang/${LANG}/${XML}.xml nitro/lang/${LANG}/${XML}.xml)
+        endforeach()
+    endforeach()
+
     set(SOUNDS # in the same order as Music.cpp
         jump jump2
         hurt
