@@ -555,7 +555,7 @@ static bool FILESYSTEM_mountAssetsFrom(const char *fname)
     if (real_dir == NULL)
     {
         FILESYSTEM_setLevelDirError(
-            loc::gettext("Could not mount {path}: real directory doesn't exist"),
+            loc::gettext(STR_ID("Could not mount {path}: real directory doesn't exist", STR_FAILED_MOUNT)),
             "path:str",
             fname
         );

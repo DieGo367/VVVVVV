@@ -144,7 +144,7 @@ void preloaderrender(void)
     char buffer[SCREEN_WIDTH_CHARS + 1];
     vformat_buf(
       buffer, sizeof(buffer),
-      loc::gettext("LOADING... {percent|digits=2|spaces}%"),
+      loc::gettext(STR_ID("LOADING... {percent|digits=2|spaces}%", STR_LOADING)),
       "percent:int",
       pre_fakepercent
     );

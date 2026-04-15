@@ -448,11 +448,11 @@ namespace level_debugger
         const char* text;
         if (should_pause)
         {
-            text = loc::gettext("[Press {button} to unfreeze gameplay]");
+            text = loc::gettext(STR_ID("[Press {button} to unfreeze gameplay]", STR_PROMPT_UNFREEZE));
         }
         else
         {
-            text = loc::gettext("[Press {button} to freeze gameplay]");
+            text = loc::gettext(STR_ID("[Press {button} to freeze gameplay]", STR_PROMPT_FREEZE));
         }
         char buffer[SCREEN_WIDTH_CHARS + 1];
         vformat_buf(

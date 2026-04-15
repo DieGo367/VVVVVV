@@ -24,7 +24,11 @@ namespace loc
     LS_INTERN Textbook textbook_main;
     LS_INTERN Textbook textbook_custom;
 
+#ifdef __NDS__
+    LS_INTERN const char* arr_translation[780];
+#else
     LS_INTERN hashmap* map_translation;
+#endif
     LS_INTERN hashmap* map_translation_plural;
     LS_INTERN std::string number[101]; /* 0..100 */
     LS_INTERN std::string number2[101]; /* 0..100 */

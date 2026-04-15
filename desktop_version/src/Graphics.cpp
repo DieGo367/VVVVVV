@@ -346,22 +346,22 @@ void Graphics::printcrewname( int x, int y, int t )
     switch(t)
     {
     case 0:
-        font::print(flags, x, y, loc::gettext("Viridian"), 16, 240, 240);
+        font::print(flags, x, y, loc::gettext(STR_ID("Viridian", STR_VIRIDIAN)), 16, 240, 240);
         break;
     case 1:
-        font::print(flags, x, y, loc::gettext("Violet"), 240, 16, 240);
+        font::print(flags, x, y, loc::gettext(STR_ID("Violet", STR_VIOLET)), 240, 16, 240);
         break;
     case 2:
-        font::print(flags, x, y, loc::gettext("Vitellary"), 240, 240, 16);
+        font::print(flags, x, y, loc::gettext(STR_ID("Vitellary", STR_VITELLARY)), 240, 240, 16);
         break;
     case 3:
-        font::print(flags, x, y, loc::gettext("Vermilion"), 240, 16, 16);
+        font::print(flags, x, y, loc::gettext(STR_ID("Vermilion", STR_VERMILION)), 240, 16, 16);
         break;
     case 4:
-        font::print(flags, x, y, loc::gettext("Verdigris"), 16, 240, 16);
+        font::print(flags, x, y, loc::gettext(STR_ID("Verdigris", STR_VERDIGRIS)), 16, 240, 16);
         break;
     case 5:
-        font::print(flags, x, y, loc::gettext("Victoria"), 16, 16, 240);
+        font::print(flags, x, y, loc::gettext(STR_ID("Victoria", STR_VICTORA)), 16, 16, 240);
         break;
     }
 }
@@ -373,22 +373,22 @@ void Graphics::printcrewnamedark( int x, int y, int t )
     switch(t)
     {
     case 0:
-        font::print(flags, x, y, loc::gettext("Viridian"), 128,128,128);
+        font::print(flags, x, y, loc::gettext(STR_ID("Viridian", STR_VIRIDIAN)), 128,128,128);
         break;
     case 1:
-        font::print(flags, x, y, loc::gettext("Violet"), 128,128,128);
+        font::print(flags, x, y, loc::gettext(STR_ID("Violet", STR_VIOLET)), 128,128,128);
         break;
     case 2:
-        font::print(flags, x, y, loc::gettext("Vitellary"), 128,128,128);
+        font::print(flags, x, y, loc::gettext(STR_ID("Vitellary", STR_VITELLARY)), 128,128,128);
         break;
     case 3:
-        font::print(flags, x, y, loc::gettext("Vermilion"), 128,128,128);
+        font::print(flags, x, y, loc::gettext(STR_ID("Vermilion", STR_VERMILION)), 128,128,128);
         break;
     case 4:
-        font::print(flags, x, y, loc::gettext("Verdigris"), 128,128,128);
+        font::print(flags, x, y, loc::gettext(STR_ID("Verdigris", STR_VERDIGRIS)), 128,128,128);
         break;
     case 5:
-        font::print(flags, x, y, loc::gettext("Victoria"), 128,128,128);
+        font::print(flags, x, y, loc::gettext(STR_ID("Victoria", STR_VICTORA)), 128,128,128);
         break;
     }
 }
@@ -432,16 +432,16 @@ void Graphics::printcrewnamestatus( int x, int y, int t, bool rescued )
     const char* status_text;
     if (gender == 3 && rescued)
     {
-        status_text = loc::gettext("(that's you!)");
+        status_text = loc::gettext(STR_ID("(that's you!)", STR_THATS_YOU));
     }
     else if (rescued)
     {
-        status_text = loc::gettext_case("Rescued!", gender);
+        status_text = loc::gettext_case(STR_ID("Rescued!", (String_ID)(STR_RESCUED_MALE + gender - 1)), gender);
     }
     else
     {
         r = 64; g = 64; b = 64;
-        status_text = loc::gettext_case("Missing...", gender);
+        status_text = loc::gettext_case(STR_ID("Missing...", (String_ID)(STR_MISSING_MALE + gender - 1)), gender);
     }
 
     font::print(flipmode ? PR_CJK_HIGH : PR_CJK_LOW, x, y, status_text, r, g, b);
@@ -1272,7 +1272,7 @@ void Graphics::drawgui(void)
         {
             // Level complete
             const char* english = "Level Complete!";
-            const char* translation = loc::gettext(english);
+            const char* translation = loc::gettext(STR_ID(english, STR_LEVEL_COMPLETE));
             if (SDL_strcmp(english, translation) != 0
                 && !(flipmode && fliplevelcomplete_mounted)
                 && !(!flipmode && levelcomplete_mounted)
@@ -1309,7 +1309,7 @@ void Graphics::drawgui(void)
         {
             // Game complete
             const char* english = "Game Complete!";
-            const char* translation = loc::gettext(english);
+            const char* translation = loc::gettext(STR_ID(english, STR_GAME_COMPLETE));
             if (SDL_strcmp(english, translation) != 0
                 && !(flipmode && flipgamecomplete_mounted)
                 && !(!flipmode && gamecomplete_mounted)
@@ -2324,70 +2324,70 @@ void Graphics::drawtrophytext(void)
     switch(obj.trophytype)
     {
     case 1:
-        top_text = loc::gettext("SPACE STATION 1 MASTERED");
-        bottom_text = loc::gettext("Obtain a V Rank in this Time Trial");
+        top_text = loc::gettext(STR_ID("SPACE STATION 1 MASTERED", STR_MASTERED_SS1));
+        bottom_text = loc::gettext(STR_ID("Obtain a V Rank in this Time Trial", STR_OBTAIN_A_V_RANK));
         break;
     case 2:
-        top_text = loc::gettext("LABORATORY MASTERED");
-        bottom_text = loc::gettext("Obtain a V Rank in this Time Trial");
+        top_text = loc::gettext(STR_ID("LABORATORY MASTERED", STR_MASTERED_LAB));
+        bottom_text = loc::gettext(STR_ID("Obtain a V Rank in this Time Trial", STR_OBTAIN_A_V_RANK));
         break;
     case 3:
-        top_text = loc::gettext("THE TOWER MASTERED");
-        bottom_text = loc::gettext("Obtain a V Rank in this Time Trial");
+        top_text = loc::gettext(STR_ID("THE TOWER MASTERED", STR_MASTERED_TOWER));
+        bottom_text = loc::gettext(STR_ID("Obtain a V Rank in this Time Trial", STR_OBTAIN_A_V_RANK));
         break;
     case 4:
-        top_text = loc::gettext("SPACE STATION 2 MASTERED");
-        bottom_text = loc::gettext("Obtain a V Rank in this Time Trial");
+        top_text = loc::gettext(STR_ID("SPACE STATION 2 MASTERED", STR_MASTERED_SS2));
+        bottom_text = loc::gettext(STR_ID("Obtain a V Rank in this Time Trial", STR_OBTAIN_A_V_RANK));
         break;
     case 5:
-        top_text = loc::gettext("WARP ZONE MASTERED");
-        bottom_text = loc::gettext("Obtain a V Rank in this Time Trial");
+        top_text = loc::gettext(STR_ID("WARP ZONE MASTERED", STR_MASTERED_WARP_ZONE));
+        bottom_text = loc::gettext(STR_ID("Obtain a V Rank in this Time Trial", STR_OBTAIN_A_V_RANK));
         break;
     case 6:
-        top_text = loc::gettext("FINAL LEVEL MASTERED");
-        bottom_text = loc::gettext("Obtain a V Rank in this Time Trial");
+        top_text = loc::gettext(STR_ID("FINAL LEVEL MASTERED", STR_MASTERED_FINAL));
+        bottom_text = loc::gettext(STR_ID("Obtain a V Rank in this Time Trial", STR_OBTAIN_A_V_RANK));
         break;
     case 7:
-        top_text = loc::gettext("GAME COMPLETE");
-        bottom_text = loc::gettext_case("Complete the game", 1);
+        top_text = loc::gettext(STR_ID("GAME COMPLETE", STR_GAME_COMPLETE_TROPHY));
+        bottom_text = loc::gettext_case(STR_ID("Complete the game", STR_COMPLETE_THE_GAME_TROPHY), 1);
         break;
     case 8:
-        top_text = loc::gettext("FLIP MODE COMPLETE");
-        bottom_text = loc::gettext("Complete the game in flip mode");
+        top_text = loc::gettext(STR_ID("FLIP MODE COMPLETE", STR_FLIP_MODE_COMPLETE));
+        bottom_text = loc::gettext(STR_ID("Complete the game in flip mode", STR_COMPLETE_FLIP_MODE));
         break;
     case 9:
-        bottom_text = loc::gettext("Win with less than 50 deaths");
+        bottom_text = loc::gettext(STR_ID("Win with less than 50 deaths", STR_UNDER_50_DEATHS));
         break;
     case 10:
-        bottom_text = loc::gettext("Win with less than 100 deaths");
+        bottom_text = loc::gettext(STR_ID("Win with less than 100 deaths", STR_UNDER_100_DEATHS));
         break;
     case 11:
-        bottom_text = loc::gettext("Win with less than 250 deaths");
+        bottom_text = loc::gettext(STR_ID("Win with less than 250 deaths", STR_UNDER_250_DEATHS));
         break;
     case 12:
-        bottom_text = loc::gettext("Win with less than 500 deaths");
+        bottom_text = loc::gettext(STR_ID("Win with less than 500 deaths", STR_UNDER_500_DEATHS));
         break;
     case 13:
-        bottom_text = loc::gettext("Last 5 seconds on the Super Gravitron");
+        bottom_text = loc::gettext(STR_ID("Last 5 seconds on the Super Gravitron", STR_LAST_5_SECONDS));
         break;
     case 14:
-        bottom_text = loc::gettext("Last 10 seconds on the Super Gravitron");
+        bottom_text = loc::gettext(STR_ID("Last 10 seconds on the Super Gravitron", STR_LAST_10_SECONDS));
         break;
     case 15:
-        bottom_text = loc::gettext("Last 15 seconds on the Super Gravitron");
+        bottom_text = loc::gettext(STR_ID("Last 15 seconds on the Super Gravitron", STR_LAST_15_SECONDS));
         break;
     case 16:
-        bottom_text = loc::gettext("Last 20 seconds on the Super Gravitron");
+        bottom_text = loc::gettext(STR_ID("Last 20 seconds on the Super Gravitron", STR_LAST_20_SECONDS));
         break;
     case 17:
-        bottom_text = loc::gettext("Last 30 seconds on the Super Gravitron");
+        bottom_text = loc::gettext(STR_ID("Last 30 seconds on the Super Gravitron", STR_LAST_30_SECONDS));
         break;
     case 18:
-        bottom_text = loc::gettext("Last 1 minute on the Super Gravitron");
+        bottom_text = loc::gettext(STR_ID("Last 1 minute on the Super Gravitron", STR_LAST_1_MINUTE));
         break;
     case 20:
-        top_text = loc::gettext("MASTER OF THE UNIVERSE");
-        bottom_text = loc::gettext("Complete the game in no death mode");
+        top_text = loc::gettext(STR_ID("MASTER OF THE UNIVERSE", STR_MASTER_OF_THE_UNIVERSE));
+        bottom_text = loc::gettext(STR_ID("Complete the game in no death mode", STR_COMPLETE_NO_DEATH));
         break;
     }
 
@@ -4441,13 +4441,21 @@ static void commsrelay_textbox(textboxclass* THIS)
     {
         return;
     }
+    #ifdef __NDS__
+    THIS->lines.push_back(THIS->original.lines[0].c_str()); // should already be localized
+    #else
     THIS->lines.push_back(loc::gettext(THIS->original.lines[0].c_str()));
+    #endif
     THIS->wrap(11);
     THIS->resize();
     THIS->xp = 224 - THIS->w;
 }
 
+#ifdef __NDS__
+void Graphics::textboxcommsrelay(String_ID string_id)
+#else
 void Graphics::textboxcommsrelay(const char* text)
+#endif
 {
     // Special treatment for the gamestate textboxes in Comms Relay
     if (!INBOUNDS_VEC(m, textboxes))
@@ -4456,7 +4464,11 @@ void Graphics::textboxcommsrelay(const char* text)
         return;
     }
     textboxprintflags(PR_FONT_INTERFACE);
+    #ifdef __NDS__
+    textboxes[m].original.lines.push_back(loc::gettext(string_id));
+    #else
     textboxes[m].original.lines.push_back(text);
+    #endif
     textboxtranslate(TEXTTRANSLATE_FUNCTION, commsrelay_textbox);
 }
 
@@ -4817,7 +4829,7 @@ bool Graphics::checktexturesize(
     if (!valid)
     {
         FILESYSTEM_setLevelDirError(
-            loc::gettext("{filename} dimensions not exact multiples of {width} by {height}!"),
+            loc::gettext(STR_ID("{filename} dimensions not exact multiples of {width} by {height}!", STR_BAD_DIMENSIONS)),
             "filename:str, width:int, height:int",
             filename, tilewidth, tileheight
         );

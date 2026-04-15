@@ -9,6 +9,9 @@
 #include "GraphicsResources.h"
 #include "Textbox.h"
 #include "TowerBG.h"
+#ifdef __NDS__
+#include "LocalizationIDs.h"
+#endif
 
 enum FadeBars
 {
@@ -121,7 +124,11 @@ public:
 
     void textboxtranslate(TextboxTranslate translate, TextboxFunction function);
 
+    #ifdef __NDS__
+    void textboxcommsrelay(String_ID string_id);
+    #else
     void textboxcommsrelay(const char* text);
+    #endif
 
     void textboxapplyposition(void);
 

@@ -1028,7 +1028,7 @@ bool customlevelclass::load(std::string _path)
     if (!FILESYSTEM_loadTiXml2Document(_path.c_str(), doc))
     {
         FILESYSTEM_setLevelDirError(
-            loc::gettext("Level {path} not found"),
+            loc::gettext(STR_ID("Level {path} not found", STR_LEVEL_NOT_FOUND)),
             "path:str",
             _path.c_str()
         );
@@ -1038,7 +1038,7 @@ bool customlevelclass::load(std::string _path)
     if (doc.Error())
     {
         FILESYSTEM_setLevelDirError(
-            loc::gettext("Error parsing {path}: {error}"),
+            loc::gettext(STR_ID("Error parsing {path}: {error}", STR_ERR_PARSE_PATH)),
             "path:str, error:str",
             _path.c_str(),
             doc.ErrorStr()

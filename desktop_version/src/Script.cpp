@@ -166,7 +166,7 @@ static void foundlab_textbox1(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    THIS->lines.push_back(loc::gettext("Congratulations!\n\nYou have found the secret lab!"));
+    THIS->lines.push_back(loc::gettext(STR_ID("Congratulations!\n\nYou have found the secret lab!", STR_CONGRATS_SECRET_LAB)));
     THIS->wrap(2);
     THIS->centertext();
     THIS->pad(1, 1);
@@ -176,7 +176,7 @@ static void foundlab_textbox2(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    THIS->lines.push_back(loc::gettext("The secret lab is separate from the rest of the game. You can now come back here at any time by selecting the new SECRET LAB option in the play menu."));
+    THIS->lines.push_back(loc::gettext(STR_ID("The secret lab is separate from the rest of the game. You can now come back here at any time by selecting the new SECRET LAB option in the play menu.", STR_SECRET_LAB_IS_SEPERATE)));
     THIS->wrap(0);
 }
 

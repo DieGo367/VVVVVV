@@ -161,6 +161,23 @@ static void map_store_translation(Textbook* textbook, hashmap* map, const char* 
     hashmap_set(map, tb_eng, SDL_strlen(tb_eng), (uintptr_t) tb_tra);
 }
 
+#ifdef __NDS__
+static void arr_store_translation(Textbook *textbook, const char **arr, int index, const char *tra)
+{
+    if (tra == NULL)
+    {
+        tra = "";
+    }
+    const char* tb_tra = textbook_store(textbook, tra);
+    if (tb_tra == NULL)
+    {
+        return;
+    }
+
+    arr[index] = tb_tra;
+}
+#endif
+
 unsigned char form_for_count(int n)
 {
     int n_ix;
@@ -239,7 +256,9 @@ void resettext(bool final_shutdown)
 
     if (inited)
     {
+        #ifndef __NDS__
         hashmap_free(map_translation);
+        #endif
         hashmap_iterate(map_translation_cutscene, callback_free_map_value, NULL);
         hashmap_free(map_translation_cutscene);
         hashmap_free(map_translation_plural);
@@ -256,7 +275,11 @@ void resettext(bool final_shutdown)
 
     if (!final_shutdown)
     {
+        #ifdef __NDS__
+        SDL_zeroa(arr_translation);
+        #else
         map_translation = hashmap_create();
+        #endif
         map_translation_cutscene = hashmap_create();
         map_translation_plural = hashmap_create();
 
@@ -459,6 +482,7 @@ static void loadtext_strings(bool check_max)
     }
 
     #ifdef __NDS__
+    int string_id = 0;
     WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
     #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
@@ -469,6 +493,14 @@ static void loadtext_strings(bool check_max)
         const char* eng = pElem->Attribute("english");
         const char* tra = pElem->Attribute("translation");
 
+        #ifdef __NDS__
+        arr_store_translation(
+            &textbook_main,
+            arr_translation,
+            string_id++,
+            lang == "en" ? eng : tra
+        );
+        #else
         char textcase = pElem->UnsignedAttribute("case", 0);
 
         if (textcase == 0)
@@ -496,6 +528,7 @@ static void loadtext_strings(bool check_max)
             );
             VVV_free(eng_prefixed);
         }
+        #endif
 
         /* Only tally an untranslated string if English isn't blank */
         if (eng != NULL && eng[0] != '\0')
@@ -1151,6 +1184,10 @@ void loadtext(bool check_max)
 
     if (lang == "en")
     {
+        #ifdef __NDS__
+        // need to load strings now
+        loadtext_strings(check_max);
+        #endif
         if (show_translator_menu)
         {
             // We may still need the room name explanations

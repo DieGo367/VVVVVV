@@ -45,6 +45,17 @@ const LangMeta* get_langmeta(void)
     return &langmeta;
 }
 
+#ifdef __NDS__
+const char* gettext(String_ID string_id)
+{
+    const char *str = arr_translation[string_id];
+    if (str == NULL)
+    {
+        return "";
+    }
+    return str;
+}
+#else
 const char* gettext(const char* eng)
 {
     if (lang == "en")
@@ -76,6 +87,7 @@ const char* gettext_case(const char* eng, char textcase)
     VVV_free(eng_prefixed);
     return tra;
 }
+#endif
 
 static const char* gettext_plural_english(const char* eng_plural, const char* eng_singular, int n)
 {

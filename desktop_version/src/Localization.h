@@ -6,6 +6,7 @@
 #include <vector>
 #ifdef __NDS__
 #include <nds/ndstypes.h>
+#include "LocalizationIDs.h"
 #endif
 
 /* The translator menu will appear in any of the following circumstances:
@@ -87,8 +88,15 @@ extern int n_untranslated[COUNT_UNTRANSLATED_INDEX];
 
 const LangMeta* get_langmeta(void);
 
+#ifdef __NDS__
+#define STR_ID(string, id) id
+const char* gettext(String_ID string_id);
+#define gettext_case(string_id, textcase) gettext(string_id)
+#else
+#define STR_ID(string, id) string
 const char* gettext(const char* eng);
 const char* gettext_case(const char* eng, char textcase);
+#endif
 const char* gettext_plural(const char* eng_plural, const char* eng_singular, int count);
 void gettext_plural_fill(char* buf, size_t buf_len, const char* eng_plural, const char* eng_singular, const char* args_index, ...);
 std::string getnumber(int n, const char* number_class);

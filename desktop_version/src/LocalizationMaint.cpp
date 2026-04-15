@@ -55,6 +55,9 @@ static void write_max_local_decl(tinyxml2::XMLDocument* doc, uint8_t glyph_w, ui
 
 static void sync_lang_file(const std::string& langcode)
 {
+    #ifdef __NDS__
+    vlog_warn("Not syncing because NDS");
+    #else
     /* Update translation files for the given language with new strings from templates.
      * This basically takes the (English) templates, fills in existing translations, and saves.
      * Any FILESYSTEM_saveTiXml2Document() writes to main lang dir */
@@ -365,6 +368,7 @@ static void sync_lang_file(const std::string& langcode)
 
         FILESYSTEM_saveTiXml2Document((langcode + "/roomnames_special.xml").c_str(), doc);
     }
+    #endif
 }
 
 bool sync_lang_files(void)

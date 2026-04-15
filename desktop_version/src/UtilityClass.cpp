@@ -140,7 +140,7 @@ void UtilityClass::format_time(char* buffer, const size_t buffer_size, int secon
     {
         /* H:MM:SS / H:MM:SS.CC */
         vformat_buf(buffer, buffer_size,
-            loc::gettext(frames == -1 ? "{hrs}:{min|digits=2}:{sec|digits=2}" : "{hrs}:{min|digits=2}:{sec|digits=2}.{cen|digits=2}"),
+            loc::gettext(frames == -1 ? STR_ID("{hrs}:{min|digits=2}:{sec|digits=2}", STR_FMT_HMMSS) : STR_ID("{hrs}:{min|digits=2}:{sec|digits=2}.{cen|digits=2}", STR_FMT_HMMSSCC)),
             "hrs:int, min:int, sec:int, cen:int",
             h, m, s, frames * 100 / 30
         );
@@ -149,7 +149,7 @@ void UtilityClass::format_time(char* buffer, const size_t buffer_size, int secon
     {
         /* M:SS / M:SS.CC */
         vformat_buf(buffer, buffer_size,
-            loc::gettext(frames == -1 ? "{min}:{sec|digits=2}" : "{min}:{sec|digits=2}.{cen|digits=2}"),
+            loc::gettext(frames == -1 ? STR_ID("{min}:{sec|digits=2}", STR_FMT_MSS) : STR_ID("{min}:{sec|digits=2}.{cen|digits=2}", STR_FMT_MSSCC)),
             "min:int, sec:int, cen:int",
             m, s, frames * 100 / 30
         );
@@ -158,7 +158,7 @@ void UtilityClass::format_time(char* buffer, const size_t buffer_size, int secon
     {
         /* S.CC */
         vformat_buf(buffer, buffer_size,
-            loc::gettext("{sec}.{cen|digits=2}"),
+            loc::gettext(STR_ID("{sec}.{cen|digits=2}", STR_FMT_SCC)),
             "sec:int, cen:int",
             s, frames * 100 / 30
         );
