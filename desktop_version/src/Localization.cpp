@@ -177,6 +177,17 @@ const TextboxFormat* gettext_cutscene(const std::string& script_id, const std::s
     }
     else
     {
+        #ifdef __NDS__
+        if (eng.size() > 0 && eng[0] >= '0' && eng[1] <= '9')
+        {
+            int id = ss_toi(eng);
+            if (id < STRC_ID_COUNT)
+            {
+                return &arr_translation_cutscene[id];
+            }
+        }
+        return NULL;
+        #else
         if (lang == "en")
         {
             return NULL;
@@ -184,6 +195,7 @@ const TextboxFormat* gettext_cutscene(const std::string& script_id, const std::s
 
         map = map_translation_cutscene;
         map_script_key = script_id.c_str();
+        #endif
     }
 
     uintptr_t ptr_cutscene_map;
@@ -309,6 +321,9 @@ bool is_cutscene_translated(const std::string& script_id)
     }
     else
     {
+        #ifdef __NDS__
+        return true; // Main game cutscenes are always "translated" on DS (even english)
+        #else
         if (lang == "en")
         {
             return false;
@@ -316,6 +331,7 @@ bool is_cutscene_translated(const std::string& script_id)
 
         map = map_translation_cutscene;
         map_script_key = script_id.c_str();
+        #endif
     }
 
     uintptr_t ptr_unused;

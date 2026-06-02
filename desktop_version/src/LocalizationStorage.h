@@ -33,7 +33,11 @@ namespace loc
     LS_INTERN std::string number[101]; /* 0..100 */
     LS_INTERN std::string number2[101]; /* 0..100 */
     LS_INTERN unsigned char number_plural_form[200]; /* [0..99] for 0..99, [100..199] for *00..*99 */
+#ifdef __NDS__
+    LS_INTERN TextboxFormat arr_translation_cutscene[550];
+#else
     LS_INTERN hashmap* map_translation_cutscene;
+#endif
     LS_INTERN hashmap* map_translation_cutscene_custom;
     LS_INTERN hashmap* map_translation_roomnames_special;
 

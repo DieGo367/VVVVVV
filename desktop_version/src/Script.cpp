@@ -25,6 +25,9 @@
 #include "VFormat.h"
 #include "Vlogging.h"
 #include "Xoshiro.h"
+#ifdef __NDS__
+#include "LocalizationIDs.h"
+#endif
 
 scriptclass::scriptclass(void)
 {
@@ -1925,25 +1928,55 @@ void scriptclass::run(void)
             else if (words[0] == "specialline")
             {
                 //Localization is handled with regular cutscene dialogue
+                #ifdef __NDS__
+                std::string unrescued = game.unrescued();
+                int id_offset;
+                switch (unrescued[2]) {
+                case 'c':
+                    id_offset = 0; // Victoria
+                    break;
+                case 't':
+                    id_offset = 1; // Vitellary
+                    break;
+                case 'r':
+                    id_offset = unrescued[3] == 'd' ? 2 /* Verdigris */ : 3 /* Vermilion */;
+                    break;
+                default:
+                    id_offset = 4; // "You" (Violet)
+                }
+                #endif
                 switch(ss_toi(words[1]))
                 {
                 case 1:
                     txt.resize(1);
 
+                    #ifdef __NDS__
+                    txt[0] = std::to_string(STRC_TALKPURPLE_3_WORRIED_VICTORIA + id_offset);
+                    #else
                     txt[0] = "I'm worried about " + game.unrescued() + ", Doctor!";
+                    #endif
                     break;
                 case 2:
                     txt.resize(3);
 
                     if (game.crewrescued() < 5)
                     {
+                        #ifdef __NDS__
+                        txt[1] = std::to_string(STRC_TALKPURPLE_5_HELP_FIND_CREW);
+                        txt[2] = "";
+                        #else
                         txt[1] = "to helping you find the";
                         txt[2] = "rest of the crew!";
+                        #endif
                     }
                     else
                     {
                         txt.resize(2);
+                        #ifdef __NDS__
+                        txt[1] = std::to_string(STRC_TALKPURPLE_5_HELP_FIND_VICTORIA + id_offset);
+                        #else
                         txt[1] = "to helping you find " + game.unrescued() + "!";
+                        #endif
                     }
                     break;
                 }

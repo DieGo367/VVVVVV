@@ -8,7 +8,19 @@
 
 #include "Textbox.h"
 
+#ifdef __NDS__
+#define filllines(lines) do { \
+    for (unsigned int i = 0; i < SDL_arraysize(lines); i++) { \
+        if ((int)(lines[i]) < STRC_ID_COUNT) { \
+            commands.push_back(lines[i] ? std::to_string((int)(lines[i]) - 1) : ""); \
+        } else { \
+            commands.push_back(lines[i]); \
+        } \
+    } \
+} while (false)
+#else
 #define filllines(lines) commands.insert(commands.end(), lines, lines + SDL_arraysize(lines))
+#endif
 
 #ifdef SCRIPT_DEFINITION
 #define TEXT_COLOUR(a) textbox_colours[a]

@@ -258,9 +258,9 @@ void resettext(bool final_shutdown)
     {
         #ifndef __NDS__
         hashmap_free(map_translation);
-        #endif
         hashmap_iterate(map_translation_cutscene, callback_free_map_value, NULL);
         hashmap_free(map_translation_cutscene);
+        #endif
         hashmap_free(map_translation_plural);
         hashmap_free(map_translation_roomnames_special);
 
@@ -277,10 +277,11 @@ void resettext(bool final_shutdown)
     {
         #ifdef __NDS__
         SDL_zeroa(arr_translation);
+        SDL_zeroa(arr_translation_cutscene);
         #else
         map_translation = hashmap_create();
-        #endif
         map_translation_cutscene = hashmap_create();
+        #endif
         map_translation_plural = hashmap_create();
 
         for (size_t i = 0; i <= 100; i++)
@@ -722,7 +723,11 @@ static void loadtext_cutscenes(bool custom_level)
     else
     {
         textbook = &textbook_main;
+        #ifdef __NDS__
+        map = NULL;
+        #else
         map = map_translation_cutscene;
+        #endif
     }
 
     #ifdef __NDS__
@@ -731,6 +736,7 @@ static void loadtext_cutscenes(bool custom_level)
     const char* original = get_level_original_lang(hDoc);
     
     #ifdef __NDS__
+    int string_id = 0;
     WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
     #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
@@ -744,6 +750,17 @@ static void loadtext_cutscenes(bool custom_level)
             continue;
         }
 
+        #ifdef __NDS__
+        hashmap* cutscene_map = map ? hashmap_create() : NULL;
+        if (map) hashmap_set_free(
+            map,
+            script_id,
+            SDL_strlen(script_id),
+            (uintptr_t) cutscene_map,
+            callback_free_map_value,
+            NULL
+        );
+        #else
         hashmap* cutscene_map = hashmap_create();
         hashmap_set_free(
             map,
@@ -753,6 +770,7 @@ static void loadtext_cutscenes(bool custom_level)
             callback_free_map_value,
             NULL
         );
+        #endif
 
         tinyxml2::XMLElement* subElem;
         #ifdef __NDS__
@@ -769,6 +787,12 @@ static void loadtext_cutscenes(bool custom_level)
             {
                 tally_untranslated(tra, &n_untranslated[UNTRANSLATED_CUTSCENES]);
             }
+            #ifdef __NDS__
+            const char *tb_eng = NULL;
+            const char *tb_tra = NULL;
+            if (map)
+            {
+            #endif
             if (eng == NULL || tra == NULL)
             {
                 continue;
@@ -779,13 +803,26 @@ static void loadtext_cutscenes(bool custom_level)
             {
                 continue;
             }
+            #ifdef __NDS__
+            tb_eng = textbook_store(textbook, eng_prefixed);
+            tb_tra = textbook_store(textbook, tra);
+            #else
             const char* tb_eng = textbook_store(textbook, eng_prefixed);
             const char* tb_tra = textbook_store(textbook, tra);
+            #endif
             VVV_free(eng_prefixed);
             if (tb_eng == NULL || tb_tra == NULL)
             {
                 continue;
             }
+            #ifdef __NDS__
+            }
+            else
+            {
+                tb_tra = textbook_store(textbook, lang == "en" ? eng : tra);
+                if (tb_tra == NULL) continue;
+            }
+            #endif
             TextboxFormat format;
             format.text = tb_tra;
             format.tt = subElem->BoolAttribute("tt", false);
@@ -803,6 +840,13 @@ static void loadtext_cutscenes(bool custom_level)
             }
             format.padtowidth = subElem->UnsignedAttribute("padtowidth", 0);
 
+            #ifdef __NDS__
+            if (map == NULL)
+            {
+                arr_translation_cutscene[string_id++] = format;
+                continue;
+            }
+            #endif
             const TextboxFormat* tb_format = (TextboxFormat*) textbook_store_raw(
                 textbook,
                 &format,
@@ -1187,6 +1231,7 @@ void loadtext(bool check_max)
         #ifdef __NDS__
         // need to load strings now
         loadtext_strings(check_max);
+        loadtext_cutscenes(false);
         #endif
         if (show_translator_menu)
         {

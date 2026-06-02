@@ -381,6 +381,12 @@ void textboxclass::translatecutscene(void)
         applyoriginalspacing();
         return;
     }
+    #ifdef __NDS__
+    if (SDL_strncmp(original.script_name.c_str(), "custom_", 7) != 0)
+    {
+        eng = format->text;
+    }
+    #endif
 
     std::string tra;
     if (format->tt)
