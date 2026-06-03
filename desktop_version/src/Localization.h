@@ -89,11 +89,9 @@ extern int n_untranslated[COUNT_UNTRANSLATED_INDEX];
 const LangMeta* get_langmeta(void);
 
 #ifdef __NDS__
-#define STR_ID(string, id) id
 const char* gettext(String_ID string_id);
 #define gettext_case(string_id, textcase) gettext(string_id)
 #else
-#define STR_ID(string, id) string
 const char* gettext(const char* eng);
 const char* gettext_case(const char* eng, char textcase);
 #endif

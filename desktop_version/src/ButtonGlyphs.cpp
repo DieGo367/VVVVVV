@@ -290,9 +290,9 @@ const char* BUTTONGLYPHS_get_wasd_text(void)
     /* Returns the string to use in Welcome Aboard */
     if (BUTTONGLYPHS_keyboard_is_active())
     {
-        return loc::gettext(STR_ID("Press arrow keys or WASD to move", STR_ARROW_WASD_MOVE));
+        return loc::gettext(ID("Press arrow keys or WASD to move", STR_ARROW_WASD_MOVE));
     }
-    return loc::gettext(STR_ID("Press left/right to move", STR_L_R_MOVE));
+    return loc::gettext(ID("Press left/right to move", STR_L_R_MOVE));
 }
 
 static const char* sdlbutton_to_glyph(const SDL_GameControllerButton button)
@@ -350,7 +350,7 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
                 return glyph_for_vector(game.controllerButton_flip, binding);
                 #endif
             }
-            return loc::gettext(STR_ID("ACTION", STR_ACTION));
+            return loc::gettext(ID("ACTION", STR_ACTION));
         }
         break;
     case ActionSet_InGame:
@@ -361,7 +361,7 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
             {
                 return glyph_for_vector(game.controllerButton_flip, binding);
             }
-            return loc::gettext(STR_ID("ACTION", STR_ACTION));
+            return loc::gettext(ID("ACTION", STR_ACTION));
 
         case Action_InGame_Interact:
             if (show_controller)
@@ -378,21 +378,21 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
             {
                 return "E";
             }
-            return loc::gettext(STR_ID("ENTER", STR_ENTER));
+            return loc::gettext(ID("ENTER", STR_ENTER));
 
         case Action_InGame_Map:
             if (show_controller)
             {
                 return glyph_for_vector(game.controllerButton_map, binding);
             }
-            return loc::gettext(STR_ID("ENTER", STR_ENTER));
+            return loc::gettext(ID("ENTER", STR_ENTER));
 
         case Action_InGame_Esc:
             if (show_controller)
             {
                 return glyph_for_vector(game.controllerButton_esc, binding);
             }
-            return loc::gettext(STR_ID("ESC", STR_ESC));
+            return loc::gettext(ID("ESC", STR_ESC));
 
         case Action_InGame_Restart:
             if (show_controller)

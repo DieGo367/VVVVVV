@@ -767,7 +767,7 @@ static void compute_crewmate_textbox(textboxclass* THIS)
 
     /* This is a special case for wrapping, we MUST have two lines.
      * So just make sure it can't fit in one line. */
-    const char* text = loc::gettext(STR_ID("You have rescued a crew member!", STR_YOU_RESCUED_CREW));
+    const char* text = loc::gettext(ID("You have rescued a crew member!", STR_YOU_RESCUED_CREW));
     std::string wrapped = font::string_wordwrap_balanced(PR_FONT_INTERFACE, text, font::len(PR_FONT_INTERFACE, text)-1);
 
     size_t startline = 0;
@@ -813,7 +813,7 @@ static void compute_remaining_textbox(textboxclass* THIS)
     }
     else
     {
-        SDL_strlcpy(buffer, loc::gettext(STR_ID("All Crew Members Rescued!", STR_ALL_CREW_RESCUED)), sizeof(buffer));
+        SDL_strlcpy(buffer, loc::gettext(ID("All Crew Members Rescued!", STR_ALL_CREW_RESCUED)), sizeof(buffer));
     }
 
     THIS->lines.clear();
@@ -842,7 +842,7 @@ static void compute_actionprompt_textbox(textboxclass* THIS)
     char buffer[SCREEN_WIDTH_CHARS + 1];
     vformat_buf(
         buffer, sizeof(buffer),
-        loc::gettext(STR_ID("Press {button} to continue", STR_PROMPT_CONTINUE)),
+        loc::gettext(ID("Press {button} to continue", STR_PROMPT_CONTINUE)),
         "button:but",
         vformat_button(ActionSet_InGame, Action_InGame_ACTION)
     );
@@ -863,14 +863,14 @@ void Game::actionprompt_textbox(void)
 static void savetele_textbox_success(textboxclass* THIS)
 {
     THIS->lines.clear();
-    THIS->lines.push_back(loc::gettext(STR_ID("Game Saved", STR_GAME_SAVED)));
+    THIS->lines.push_back(loc::gettext(ID("Game Saved", STR_GAME_SAVED)));
     THIS->pad(3, 3);
 }
 
 static void savetele_textbox_fail(textboxclass* THIS)
 {
     THIS->lines.clear();
-    THIS->lines.push_back(loc::gettext(STR_ID("ERROR: Could not save game!", STR_ERR_SAVE_GAME)));
+    THIS->lines.push_back(loc::gettext(ID("ERROR: Could not save game!", STR_ERR_SAVE_GAME)));
     THIS->wrap(2);
     THIS->pad(1, 1);
 }
@@ -917,7 +917,7 @@ static void flip_textbox(textboxclass* THIS)
     char buffer[SCREEN_WIDTH_CHARS*3 + 1];
     vformat_buf(
         buffer, sizeof(buffer),
-        loc::gettext(STR_ID("Press {button} to flip", STR_PROMPT_FLIP)),
+        loc::gettext(ID("Press {button} to flip", STR_PROMPT_FLIP)),
         "button:but",
         vformat_button(ActionSet_InGame, Action_InGame_ACTION)
     );
@@ -930,7 +930,7 @@ static void flip_textbox(textboxclass* THIS)
 static void arrowkey_textbox(textboxclass* THIS)
 {
     THIS->lines.clear();
-    THIS->lines.push_back(loc::gettext(STR_ID("If you prefer, you can press UP or DOWN instead of ACTION to flip.", STR_U_D_FLIP)));
+    THIS->lines.push_back(loc::gettext(ID("If you prefer, you can press UP or DOWN instead of ACTION to flip.", STR_U_D_FLIP)));
     THIS->wrap(2);
     THIS->centertext();
     THIS->pad(1, 1);
@@ -943,7 +943,7 @@ static void map_textbox(textboxclass* THIS)
     char buffer[SCREEN_WIDTH_CHARS*3 + 1];
     vformat_buf(
         buffer, sizeof(buffer),
-        loc::gettext(STR_ID("Press {button} to view map and quicksave", STR_PROMPT_MAPMENU)),
+        loc::gettext(ID("Press {button} to view map and quicksave", STR_PROMPT_MAPMENU)),
         "button:but",
         vformat_button(ActionSet_InGame, Action_InGame_Map)
     );
@@ -990,7 +990,7 @@ static void im1_instructions_textbox1(textboxclass* THIS)
     );
     #endif
 
-    THIS->lines.push_back(loc::gettext(STR_ID(english, string_id)));
+    THIS->lines.push_back(loc::gettext(ID(english, string_id)));
     THIS->wrap(2);
     THIS->padtowidth(36*8);
 }
@@ -1031,7 +1031,7 @@ static void im1_instructions_textbox2(textboxclass* THIS)
     );
     #endif
 
-    THIS->lines.push_back(loc::gettext(STR_ID(english, string_id)));
+    THIS->lines.push_back(loc::gettext(ID(english, string_id)));
     THIS->wrap(2);
     THIS->padtowidth(36*8);
 }
@@ -1052,13 +1052,13 @@ static void im1_instructions_textbox3(textboxclass* THIS)
     case 2:
     case 3:
     case 4:
-        english = STR_ID("You can't continue to the next room until he is safely across.", STR_IM1_WAIT_MALE);
+        english = ID("You can't continue to the next room until he is safely across.", STR_IM1_WAIT_MALE);
         break;
     case 5:
-        english = STR_ID("You can't continue to the next room until she is safely across.", STR_IM1_WAIT_FEMALE);
+        english = ID("You can't continue to the next room until she is safely across.", STR_IM1_WAIT_FEMALE);
         break;
     default:
-        english = STR_ID("You can't continue to the next room until they are safely across.", STR_IM1_WAIT_NONBINARY);
+        english = ID("You can't continue to the next room until they are safely across.", STR_IM1_WAIT_NONBINARY);
     }
 
     THIS->lines.push_back(loc::gettext(english));
@@ -1071,7 +1071,7 @@ void foundtrinket_textbox1(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    THIS->lines.push_back(loc::gettext(STR_ID("Congratulations!\n\nYou have found a shiny trinket!", STR_CONGRATS_TRINKET)));
+    THIS->lines.push_back(loc::gettext(ID("Congratulations!\n\nYou have found a shiny trinket!", STR_CONGRATS_TRINKET)));
     THIS->wrap(2);
     THIS->centertext();
     THIS->pad(1, 1);
@@ -1088,7 +1088,7 @@ void foundtrinket_textbox2(textboxclass* THIS)
     char buffer[SCREEN_WIDTH_CHARS + 1];
     vformat_buf(
         buffer, sizeof(buffer),
-        loc::gettext(STR_ID("{n_trinkets|wordy} out of {max_trinkets|wordy}", STR_TOTAL_TRINKETS_WORDY)),
+        loc::gettext(ID("{n_trinkets|wordy} out of {max_trinkets|wordy}", STR_TOTAL_TRINKETS_WORDY)),
         "n_trinkets:int, max_trinkets:int",
         game.trinkets(), max_trinkets
     );
@@ -1108,7 +1108,7 @@ static void foundcrewmate_textbox1(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    THIS->lines.push_back(loc::gettext(STR_ID("Congratulations!\n\nYou have found a lost crewmate!", STR_CONGRATS_CREWMATE)));
+    THIS->lines.push_back(loc::gettext(ID("Congratulations!\n\nYou have found a lost crewmate!", STR_CONGRATS_CREWMATE)));
     THIS->wrap(2);
     THIS->centertext();
     THIS->pad(1, 1);
@@ -1122,7 +1122,7 @@ static void foundcrewmate_textbox2(textboxclass* THIS)
     const int num_remaining = cl.numcrewmates() - game.crewmates();
     if (num_remaining == 0)
     {
-        THIS->lines.push_back(loc::gettext(STR_ID("All crewmates rescued!", STR_ALL_CREWMATE_RESCUED)));
+        THIS->lines.push_back(loc::gettext(ID("All crewmates rescued!", STR_ALL_CREWMATE_RESCUED)));
     }
     else
     {
@@ -1149,14 +1149,14 @@ static void foundcrewmate_textbox2(textboxclass* THIS)
 static void gamecomplete_textbox2(textboxclass* THIS)
 {
     THIS->lines.clear();
-    THIS->lines.push_back(loc::gettext(STR_ID("All Crew Members Rescued!", STR_ALL_CREW_RESCUED)));
+    THIS->lines.push_back(loc::gettext(ID("All Crew Members Rescued!", STR_ALL_CREW_RESCUED)));
 }
 
 static void gamecomplete_textbox3(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    const char* label = loc::gettext(STR_ID("Trinkets Found:", STR_TRINKETS_FOUND));
+    const char* label = loc::gettext(ID("Trinkets Found:", STR_TRINKETS_FOUND));
     THIS->lines.push_back(label);
     THIS->xp = 170 - font::len(PR_FONT_INTERFACE, label);
 }
@@ -1168,7 +1168,7 @@ static void gamecomplete_textbox4(textboxclass* THIS)
 
     char buffer[SCREEN_WIDTH_CHARS + 1];
     vformat_buf(buffer, sizeof(buffer),
-        loc::gettext(STR_ID("{gamecomplete_n_trinkets|wordy}", STR_GAMECOMPLETE_TRINKET_COUNT)),
+        loc::gettext(ID("{gamecomplete_n_trinkets|wordy}", STR_GAMECOMPLETE_TRINKET_COUNT)),
         "gamecomplete_n_trinkets:int",
         game.trinkets()
     );
@@ -1179,7 +1179,7 @@ static void gamecomplete_textbox5(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    const char* label = loc::gettext(STR_ID("Game Time:", STR_GAME_TIME));
+    const char* label = loc::gettext(ID("Game Time:", STR_GAME_TIME));
     THIS->lines.push_back(label);
     THIS->xp = 170 - font::len(PR_FONT_INTERFACE, label);
 }
@@ -1198,7 +1198,7 @@ static void gamecomplete_textbox7(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    const char* label = loc::gettext(STR_ID("Total Flips:", STR_TOTAL_FLIPS));
+    const char* label = loc::gettext(ID("Total Flips:", STR_TOTAL_FLIPS));
     THIS->lines.push_back(label);
     THIS->xp = 170 - font::len(PR_FONT_INTERFACE, label);
 }
@@ -1207,7 +1207,7 @@ static void gamecomplete_textbox9(textboxclass* THIS)
 {
     THIS->lines.clear();
 
-    const char* label = loc::gettext(STR_ID("Total Deaths:", STR_TOTAL_DEATHS));
+    const char* label = loc::gettext(ID("Total Deaths:", STR_TOTAL_DEATHS));
     THIS->lines.push_back(label);
     THIS->xp = 170 - font::len(PR_FONT_INTERFACE, label);
 }
@@ -1875,7 +1875,7 @@ void Game::updatestate(void)
         case 50:
             music.playef(Sound_VIOLET);
             graphics.createtextbox("", 5, 8, TEXT_COLOUR("purple"));
-            graphics.textboxcommsrelay(STR_ID("Help! Can anyone hear this message?", STR_COMMS_RELAY_0));
+            graphics.textboxcommsrelay(ID("Help! Can anyone hear this message?", STR_COMMS_RELAY_0));
             graphics.textboxtimer(60);
             incstate();
             setstatedelay(100);
@@ -1883,7 +1883,7 @@ void Game::updatestate(void)
         case 51:
             music.playef(Sound_VIOLET);
             graphics.createtextbox("", 5, 8, TEXT_COLOUR("purple"));
-            graphics.textboxcommsrelay(STR_ID("Verdigris? Are you out there? Are you ok?", STR_COMMS_RELAY_1));
+            graphics.textboxcommsrelay(ID("Verdigris? Are you out there? Are you ok?", STR_COMMS_RELAY_1));
             graphics.textboxtimer(60);
             incstate();
             setstatedelay(100);
@@ -1891,7 +1891,7 @@ void Game::updatestate(void)
         case 52:
             music.playef(Sound_VIOLET);
             graphics.createtextbox("", 5, 8, TEXT_COLOUR("purple"));
-            graphics.textboxcommsrelay(STR_ID("Please help us! We've crashed and need assistance!", STR_COMMS_RELAY_2));
+            graphics.textboxcommsrelay(ID("Please help us! We've crashed and need assistance!", STR_COMMS_RELAY_2));
             graphics.textboxtimer(60);
             incstate();
             setstatedelay(100);
@@ -1899,7 +1899,7 @@ void Game::updatestate(void)
         case 53:
             music.playef(Sound_VIOLET);
             graphics.createtextbox("", 5, 8, TEXT_COLOUR("purple"));
-            graphics.textboxcommsrelay(STR_ID("Hello? Anyone out there?", STR_COMMS_RELAY_3));
+            graphics.textboxcommsrelay(ID("Hello? Anyone out there?", STR_COMMS_RELAY_3));
             graphics.textboxtimer(60);
             incstate();
             setstatedelay(100);
@@ -1907,7 +1907,7 @@ void Game::updatestate(void)
         case 54:
             music.playef(Sound_VIOLET);
             graphics.createtextbox("", 5, 8, TEXT_COLOUR("purple"));
-            graphics.textboxcommsrelay(STR_ID("This is Doctor Violet from the D.S.S. Souleye! Please respond!", STR_COMMS_RELAY_4));
+            graphics.textboxcommsrelay(ID("This is Doctor Violet from the D.S.S. Souleye! Please respond!", STR_COMMS_RELAY_4));
             graphics.textboxtimer(60);
             incstate();
             setstatedelay(100);
@@ -1915,7 +1915,7 @@ void Game::updatestate(void)
         case 55:
             music.playef(Sound_VIOLET);
             graphics.createtextbox("", 5, 8, TEXT_COLOUR("purple"));
-            graphics.textboxcommsrelay(STR_ID("Please... Anyone...", STR_COMMS_RELAY_5));
+            graphics.textboxcommsrelay(ID("Please... Anyone...", STR_COMMS_RELAY_5));
             graphics.textboxtimer(60);
             incstate();
             setstatedelay(100);
@@ -1923,7 +1923,7 @@ void Game::updatestate(void)
         case 56:
             music.playef(Sound_VIOLET);
             graphics.createtextbox("", 5, 8, TEXT_COLOUR("purple"));
-            graphics.textboxcommsrelay(STR_ID("Please be alright, everyone...", STR_COMMS_RELAY_6));
+            graphics.textboxcommsrelay(ID("Please be alright, everyone...", STR_COMMS_RELAY_6));
             graphics.textboxtimer(60);
             setstate(50);
             setstatedelay(100);
@@ -6628,44 +6628,44 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
             break;
         }
 #if !defined(MAKEANDPLAY)
-        option(loc::gettext(STR_ID("play", STR_PLAY)));
+        option(loc::gettext(ID("play", STR_PLAY)));
 #endif
-        option(loc::gettext(STR_ID("levels", STR_LEVELS)));
-        option(loc::gettext(STR_ID("options", STR_OPTIONS)));
+        option(loc::gettext(ID("levels", STR_LEVELS)));
+        option(loc::gettext(ID("options", STR_OPTIONS)));
         if (loc::show_translator_menu)
         {
-            option(loc::gettext(STR_ID("translator", STR_TRANSLATOR)));
+            option(loc::gettext(ID("translator", STR_TRANSLATOR)));
         }
-        option(loc::gettext(STR_ID("credits", STR_CREDITS)));
-        option(loc::gettext(STR_ID("quit", STR_QUIT)));
+        option(loc::gettext(ID("credits", STR_CREDITS)));
+        option(loc::gettext(ID("quit", STR_QUIT)));
         menuyoff = -10;
         maxspacing = 15;
         break;
     case Menu::playerworlds:
-        option(loc::gettext(STR_ID("play a level", STR_PLAY_LEVEL)));
-        option(loc::gettext(STR_ID("level editor", STR_LEVEL_EDITOR)), !editor_disabled);
+        option(loc::gettext(ID("play a level", STR_PLAY_LEVEL)));
+        option(loc::gettext(ID("level editor", STR_LEVEL_EDITOR)), !editor_disabled);
         if (!editor_disabled)
         {
-            option(loc::gettext(STR_ID("open level folder", STR_OPEN_LEVEL_FOLDER)), FILESYSTEM_openDirectoryEnabled());
-            option(loc::gettext(STR_ID("show level folder path", STR_SHOW_LEVEL_FOLDER_PATH)));
+            option(loc::gettext(ID("open level folder", STR_OPEN_LEVEL_FOLDER)), FILESYSTEM_openDirectoryEnabled());
+            option(loc::gettext(ID("show level folder path", STR_SHOW_LEVEL_FOLDER_PATH)));
         }
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = -40;
         maxspacing = 15;
         break;
     case Menu::confirmshowlevelspath:
-        option(loc::gettext(STR_ID("no, don't show me", STR_DONT_SHOW)));
-        option(loc::gettext(STR_ID("yes, reveal the path", STR_YES_REVEAL)));
+        option(loc::gettext(ID("no, don't show me", STR_DONT_SHOW)));
+        option(loc::gettext(ID("yes, reveal the path", STR_YES_REVEAL)));
         menuyoff = -10;
         break;
     case Menu::showlevelspath:
-        option(loc::gettext(STR_ID("return to levels", STR_RETURN_TO_LEVELS)));
+        option(loc::gettext(ID("return to levels", STR_RETURN_TO_LEVELS)));
         menuyoff = 60;
         break;
     case Menu::levellist:
         if(cl.ListOfMetaData.size()==0)
         {
-            option(loc::gettext(STR_ID("ok", STR_OK)));
+            option(loc::gettext(ID("ok", STR_OK)));
             menuyoff = -20;
         }
         else
@@ -6709,7 +6709,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
                     const char* title = cl.ListOfMetaData[i].title.c_str();
                     if (cl.ListOfMetaData[i].title_is_gettext)
                     {
-                        title = loc::gettext(STR_ID(title, STR_UNTITLED_LEVEL));
+                        title = loc::gettext(ID(title, STR_UNTITLED_LEVEL));
                     }
                     /* We have to make sure the stars and spaces are consistently on the
                      * correct side of the title, no matter what bidi characters are in there.
@@ -6744,22 +6744,22 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
             {
                 if((size_t) ((levelpage*8)+8) <cl.ListOfMetaData.size())
                 {
-                    option(loc::gettext(STR_ID("next page", STR_NEXT_PAGE)));
+                    option(loc::gettext(ID("next page", STR_NEXT_PAGE)));
                 }
                 else
                 {
-                    option(loc::gettext(STR_ID("first page", STR_FIRST_PAGE)));
+                    option(loc::gettext(ID("first page", STR_FIRST_PAGE)));
                 }
                 if (levelpage == 0)
                 {
-                    option(loc::gettext(STR_ID("last page", STR_LAST_PAGE)));
+                    option(loc::gettext(ID("last page", STR_LAST_PAGE)));
                 }
                 else
                 {
-                    option(loc::gettext(STR_ID("previous page", STR_PREV_PAGE)));
+                    option(loc::gettext(ID("previous page", STR_PREV_PAGE)));
                 }
             }
-            option(loc::gettext(STR_ID("return", STR_RETURN)));
+            option(loc::gettext(ID("return", STR_RETURN)));
 
             menuxoff = 20;
             menuyoff = 70-(menuoptions.size()*10);
@@ -6768,24 +6768,24 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         }
         break;
     case Menu::quickloadlevel:
-        option(loc::gettext(STR_ID("continue from save", STR_CONTINUE_SAVE)));
-        option(loc::gettext(STR_ID("start from beginning", STR_START_FROM_BEGIN)));
-        option(loc::gettext(STR_ID("delete save", STR_DELETE_SAVE)));
-        option(loc::gettext(STR_ID("back to levels", STR_BACK_TO_LEVELS)));
+        option(loc::gettext(ID("continue from save", STR_CONTINUE_SAVE)));
+        option(loc::gettext(ID("start from beginning", STR_START_FROM_BEGIN)));
+        option(loc::gettext(ID("delete save", STR_DELETE_SAVE)));
+        option(loc::gettext(ID("back to levels", STR_BACK_TO_LEVELS)));
         menuyoff = -30;
         break;
     case Menu::deletequicklevel:
-        option(loc::gettext(STR_ID("no! don't delete", STR_DONT_DELETE)));
-        option(loc::gettext(STR_ID("yes, delete save", STR_YES_DELETE_SAVE)));
+        option(loc::gettext(ID("no! don't delete", STR_DONT_DELETE)));
+        option(loc::gettext(ID("yes, delete save", STR_YES_DELETE_SAVE)));
         menuyoff = 64;
         break;
     case Menu::youwannaquit:
-        option(loc::gettext(STR_ID("yes, quit", STR_YES_QUIT)));
-        option(loc::gettext(STR_ID("no, return", STR_NO_RETURN)));
+        option(loc::gettext(ID("yes, quit", STR_YES_QUIT)));
+        option(loc::gettext(ID("no, return", STR_NO_RETURN)));
         menuyoff = -20;
         break;
     case Menu::errornostart:
-        option(loc::gettext(STR_ID("ok", STR_OK)));
+        option(loc::gettext(ID("ok", STR_OK)));
         menuyoff = -20;
         break;
     case Menu::gameplayoptions:
@@ -6793,69 +6793,69 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         if (ingame_titlemode && unlock[Unlock_FLIPMODE])
 #endif
         {
-                option(loc::gettext(STR_ID("flip mode", STR_FLIP_MODE_OPT)));
+                option(loc::gettext(ID("flip mode", STR_FLIP_MODE_OPT)));
         }
-        option(loc::gettext(STR_ID("toggle fps", STR_TOGGLE_FPS_OPT)));
-        option(loc::gettext(STR_ID("speedrun options", STR_SPEEDRUN_OPTS_OPT)));
-        option(loc::gettext(STR_ID("advanced options", STR_ADVANCED_OPTS_OPT)));
-        option(loc::gettext(STR_ID("clear main game data", STR_CLEAR_MAIN_DATA)));
-        option(loc::gettext(STR_ID("clear custom level data", STR_CLEAR_CUSTOM_DATA)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("toggle fps", STR_TOGGLE_FPS_OPT)));
+        option(loc::gettext(ID("speedrun options", STR_SPEEDRUN_OPTS_OPT)));
+        option(loc::gettext(ID("advanced options", STR_ADVANCED_OPTS_OPT)));
+        option(loc::gettext(ID("clear main game data", STR_CLEAR_MAIN_DATA)));
+        option(loc::gettext(ID("clear custom level data", STR_CLEAR_CUSTOM_DATA)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = -10;
         maxspacing = 15;
         break;
     case Menu::graphicoptions:
         if (!gameScreen.isForcedFullscreen())
         {
-            option(loc::gettext(STR_ID("toggle fullscreen", STR_FULLSCREEN_OPT)));
+            option(loc::gettext(ID("toggle fullscreen", STR_FULLSCREEN_OPT)));
         }
-        option(loc::gettext(STR_ID("scaling mode", STR_SCALING_MODE_OPT)));
+        option(loc::gettext(ID("scaling mode", STR_SCALING_MODE_OPT)));
         if (!gameScreen.isForcedFullscreen())
         {
-            option(loc::gettext(STR_ID("resize to nearest", STR_RESIZE_OPT)), gameScreen.isWindowed);
+            option(loc::gettext(ID("resize to nearest", STR_RESIZE_OPT)), gameScreen.isWindowed);
         }
-        option(loc::gettext(STR_ID("toggle filter", STR_FILTER_OPT)));
-        option(loc::gettext(STR_ID("toggle analogue", STR_ANALOGUE_OPT)));
-        option(loc::gettext(STR_ID("toggle vsync", STR_VSYNC_OPT)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("toggle filter", STR_FILTER_OPT)));
+        option(loc::gettext(ID("toggle analogue", STR_ANALOGUE_OPT)));
+        option(loc::gettext(ID("toggle vsync", STR_VSYNC_OPT)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = -10;
         maxspacing = 15;
         break;
     case Menu::ed_settings:
-        option(loc::gettext(STR_ID("change description", STR_CHANGE_DESCRIPTION)));
-        option(loc::gettext(STR_ID("edit scripts", STR_EDIT_SCRIPTS)));
-        option(loc::gettext(STR_ID("change music", STR_CHANGE_MUSIC)));
-        option(loc::gettext(STR_ID("editor ghosts", STR_EDITOR_GHOSTS)));
-        option(loc::gettext(STR_ID("load level", STR_LOAD_LEVEL)));
-        option(loc::gettext(STR_ID("save level", STR_SAVE_LEVEL)));
-        option(loc::gettext(STR_ID("options", STR_OPTIONS)));
-        option(loc::gettext(STR_ID("quit to main menu", STR_QUIT_TO_MAIN)));
+        option(loc::gettext(ID("change description", STR_CHANGE_DESCRIPTION)));
+        option(loc::gettext(ID("edit scripts", STR_EDIT_SCRIPTS)));
+        option(loc::gettext(ID("change music", STR_CHANGE_MUSIC)));
+        option(loc::gettext(ID("editor ghosts", STR_EDITOR_GHOSTS)));
+        option(loc::gettext(ID("load level", STR_LOAD_LEVEL)));
+        option(loc::gettext(ID("save level", STR_SAVE_LEVEL)));
+        option(loc::gettext(ID("options", STR_OPTIONS)));
+        option(loc::gettext(ID("quit to main menu", STR_QUIT_TO_MAIN)));
 
         menuyoff = -20;
         maxspacing = 15;
         break;
     case Menu::ed_desc:
-        option(loc::gettext(STR_ID("change name", STR_CHANGE_NAME)));
-        option(loc::gettext(STR_ID("change author", STR_CHANGE_AUTHOR)));
-        option(loc::gettext(STR_ID("change description", STR_CHANGE_DESCRIPTION)));
-        option(loc::gettext(STR_ID("change website", STR_CHANGE_WEBSITE)));
-        option(loc::gettext(STR_ID("change font", STR_CHANGE_FONT)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("change name", STR_CHANGE_NAME)));
+        option(loc::gettext(ID("change author", STR_CHANGE_AUTHOR)));
+        option(loc::gettext(ID("change description", STR_CHANGE_DESCRIPTION)));
+        option(loc::gettext(ID("change website", STR_CHANGE_WEBSITE)));
+        option(loc::gettext(ID("change font", STR_CHANGE_FONT)));
+        option(loc::gettext(ID("return", STR_RETURN)));
 
         menuyoff = 6;
         maxspacing = 15;
         break;
     case Menu::ed_music:
-        option(loc::gettext(STR_ID("next song", STR_NEXT_SONG)));
-        option(loc::gettext(STR_ID("previous song", STR_PREV_SONG)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("next song", STR_NEXT_SONG)));
+        option(loc::gettext(ID("previous song", STR_PREV_SONG)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 16;
         maxspacing = 15;
         break;
     case Menu::ed_quit:
-        option(loc::gettext(STR_ID("yes, save and quit", STR_YES_SAVE_QUIT)));
-        option(loc::gettext(STR_ID("no, quit without saving", STR_NO_QUIT_UNSAVED)));
-        option(loc::gettext(STR_ID("return to editor", STR_RETURN_TO_EDITOR)));
+        option(loc::gettext(ID("yes, save and quit", STR_YES_SAVE_QUIT)));
+        option(loc::gettext(ID("no, quit without saving", STR_NO_QUIT_UNSAVED)));
+        option(loc::gettext(ID("return to editor", STR_RETURN_TO_EDITOR)));
         menuyoff = 8;
         maxspacing = 15;
         break;
@@ -6877,24 +6877,24 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         break;
     }
     case Menu::options:
-        option(loc::gettext(STR_ID("gameplay", STR_GAMEPLAY_OPT)));
-        option(loc::gettext(STR_ID("graphics", STR_GRAPHICS_OPT)));
-        option(loc::gettext(STR_ID("audio", STR_AUDIO_OPT)));
-        option(loc::gettext(STR_ID("game pad", STR_GAME_PAD_OPT)));
-        option(loc::gettext(STR_ID("accessibility", STR_ACCESSIBILITY_OPT)));
-        option(loc::gettext(STR_ID("language", STR_LANGUAGE_OPT)), !translator_cutscene_test);
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("gameplay", STR_GAMEPLAY_OPT)));
+        option(loc::gettext(ID("graphics", STR_GRAPHICS_OPT)));
+        option(loc::gettext(ID("audio", STR_AUDIO_OPT)));
+        option(loc::gettext(ID("game pad", STR_GAME_PAD_OPT)));
+        option(loc::gettext(ID("accessibility", STR_ACCESSIBILITY_OPT)));
+        option(loc::gettext(ID("language", STR_LANGUAGE_OPT)), !translator_cutscene_test);
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         maxspacing = 15;
         break;
     case Menu::speedrunneroptions:
-        option(loc::gettext(STR_ID("glitchrunner mode", STR_GLITCH_OPT)));
-        option(loc::gettext(STR_ID("input delay", STR_DELAY_OPT)));
-        option(loc::gettext(STR_ID("interact button", STR_INTERACT_BUTTON_OPT)));
-        option(loc::gettext(STR_ID("fake load screen", STR_FAKE_LOAD_OPT)));
-        option(loc::gettext(STR_ID("toggle in-game timer", STR_TIMER_OPT)));
-        option(loc::gettext(STR_ID("english sprites", STR_SPRITES_OPT)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("glitchrunner mode", STR_GLITCH_OPT)));
+        option(loc::gettext(ID("input delay", STR_DELAY_OPT)));
+        option(loc::gettext(ID("interact button", STR_INTERACT_BUTTON_OPT)));
+        option(loc::gettext(ID("fake load screen", STR_FAKE_LOAD_OPT)));
+        option(loc::gettext(ID("toggle in-game timer", STR_TIMER_OPT)));
+        option(loc::gettext(ID("english sprites", STR_SPRITES_OPT)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         maxspacing = 15;
         break;
@@ -6902,61 +6902,61 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
     {
         int i;
 
-        option(loc::gettext(STR_ID("none", STR_GLITCH_NONE)));
+        option(loc::gettext(ID("none", STR_GLITCH_NONE)));
 
         for (i = 1; i < GlitchrunnerNumVersions; ++i)
         {
-            option(loc::gettext(STR_ID(GlitchrunnerMode_enum_to_string((enum GlitchrunnerMode) i), (String_ID)(STR_GLITCH_NONE + i))));
+            option(loc::gettext(ID(GlitchrunnerMode_enum_to_string((enum GlitchrunnerMode) i), (String_ID)(STR_GLITCH_NONE + i))));
         }
         break;
     }
     case Menu::advancedoptions:
-        option(loc::gettext(STR_ID("unfocus pause", STR_UNFOCUS_PAUSE_OPT)));
-        option(loc::gettext(STR_ID("unfocus audio pause", STR_UNFOCUS_AUDIO_PAUSE_OPT)));
-        option(loc::gettext(STR_ID("room name background", STR_RNBG_OPT)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("unfocus pause", STR_UNFOCUS_PAUSE_OPT)));
+        option(loc::gettext(ID("unfocus audio pause", STR_UNFOCUS_AUDIO_PAUSE_OPT)));
+        option(loc::gettext(ID("room name background", STR_RNBG_OPT)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         maxspacing = 15;
         break;
     case Menu::audiooptions:
-        option(loc::gettext(STR_ID("music volume", STR_MUSIC_VOLUME_OPT)));
-        option(loc::gettext(STR_ID("sound volume", STR_SOUND_VOLUME_OPT)));
+        option(loc::gettext(ID("music volume", STR_MUSIC_VOLUME_OPT)));
+        option(loc::gettext(ID("sound volume", STR_SOUND_VOLUME_OPT)));
         if (music.mmmmmm)
         {
-            option(loc::gettext(STR_ID("soundtrack", STR_SOUNDTRACK_OPT)));
+            option(loc::gettext(ID("soundtrack", STR_SOUNDTRACK_OPT)));
         }
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         maxspacing = 15;
         break;
     case Menu::accessibility:
 #if !defined(MAKEANDPLAY)
-        option(loc::gettext(STR_ID("unlock play modes", STR_UNLOCK_MODES_OPT)));
+        option(loc::gettext(ID("unlock play modes", STR_UNLOCK_MODES_OPT)));
 #endif
-        option(loc::gettext(STR_ID("invincibility", STR_INVINCIBILITY)), !ingame_titlemode || !incompetitive());
-        option(loc::gettext(STR_ID("slowdown", STR_SLOWDOWN_OPT)), !ingame_titlemode || !incompetitive());
-        option(loc::gettext(STR_ID("animated backgrounds", STR_BACKGROUND_OPT)));
-        option(loc::gettext(STR_ID("screen effects", STR_SCREENFX_OPT)));
-        option(loc::gettext(STR_ID("text outline", STR_TEXT_OUTLINE)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("invincibility", STR_INVINCIBILITY)), !ingame_titlemode || !incompetitive());
+        option(loc::gettext(ID("slowdown", STR_SLOWDOWN_OPT)), !ingame_titlemode || !incompetitive());
+        option(loc::gettext(ID("animated backgrounds", STR_BACKGROUND_OPT)));
+        option(loc::gettext(ID("screen effects", STR_SCREENFX_OPT)));
+        option(loc::gettext(ID("text outline", STR_TEXT_OUTLINE)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         maxspacing = 15;
         break;
     case Menu::controller:
-        option(loc::gettext(STR_ID("analog stick sensitivity", STR_STICK_SENS)));
-        option(loc::gettext(STR_ID("bind flip", STR_BIND_FLIP)));
-        option(loc::gettext(STR_ID("bind enter", STR_BIND_ENTER)));
-        option(loc::gettext(STR_ID("bind menu", STR_BIND_MENU)));
-        option(loc::gettext(STR_ID("bind restart", STR_BIND_RESTART)));
-        option(loc::gettext(STR_ID("bind interact", STR_BIND_INTERACT)), separate_interact);
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("analog stick sensitivity", STR_STICK_SENS)));
+        option(loc::gettext(ID("bind flip", STR_BIND_FLIP)));
+        option(loc::gettext(ID("bind enter", STR_BIND_ENTER)));
+        option(loc::gettext(ID("bind menu", STR_BIND_MENU)));
+        option(loc::gettext(ID("bind restart", STR_BIND_RESTART)));
+        option(loc::gettext(ID("bind interact", STR_BIND_INTERACT)), separate_interact);
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         maxspacing = 10;
         break;
     case Menu::language:
         if (loc::languagelist.empty())
         {
-            option(loc::gettext(STR_ID("ok", STR_OK)));
+            option(loc::gettext(ID("ok", STR_OK)));
             menuyoff = -20;
         }
         else
@@ -6982,41 +6982,41 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         }
         break;
     case Menu::translator_main:
-        option(loc::gettext(STR_ID("translator options", STR_TRANSLATOR_OPTS_OPT)));
-        option(loc::gettext(STR_ID("maintenance", STR_MAINTENANCE_OPT)));
-        option(loc::gettext(STR_ID("open lang folder", STR_OPEN_LANG_FOLDER)), FILESYSTEM_openDirectoryEnabled());
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("translator options", STR_TRANSLATOR_OPTS_OPT)));
+        option(loc::gettext(ID("maintenance", STR_MAINTENANCE_OPT)));
+        option(loc::gettext(ID("open lang folder", STR_OPEN_LANG_FOLDER)), FILESYSTEM_openDirectoryEnabled());
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         break;
     case Menu::translator_options:
-        option(loc::gettext(STR_ID("language statistics", STR_LANG_STATS_OPT)));
-        option(loc::gettext(STR_ID("translate room names", STR_TRANSLATE_ROOMS_OPT)));
-        option(loc::gettext(STR_ID("explore game", STR_EXPLORE_GAME_OPT)));
-        option(loc::gettext(STR_ID("menu test", STR_MENU_TEST_OPT)));
-        option(loc::gettext(STR_ID("cutscene test", STR_CUTSCENE_TEST_OPT)), loc::lang != "en");
-        option(loc::gettext(STR_ID("limits check", STR_LIMITS_CHECK_OPT)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("language statistics", STR_LANG_STATS_OPT)));
+        option(loc::gettext(ID("translate room names", STR_TRANSLATE_ROOMS_OPT)));
+        option(loc::gettext(ID("explore game", STR_EXPLORE_GAME_OPT)));
+        option(loc::gettext(ID("menu test", STR_MENU_TEST_OPT)));
+        option(loc::gettext(ID("cutscene test", STR_CUTSCENE_TEST_OPT)), loc::lang != "en");
+        option(loc::gettext(ID("limits check", STR_LIMITS_CHECK_OPT)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         break;
     case Menu::translator_options_limitscheck:
-        option(loc::gettext(STR_ID("next page", STR_NEXT_PAGE)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("next page", STR_NEXT_PAGE)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 64;
         break;
     case Menu::translator_options_stats:
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 64;
         break;
     case Menu::translator_options_exploregame:
-        option(loc::gettext(STR_ID("space station 1", STR_SPACE_STATION_1_OPT)));
-        option(loc::gettext(STR_ID("the laboratory", STR_THE_LABORATORY_OPT)));
-        option(loc::gettext(STR_ID("the tower", STR_THE_TOWER_OPT)));
-        option(loc::gettext(STR_ID("space station 2", STR_SPACE_STATION_2_OPT)));
-        option(loc::gettext(STR_ID("the warp zone", STR_THE_WARP_ZONE_OPT)));
-        option(loc::gettext(STR_ID("intermission 1", STR_INTERMISSION_1_OPT)));
-        option(loc::gettext(STR_ID("intermission 2", STR_INTERMISSION_2_OPT)));
-        option(loc::gettext(STR_ID("the final level", STR_THE_FINAL_LEVEL_OPT)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("space station 1", STR_SPACE_STATION_1_OPT)));
+        option(loc::gettext(ID("the laboratory", STR_THE_LABORATORY_OPT)));
+        option(loc::gettext(ID("the tower", STR_THE_TOWER_OPT)));
+        option(loc::gettext(ID("space station 2", STR_SPACE_STATION_2_OPT)));
+        option(loc::gettext(ID("the warp zone", STR_THE_WARP_ZONE_OPT)));
+        option(loc::gettext(ID("intermission 1", STR_INTERMISSION_1_OPT)));
+        option(loc::gettext(ID("intermission 2", STR_INTERMISSION_2_OPT)));
+        option(loc::gettext(ID("the final level", STR_THE_FINAL_LEVEL_OPT)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = -20;
         break;
     case Menu::translator_options_cutscenetest:
@@ -7030,75 +7030,75 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         }
         if((cutscenetest_menu_page*14)+14 < loc::testable_script_ids.size())
         {
-            option(loc::gettext(STR_ID("next page", STR_NEXT_PAGE)));
+            option(loc::gettext(ID("next page", STR_NEXT_PAGE)));
         }
         else
         {
-            option(loc::gettext(STR_ID("first page", STR_FIRST_PAGE)));
+            option(loc::gettext(ID("first page", STR_FIRST_PAGE)));
         }
         if (cutscenetest_menu_page == 0)
         {
-            option(loc::gettext(STR_ID("last page", STR_LAST_PAGE)));
+            option(loc::gettext(ID("last page", STR_LAST_PAGE)));
         }
         else
         {
-            option(loc::gettext(STR_ID("previous page", STR_PREV_PAGE)));
+            option(loc::gettext(ID("previous page", STR_PREV_PAGE)));
         }
-        option(loc::gettext(STR_ID("from clipboard", STR_FROM_CLIPBOARD)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("from clipboard", STR_FROM_CLIPBOARD)));
+        option(loc::gettext(ID("return", STR_RETURN)));
 
         menuxoff = 20;
         menuyoff = 55-(menuoptions.size()*10);
         menuspacing = 5;
         return; // skip automatic centering, will turn out bad with scripts list
     case Menu::translator_maintenance:
-        option(loc::gettext(STR_ID("sync language files", STR_SYNC_LANGS_OPT)));
-        option(loc::gettext(STR_ID("global statistics", STR_GLOBAL_STATS_OPT)), false);
-        option(loc::gettext(STR_ID("global limits check", STR_GLOBAL_LIMITS_CHECK_OPT)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("sync language files", STR_SYNC_LANGS_OPT)));
+        option(loc::gettext(ID("global statistics", STR_GLOBAL_STATS_OPT)), false);
+        option(loc::gettext(ID("global limits check", STR_GLOBAL_LIMITS_CHECK_OPT)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         break;
     case Menu::translator_maintenance_sync:
-        option(loc::gettext(STR_ID("sync", STR_SYNC)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("sync", STR_SYNC)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 64;
         break;
     case Menu::translator_error_setlangwritedir:
-        option(loc::gettext(STR_ID("ok", STR_OK)));
+        option(loc::gettext(ID("ok", STR_OK)));
         menuyoff = 10;
         break;
     case Menu::cleardatamenu:
     case Menu::clearcustomdatamenu:
-        option(loc::gettext(STR_ID("no! don't delete", STR_DONT_DELETE)));
-        option(loc::gettext(STR_ID("yes, delete everything", STR_YES_DELETE_ALL)));
+        option(loc::gettext(ID("no! don't delete", STR_DONT_DELETE)));
+        option(loc::gettext(ID("yes, delete everything", STR_YES_DELETE_ALL)));
         menuyoff = 64;
         break;
     case Menu::setinvincibility:
-        option(loc::gettext(STR_ID("no, return to options", STR_NO_RETURN_TO_OPTIONS)));
-        option(loc::gettext(STR_ID("yes, enable", STR_YES_ENABLE)));
+        option(loc::gettext(ID("no, return to options", STR_NO_RETURN_TO_OPTIONS)));
+        option(loc::gettext(ID("yes, enable", STR_YES_ENABLE)));
         menuyoff = 64;
         break;
     case Menu::setslowdown:
-        option(loc::gettext(STR_ID("normal speed", STR_NORMAL_SPEED)));
-        option(loc::gettext(STR_ID("80% speed", STR_80_SPEED)));
-        option(loc::gettext(STR_ID("60% speed", STR_60_SPEED)));
-        option(loc::gettext(STR_ID("40% speed", STR_40_SPEED)));
+        option(loc::gettext(ID("normal speed", STR_NORMAL_SPEED)));
+        option(loc::gettext(ID("80% speed", STR_80_SPEED)));
+        option(loc::gettext(ID("60% speed", STR_60_SPEED)));
+        option(loc::gettext(ID("40% speed", STR_40_SPEED)));
         menuyoff = 16;
         break;
     case Menu::unlockmenu:
-        option(loc::gettext(STR_ID("unlock time trials", STR_UNLOCK_TRIALS_OPT)));
-        option(loc::gettext(STR_ID("unlock intermissions", STR_UNLOCK_IMS)), !unlock[Unlock_INTERMISSION_REPLAYS]);
-        option(loc::gettext(STR_ID("unlock no death mode", STR_UNLOCK_NO_DEATH)), !unlock[Unlock_NODEATHMODE]);
-        option(loc::gettext(STR_ID("unlock flip mode", STR_UNLOCK_FLIP_MODE)), !unlock[Unlock_FLIPMODE]);
-        option(loc::gettext(STR_ID("unlock ship jukebox", STR_UNLOCK_JUKEBOX)), (stat_trinkets<20));
-        option(loc::gettext(STR_ID("unlock secret lab", STR_UNLOCK_SECRET_LAB)), !unlock[Unlock_SECRETLAB]);
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("unlock time trials", STR_UNLOCK_TRIALS_OPT)));
+        option(loc::gettext(ID("unlock intermissions", STR_UNLOCK_IMS)), !unlock[Unlock_INTERMISSION_REPLAYS]);
+        option(loc::gettext(ID("unlock no death mode", STR_UNLOCK_NO_DEATH)), !unlock[Unlock_NODEATHMODE]);
+        option(loc::gettext(ID("unlock flip mode", STR_UNLOCK_FLIP_MODE)), !unlock[Unlock_FLIPMODE]);
+        option(loc::gettext(ID("unlock ship jukebox", STR_UNLOCK_JUKEBOX)), (stat_trinkets<20));
+        option(loc::gettext(ID("unlock secret lab", STR_UNLOCK_SECRET_LAB)), !unlock[Unlock_SECRETLAB]);
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = -20;
         break;
     case Menu::credits:
-        option(loc::gettext(STR_ID("next page", STR_NEXT_PAGE)));
-        option(loc::gettext(STR_ID("last page", STR_LAST_PAGE)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("next page", STR_NEXT_PAGE)));
+        option(loc::gettext(ID("last page", STR_LAST_PAGE)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 64;
         break;
     case Menu::credits2:
@@ -7108,15 +7108,15 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
     case Menu::credits5:
     case Menu::credits_localisations_implementation:
     case Menu::credits_localisations_translations:
-        option(loc::gettext(STR_ID("next page", STR_NEXT_PAGE)));
-        option(loc::gettext(STR_ID("previous page", STR_PREV_PAGE)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("next page", STR_NEXT_PAGE)));
+        option(loc::gettext(ID("previous page", STR_PREV_PAGE)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 64;
         break;
     case Menu::credits6:
-        option(loc::gettext(STR_ID("first page", STR_FIRST_PAGE)));
-        option(loc::gettext(STR_ID("previous page", STR_PREV_PAGE)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("first page", STR_FIRST_PAGE)));
+        option(loc::gettext(ID("previous page", STR_PREV_PAGE)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 64;
         break;
     case Menu::play:
@@ -7234,23 +7234,23 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
             {
                 if (save_exists())
                 {
-                    option(loc::gettext(STR_ID("continue", STR_CONTINUE)));
+                    option(loc::gettext(ID("continue", STR_CONTINUE)));
                 }
                 else
                 {
-                    option(loc::gettext(STR_ID("new game", STR_NEW_GAME)));
+                    option(loc::gettext(ID("new game", STR_NEW_GAME)));
                 }
                 //ok, secret lab! no notification, but test:
                 if (unlock[Unlock_SECRETLAB])
                 {
-                    option(loc::gettext(STR_ID("secret lab", STR_SECRET_LAB)));
+                    option(loc::gettext(ID("secret lab", STR_SECRET_LAB)));
                 }
-                option(loc::gettext(STR_ID("play modes", STR_PLAY_MODES)));
+                option(loc::gettext(ID("play modes", STR_PLAY_MODES)));
                 if (save_exists())
                 {
-                    option(loc::gettext(STR_ID("new game", STR_NEW_GAME)));
+                    option(loc::gettext(ID("new game", STR_NEW_GAME)));
                 }
-                option(loc::gettext(STR_ID("return", STR_RETURN)));
+                option(loc::gettext(ID("return", STR_RETURN)));
                 if (unlock[Unlock_SECRETLAB])
                 {
                     menuyoff = -30;
@@ -7268,58 +7268,58 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
     case Menu::unlocknodeathmode:
     case Menu::unlockintermission:
     case Menu::unlockflipmode:
-        option(loc::gettext(STR_ID("proceed", STR_PROCEED)));
+        option(loc::gettext(ID("proceed", STR_PROCEED)));
         menuyoff = 70;
         break;
     case Menu::newgamewarning:
-        option(loc::gettext(STR_ID("start new game", STR_START_NEW_GAME)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("start new game", STR_START_NEW_GAME)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 64;
         break;
     case Menu::playmodes:
-        option(loc::gettext(STR_ID("time trials", STR_TIME_TRIALS_OPT)), !nocompetitive_unless_translator());
-        option(loc::gettext(STR_ID("intermissions", STR_INTERMISSIONS_OPT)), unlock[Unlock_INTERMISSION_REPLAYS]);
-        option(loc::gettext(STR_ID("no death mode", STR_NO_DEATH_OPT)), unlock[Unlock_NODEATHMODE] && !nocompetitive());
-        option(loc::gettext(STR_ID("flip mode", STR_FLIP_MODE_OPT)), unlock[Unlock_FLIPMODE]);
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("time trials", STR_TIME_TRIALS_OPT)), !nocompetitive_unless_translator());
+        option(loc::gettext(ID("intermissions", STR_INTERMISSIONS_OPT)), unlock[Unlock_INTERMISSION_REPLAYS]);
+        option(loc::gettext(ID("no death mode", STR_NO_DEATH_OPT)), unlock[Unlock_NODEATHMODE] && !nocompetitive());
+        option(loc::gettext(ID("flip mode", STR_FLIP_MODE_OPT)), unlock[Unlock_FLIPMODE]);
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 8;
         maxspacing = 20;
         break;
     case Menu::intermissionmenu:
-        option(loc::gettext(STR_ID("play intermission 1", STR_PLAY_IM1)));
-        option(loc::gettext(STR_ID("play intermission 2", STR_PLAY_IM2)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("play intermission 1", STR_PLAY_IM1)));
+        option(loc::gettext(ID("play intermission 2", STR_PLAY_IM2)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = -35;
         break;
     case Menu::playint1:
         start_translator_exploring = false;
-        option(loc::gettext_case(STR_ID("Vitellary", STR_WITH_VITELLARY), 1));
-        option(loc::gettext_case(STR_ID("Vermilion", STR_WITH_VERMILION), 1));
-        option(loc::gettext_case(STR_ID("Verdigris", STR_WITH_VERDIGRIS), 1));
-        option(loc::gettext_case(STR_ID("Victoria", STR_WITH_VICTORIA), 1));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext_case(ID("Vitellary", STR_WITH_VITELLARY), 1));
+        option(loc::gettext_case(ID("Vermilion", STR_WITH_VERMILION), 1));
+        option(loc::gettext_case(ID("Verdigris", STR_WITH_VERDIGRIS), 1));
+        option(loc::gettext_case(ID("Victoria", STR_WITH_VICTORIA), 1));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 10;
         break;
     case Menu::playint2:
         start_translator_exploring = false;
-        option(loc::gettext_case(STR_ID("Vitellary", STR_WITH_VITELLARY), 1));
-        option(loc::gettext_case(STR_ID("Vermilion", STR_WITH_VERMILION), 1));
-        option(loc::gettext_case(STR_ID("Verdigris", STR_WITH_VERDIGRIS), 1));
-        option(loc::gettext_case(STR_ID("Victoria", STR_WITH_VICTORIA), 1));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext_case(ID("Vitellary", STR_WITH_VITELLARY), 1));
+        option(loc::gettext_case(ID("Vermilion", STR_WITH_VERMILION), 1));
+        option(loc::gettext_case(ID("Verdigris", STR_WITH_VERDIGRIS), 1));
+        option(loc::gettext_case(ID("Victoria", STR_WITH_VICTORIA), 1));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 10;
         break;
     case Menu::continuemenu:
         map.settowercolour(3);
-        option(loc::gettext(STR_ID("continue from teleporter", STR_CONTINUE_TELE)));
-        option(loc::gettext(STR_ID("continue from quicksave", STR_CONTINUE_QUICK)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("continue from teleporter", STR_CONTINUE_TELE)));
+        option(loc::gettext(ID("continue from quicksave", STR_CONTINUE_QUICK)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 20;
         break;
     case Menu::startnodeathmode:
-        option(loc::gettext(STR_ID("disable cutscenes", STR_DISABLE_CUTSCENES)));
-        option(loc::gettext(STR_ID("enable cutscenes", STR_ENABLE_CUTSCENES)));
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("disable cutscenes", STR_DISABLE_CUTSCENES)));
+        option(loc::gettext(ID("enable cutscenes", STR_ENABLE_CUTSCENES)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 40;
         break;
     case Menu::gameover:
@@ -7327,35 +7327,35 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         menudest=Menu::gameover2;
         break;
     case Menu::gameover2:
-        option(loc::gettext(STR_ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
+        option(loc::gettext(ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
         menuyoff = 80;
         break;
     case Menu::unlockmenutrials:
-        option(loc::gettext(STR_ID("space station 1", STR_SPACE_STATION_1_OPT)), !unlock[Unlock_TIMETRIAL_SPACESTATION1]);
-        option(loc::gettext(STR_ID("the laboratory", STR_THE_LABORATORY_OPT)), !unlock[Unlock_TIMETRIAL_LABORATORY]);
-        option(loc::gettext(STR_ID("the tower", STR_THE_TOWER_OPT)), !unlock[Unlock_TIMETRIAL_TOWER]);
-        option(loc::gettext(STR_ID("space station 2", STR_SPACE_STATION_2_OPT)), !unlock[Unlock_TIMETRIAL_SPACESTATION2]);
-        option(loc::gettext(STR_ID("the warp zone", STR_THE_WARP_ZONE_OPT)), !unlock[Unlock_TIMETRIAL_WARPZONE]);
-        option(loc::gettext(STR_ID("the final level", STR_THE_FINAL_LEVEL_OPT)), !unlock[Unlock_TIMETRIAL_FINALLEVEL]);
+        option(loc::gettext(ID("space station 1", STR_SPACE_STATION_1_OPT)), !unlock[Unlock_TIMETRIAL_SPACESTATION1]);
+        option(loc::gettext(ID("the laboratory", STR_THE_LABORATORY_OPT)), !unlock[Unlock_TIMETRIAL_LABORATORY]);
+        option(loc::gettext(ID("the tower", STR_THE_TOWER_OPT)), !unlock[Unlock_TIMETRIAL_TOWER]);
+        option(loc::gettext(ID("space station 2", STR_SPACE_STATION_2_OPT)), !unlock[Unlock_TIMETRIAL_SPACESTATION2]);
+        option(loc::gettext(ID("the warp zone", STR_THE_WARP_ZONE_OPT)), !unlock[Unlock_TIMETRIAL_WARPZONE]);
+        option(loc::gettext(ID("the final level", STR_THE_FINAL_LEVEL_OPT)), !unlock[Unlock_TIMETRIAL_FINALLEVEL]);
 
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         break;
     case Menu::timetrials:
-        option(loc::gettext(unlock[Unlock_TIMETRIAL_SPACESTATION1] ? STR_ID("space station 1", STR_SPACE_STATION_1_OPT) : STR_ID("???", STR_QQQ)),
+        option(loc::gettext(unlock[Unlock_TIMETRIAL_SPACESTATION1] ? ID("space station 1", STR_SPACE_STATION_1_OPT) : ID("???", STR_QQQ)),
             unlock[Unlock_TIMETRIAL_SPACESTATION1]);
-        option(loc::gettext(unlock[Unlock_TIMETRIAL_LABORATORY] ? STR_ID("the laboratory", STR_THE_LABORATORY_OPT) : STR_ID("???", STR_QQQ)),
+        option(loc::gettext(unlock[Unlock_TIMETRIAL_LABORATORY] ? ID("the laboratory", STR_THE_LABORATORY_OPT) : ID("???", STR_QQQ)),
             unlock[Unlock_TIMETRIAL_LABORATORY]);
-        option(loc::gettext(unlock[Unlock_TIMETRIAL_TOWER] ? STR_ID("the tower", STR_THE_TOWER_OPT) : STR_ID("???", STR_QQQ)),
+        option(loc::gettext(unlock[Unlock_TIMETRIAL_TOWER] ? ID("the tower", STR_THE_TOWER_OPT) : ID("???", STR_QQQ)),
             unlock[Unlock_TIMETRIAL_TOWER]);
-        option(loc::gettext(unlock[Unlock_TIMETRIAL_SPACESTATION2] ? STR_ID("space station 2", STR_SPACE_STATION_2_OPT) : STR_ID("???", STR_QQQ)),
+        option(loc::gettext(unlock[Unlock_TIMETRIAL_SPACESTATION2] ? ID("space station 2", STR_SPACE_STATION_2_OPT) : ID("???", STR_QQQ)),
             unlock[Unlock_TIMETRIAL_SPACESTATION2]);
-        option(loc::gettext(unlock[Unlock_TIMETRIAL_WARPZONE] ? STR_ID("the warp zone", STR_THE_WARP_ZONE_OPT) : STR_ID("???", STR_QQQ)),
+        option(loc::gettext(unlock[Unlock_TIMETRIAL_WARPZONE] ? ID("the warp zone", STR_THE_WARP_ZONE_OPT) : ID("???", STR_QQQ)),
             unlock[Unlock_TIMETRIAL_WARPZONE]);
-        option(loc::gettext(unlock[Unlock_TIMETRIAL_FINALLEVEL] ? STR_ID("the final level", STR_THE_FINAL_LEVEL_OPT) : STR_ID("???", STR_QQQ)),
+        option(loc::gettext(unlock[Unlock_TIMETRIAL_FINALLEVEL] ? ID("the final level", STR_THE_FINAL_LEVEL_OPT) : ID("???", STR_QQQ)),
             unlock[Unlock_TIMETRIAL_FINALLEVEL]);
 
-        option(loc::gettext(STR_ID("return", STR_RETURN)));
+        option(loc::gettext(ID("return", STR_RETURN)));
         menuyoff = 0;
         maxspacing = 15;
         break;
@@ -7364,7 +7364,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         menudest = Menu::nodeathmodecomplete2;
         break;
     case Menu::nodeathmodecomplete2:
-        option(loc::gettext(STR_ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
+        option(loc::gettext(ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
         menuyoff = 70;
         break;
     case Menu::timetrialcomplete:
@@ -7376,22 +7376,22 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         menudest=Menu::timetrialcomplete3;
         break;
     case Menu::timetrialcomplete3:
-        option(loc::gettext(STR_ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
-        option(loc::gettext(STR_ID("try again", STR_TRY_AGAIN)));
+        option(loc::gettext(ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
+        option(loc::gettext(ID("try again", STR_TRY_AGAIN)));
         menuyoff = 70;
         break;
     case Menu::gamecompletecontinue:
-        option(loc::gettext(STR_ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
+        option(loc::gettext(ID("return to play menu", STR_RETURN_TO_PLAY_MENU)));
         menuyoff = 70;
         break;
     case Menu::errorsavingsettings:
-        option(loc::gettext(STR_ID("ok", STR_OK)));
-        option(loc::gettext(STR_ID("silence", STR_SILENCE)));
+        option(loc::gettext(ID("ok", STR_OK)));
+        option(loc::gettext(ID("silence", STR_SILENCE)));
         menuyoff = 10;
         break;
     case Menu::errorloadinglevel:
     case Menu::warninglevellist:
-        option(loc::gettext(STR_ID("ok", STR_OK)));
+        option(loc::gettext(ID("ok", STR_OK)));
         menuyoff = 50;
         break;
     }

@@ -858,211 +858,211 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
         switch(trig)
         {
         case 0: //testing zone
-            block.prompt = STR_ID("Press {button} to explode", loc::gettext(STR_PROMPT_EXPLODE));
+            block.prompt = ID("Press {button} to explode", loc::gettext(STR_PROMPT_EXPLODE));
             block.script = "intro";
             block.setblockcolour("orange");
             trig=1;
             break;
         case 1:
-            block.prompt = STR_ID("Press {button} to talk to Violet", loc::gettext(STR_PROMPT_VIOLET));
+            block.prompt = ID("Press {button} to talk to Violet", loc::gettext(STR_PROMPT_VIOLET));
             block.script = "talkpurple";
             block.setblockcolour("purple");
             trig=0;
             break;
         case 2:
-            block.prompt = STR_ID("Press {button} to talk to Vitellary", loc::gettext(STR_PROMPT_VITELLARY));
+            block.prompt = ID("Press {button} to talk to Vitellary", loc::gettext(STR_PROMPT_VITELLARY));
             block.script = "talkyellow";
             block.setblockcolour("yellow");
             trig=0;
             break;
         case 3:
-            block.prompt = STR_ID("Press {button} to talk to Vermilion", loc::gettext(STR_PROMPT_VERMILION));
+            block.prompt = ID("Press {button} to talk to Vermilion", loc::gettext(STR_PROMPT_VERMILION));
             block.script = "talkred";
             block.setblockcolour("red");
             trig=0;
             break;
         case 4:
-            block.prompt = STR_ID("Press {button} to talk to Verdigris", loc::gettext(STR_PROMPT_VERDIGRIS));
+            block.prompt = ID("Press {button} to talk to Verdigris", loc::gettext(STR_PROMPT_VERDIGRIS));
             block.script = "talkgreen";
             block.setblockcolour("green");
             trig=0;
             break;
         case 5:
-            block.prompt = STR_ID("Press {button} to talk to Victoria", loc::gettext(STR_PROMPT_VICTORIA));
+            block.prompt = ID("Press {button} to talk to Victoria", loc::gettext(STR_PROMPT_VICTORIA));
             block.script = "talkblue";
             block.setblockcolour("blue");
             trig=0;
             break;
         case 6:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_station_1";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 7:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_outside_1";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 8:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_outside_2";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 9:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_outside_3";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 10:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_outside_4";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 11:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_outside_5";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 12:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_outside_6";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 13:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_finallevel";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 14:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_station_2";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 15:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_station_3";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 16:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_station_4";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 17:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_warp_1";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 18:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_warp_2";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 19:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_lab_1";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 20:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_lab_2";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 21:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_secretlab";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 22:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_shipcomputer";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 23:
-            block.prompt = STR_ID("Press {button} to activate terminals", loc::gettext(STR_PROMPT_TERMINALS));
+            block.prompt = ID("Press {button} to activate terminals", loc::gettext(STR_PROMPT_TERMINALS));
             block.script = "terminal_radio";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 24:
-            block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+            block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             block.script = "terminal_jukebox";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 25:
-            block.prompt = STR_ID("Passion for Exploring", loc::gettext(STR_PASSION_FOR_EXPLORING));
+            block.prompt = ID("Passion for Exploring", loc::gettext(STR_PASSION_FOR_EXPLORING));
             block.script = "terminal_juke1";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 26:
-            block.prompt = STR_ID("Pushing Onwards", loc::gettext(STR_PUSHING_ONWARDS));
+            block.prompt = ID("Pushing Onwards", loc::gettext(STR_PUSHING_ONWARDS));
             block.script = "terminal_juke2";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 27:
-            block.prompt = STR_ID("Positive Force", loc::gettext(STR_POSITIVE_FORCE));
+            block.prompt = ID("Positive Force", loc::gettext(STR_POSITIVE_FORCE));
             block.script = "terminal_juke3";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 28:
-            block.prompt = STR_ID("Presenting VVVVVV", loc::gettext(STR_PRESENTING_VVVVVV));
+            block.prompt = ID("Presenting VVVVVV", loc::gettext(STR_PRESENTING_VVVVVV));
             block.script = "terminal_juke4";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 29:
-            block.prompt = STR_ID("Potential for Anything", loc::gettext(STR_POTENTIAL_FOR_ANYTHING));
+            block.prompt = ID("Potential for Anything", loc::gettext(STR_POTENTIAL_FOR_ANYTHING));
             block.script = "terminal_juke5";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 30:
-            block.prompt = STR_ID("Predestined Fate", loc::gettext(STR_PREDESTINED_FATE));
+            block.prompt = ID("Predestined Fate", loc::gettext(STR_PREDESTINED_FATE));
             block.script = "terminal_juke6";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 31:
-            block.prompt = STR_ID("Pipe Dream", loc::gettext(STR_PIPE_DREAM));
+            block.prompt = ID("Pipe Dream", loc::gettext(STR_PIPE_DREAM));
             block.script = "terminal_juke7";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 32:
-            block.prompt = STR_ID("Popular Potpourri", loc::gettext(STR_POPULAR_POTPOURRI));
+            block.prompt = ID("Popular Potpourri", loc::gettext(STR_POPULAR_POTPOURRI));
             block.script = "terminal_juke8";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 33:
-            block.prompt = STR_ID("Pressure Cooker", loc::gettext(STR_PRESSURE_COOKER));
+            block.prompt = ID("Pressure Cooker", loc::gettext(STR_PRESSURE_COOKER));
             block.script = "terminal_juke9";
             block.setblockcolour("orange");
             trig=0;
             break;
         case 34:
-            block.prompt = STR_ID("ecroF evitisoP", loc::gettext(STR_ECROF_EVITISOP));
+            block.prompt = ID("ecroF evitisoP", loc::gettext(STR_ECROF_EVITISOP));
             block.script = "terminal_juke10";
             block.setblockcolour("orange");
             trig=0;
@@ -1070,11 +1070,11 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
         case 35:
             if (custom)
             {
-                block.prompt = STR_ID("Press {button} to interact", loc::gettext(STR_PROMPT_INTERACT));
+                block.prompt = ID("Press {button} to interact", loc::gettext(STR_PROMPT_INTERACT));
             }
             else
             {
-                block.prompt = STR_ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
+                block.prompt = ID("Press {button} to activate terminal", loc::gettext(STR_PROMPT_TERMINAL));
             }
             block.script = "custom_"+customscript;
             block.setblockcolour("orange");

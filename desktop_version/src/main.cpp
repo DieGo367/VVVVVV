@@ -715,7 +715,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            message = loc::gettext(STR_ID("Something went wrong, but we forgot the error message.", STR_MISSING_ERROR));
+            message = loc::gettext(ID("Something went wrong, but we forgot the error message.", STR_MISSING_ERROR));
         }
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, NULL);
 
@@ -1015,14 +1015,14 @@ static void unfocused_run(void)
         /* The pause screen can also appear on the language screen, where highlighting
          * a language changes the used language metadata but not the loaded strings... */
         uint32_t flags = PR_CEN | PR_BOR | PR_FONT_IDX(loc::langmeta.font_idx, loc::langmeta.rtl);
-        font::print(flags | FLIP_PR_CJK_HIGH, -1, FLIP(110), loc::gettext(STR_ID("Game paused", STR_GAME_PAUSED)), 196 - help.glow, 255 - help.glow, 196 - help.glow);
+        font::print(flags | FLIP_PR_CJK_HIGH, -1, FLIP(110), loc::gettext(ID("Game paused", STR_GAME_PAUSED)), 196 - help.glow, 255 - help.glow, 196 - help.glow);
 
         if (BUTTONGLYPHS_keyboard_is_available())
         {
-            font::print(flags | FLIP_PR_CJK_LOW, -1, FLIP(120), loc::gettext(STR_ID("[click to resume]", STR_CLICK_RESUME)), 196 - help.glow, 255 - help.glow, 196 - help.glow);
+            font::print(flags | FLIP_PR_CJK_LOW, -1, FLIP(120), loc::gettext(ID("[click to resume]", STR_CLICK_RESUME)), 196 - help.glow, 255 - help.glow, 196 - help.glow);
 
-            font::print(flags | FLIP_PR_CJK_HIGH, -1, FLIP(220), loc::gettext(STR_ID("Press M to mute in game", STR_M_MUTE)), 164 - help.glow, 196 - help.glow, 164 - help.glow);
-            font::print(flags, -1, FLIP(230), loc::gettext(STR_ID("Press N to mute music only", STR_N_MUTE_MUSIC)), 164 - help.glow, 196 - help.glow, 164 - help.glow);
+            font::print(flags | FLIP_PR_CJK_HIGH, -1, FLIP(220), loc::gettext(ID("Press M to mute in game", STR_M_MUTE)), 164 - help.glow, 196 - help.glow, 164 - help.glow);
+            font::print(flags, -1, FLIP(230), loc::gettext(ID("Press N to mute music only", STR_N_MUTE_MUSIC)), 164 - help.glow, 196 - help.glow, 164 - help.glow);
         }
 #undef FLIP_PR_CJK_HIGH
 #undef FLIP_PR_CJK_LOW

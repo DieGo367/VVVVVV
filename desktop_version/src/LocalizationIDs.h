@@ -3,6 +3,7 @@
 #define LOCALIZATION_IDS_H
 
 #ifdef __NDS__
+#define ID(string, id) id
 /* This cast is an EGREGIOUS hack for the sake of saving memory.
  * Instead of storing string IDs as strings that would eat up static
  * memory, the ID value is stored in the pointer value. At the load
@@ -13,791 +14,798 @@
 #define IDC(string, id) (char *)(id + 1)
 #define NUL(string) (char *)(0)
 #else
+#define ID(string, id) string
 #define IDC(string, id) string
 #define NUL(string) string
 #endif
 
 enum String_ID {
-    STR_LOADING,
-    STR_GAME_PAUSED,
-    STR_CLICK_RESUME,
-    STR_M_MUTE,
-    STR_N_MUTE_MUSIC,
-    STR_MAKE_AND_PLAY,
-    STR_M6_INSTALLED,
-    STR_PLAY,
-    STR_LEVELS,
-    STR_OPTIONS,
-    STR_TRANSLATOR,
-    STR_CREDITS,
-    STR_QUIT,
-    STR_GAMEPLAY_OPT,
-    STR_GAMEPLAY_TITLE,
-    STR_GAMEPLAY_DESC,
-    STR_GRAPHICS_OPT,
-    STR_GRAPHICS_TITLE,
-    STR_GRAPHICS_DESC,
-    STR_AUDIO_OPT,
-    STR_AUDIO_TITLE,
-    STR_AUDIO_DESC_M6,
-    STR_AUDIO_DESC,
-    STR_CONTINUE,
-    STR_CONTINUE_TELE,
-    STR_TELE_SAVE_TITLE,
-    STR_CONTINUE_QUICK,
-    STR_QUICK_SAVE_TITLE,
-    STR_PROCEED,
-    STR_NEW_GAME,
-    STR_START_NEW_GAME,
-    STR_SECRET_LAB,
-    STR_PLAY_MODES,
-    STR_ERR_NO_LEVELS,
-    STR_ERR_NO_START_POINT,
-    STR_ERROR,
-    STR_WARNING,
-    STR_UNLOCK_MODES_OPT,
-    STR_UNLOCK_MODES_TITLE,
-    STR_UNLOCK_MODES_DESC,
-    STR_UNLOCK_MODES_DESC_MENU,
-    STR_UNLOCK_JUKEBOX,
-    STR_UNLOCK_SECRET_LAB,
-    STR_GAME_PAD_OPT,
-    STR_GAME_PAD_OPTS_TITLE,
-    STR_GAME_PAD_TITLE,
-    STR_GAME_PAD_OPTS_DESC,
-    STR_GAME_PAD_DESC,
-    STR_LANGUAGE_OPT,
-    STR_LANGUAGE_TITLE,
-    STR_LANGUAGE_DESC,
-    STR_UNUSED_CHANGE_LANG_TEXTBOX,
-    STR_CLEAR_MAIN_DATA,
-    STR_CLEAR_CUSTOM_DATA,
-    STR_CLEAR_DATA_TITLE,
-    STR_CLEAR_MAIN_DATA_DESC,
-    STR_CLEAR_CUSTOM_DATA_DESC,
-    STR_WARNING_NEW_GAME,
-    STR_WANNA_DELETE_DATA,
-    STR_WANNA_DELETE_QUICKSAVE,
-    STR_DONT_DELETE,
-    STR_YES_DELETE_ALL,
-    STR_YES_DELETE_SAVE,
-    STR_SOUNDTRACK_OPT,
-    STR_SOUNDTRACK_TITLE,
-    STR_SOUNDTRACK_DESC,
-    STR_SOUNDTRACK_P6,
-    STR_SOUNDTRACK_M6,
-    STR_FULLSCREEN_OPT,
-    STR_FULLSCREEN_TITLE,
-    STR_FULLSCREEN_DESC,
-    STR_MODE_WINDOWED,
-    STR_MODE_FULLSCREEN,
-    STR_SCALING_MODE_OPT,
-    STR_SCALING_MODE_TITLE,
-    STR_SCALING_MODE_DESC,
-    STR_MODE_INTEGER,
-    STR_MODE_STRETCH,
-    STR_MODE_LETTERBOX,
-    STR_RESIZE_OPT,
-    STR_RESIZE_TITLE,
-    STR_RESIZE_DESC,
-    STR_YOU_MUST_BE_WINDOWED,
-    STR_FILTER_OPT,
-    STR_FILTER_TITLE,
-    STR_FILTER_DESC,
-    STR_MODE_LINEAR,
-    STR_MODE_NEAREST,
-    STR_ANALOGUE_OPT,
-    STR_ANALOGUE_TITLE,
-    STR_ANALOGUE_DESC,
-    STR_TOGGLE_FPS_OPT,
-    STR_TOGGLE_FPS_TITLE,
-    STR_TOGGLE_FPS_DESC,
-    STR_AT_30_FPS,
-    STR_OVER_30_FPS,
-    STR_VSYNC_OPT,
-    STR_VSYNC_TITLE,
-    STR_VSYNC_DESC,
-    STR_VSYNC_OFF,
-    STR_VSYNC_ON,
-    STR_MUSIC_VOLUME_OPT,
-    STR_MUSIC_VOLUME_TITLE,
-    STR_MUSIC_VOLUME_DESC,
-    STR_SOUND_VOLUME_OPT,
-    STR_SOUND_VOLUME_TITLE,
-    STR_SOUND_VOLUME_DESC,
-    STR_CREDITS_TITLE,
-    STR_V6_IS_BY,
-    STR_FEATURES_MUSIC_BY,
-    STR_ROOMNAMES_BY,
-    STR_CPP_VERSION_BY,
-    STR_BETA_TESTED_BY,
-    STR_END_PICTURE_BY,
-    STR_CREATED_BY,
-    STR_WITH_MUSIC_BY,
-    STR_ROOMS_NAMED_BY,
-    STR_CPP_PORT_BY,
-    STR_PATRONS,
-    STR_V6_SUPPORTED_BY_PATRONS,
-    STR_AND_ALSO_BY,
-    STR_AND,
-    STR_GH_CONTRIBUTORS,
-    STR_WITH_CONTRIB_FROM,
-    STR_ALSO_THANKS_TO,
-    STR_YOU,
-    STR_THANKS_TO_YOUR_SUPPORT,
-    STR_THANK_YOU,
-    STR_GOOD_LUCK,
-    STR_CANT_SAVE_MODE,
-    STR_WANNA_DISABLE_CUTSCENES,
-    STR_DISABLE_CUTSCENES,
-    STR_ENABLE_CUTSCENES,
-    STR_STICK_SENS,
-    STR_LOW,
-    STR_MEDIUM,
-    STR_HIGH,
-    STR_BIND_FLIP,
-    STR_BIND_ENTER,
-    STR_BIND_MENU,
-    STR_BIND_RESTART,
-    STR_BIND_INTERACT,
-    STR_BOUND_FLIP,
-    STR_BOUND_ENTER,
-    STR_BOUND_MENU,
-    STR_BOUND_RESTART,
-    STR_BOUND_INTERACT,
-    STR_ERR_NO_LANG_FILES,
-    STR_LANG_FOLDER,
-    STR_REPO_LANG_FOLDER,
-    STR_TRANSLATOR_OPTS_OPT,
-    STR_TRANSLATOR_OPTS_TITLE,
-    STR_TRANSLATOR_OPTS_DESC,
-    STR_MAINTENANCE_OPT,
-    STR_MAINTENANCE_TITLE,
-    STR_OPEN_LANG_FOLDER,
-    STR_MAINTENANCE_DESC,
-    STR_TRANSLATE_ROOMS_OPT,
-    STR_TRANSLATE_ROOMS_TITLE,
-    STR_TRANSLATE_ROOMS_DESC,
-    STR_NOT_ENABLED_TRANSLATOR,
-    STR_MENU_TEST_OPT,
-    STR_MENU_TEST_TITLE,
-    STR_MENU_TEST_DESC,
-    STR_CUTSCENE_TEST_OPT,
-    STR_CUTSCENE_TEST_TITLE,
-    STR_CUTSCENE_TEST_DESC,
-    STR_FROM_CLIPBOARD,
-    STR_EXPLORE_GAME_OPT,
-    STR_EXPLORE_GAME_TITLE,
-    STR_EXPLORE_GAME_DESC,
-    STR_LIMITS_CHECK_OPT,
-    STR_GLOBAL_LIMITS_CHECK_OPT,
-    STR_LIMITS_CHECK_TITLE,
-    STR_LIMITS_CHECK_DESC,
-    STR_NO_OVERFLOWS_FOUND,
-    STR_NO_OVERFLOWS_LEFT,
-    STR_NOTE_DETECTION,
-    STR_SYNC_LANGS_OPT,
-    STR_SYNC_LANGS_TITLE,
-    STR_SYNC,
-    STR_SYNC_LANGS_DESC,
-    STR_LANG_STATS_OPT,
-    STR_GLOBAL_STATS_OPT,
-    STR_STATS_TITLE,
-    STR_LANG_STATS_DESC,
-    STR_GLOBAL_STATS_DESC,
-    STR_IF_NEW_STRINGS,
-    STR_FULL_SYNCING,
-    STR_SYNC_NOT_SUPPORTED,
-    STR_ADVANCED_OPTS_OPT,
-    STR_ADVANCED_OPTS_TITLE,
-    STR_ADVANCED_OPTS_DESC,
-    STR_UNFOCUS_PAUSE_OPT,
-    STR_UNFOCUS_PAUSE_TITLE,
-    STR_UNFOCUS_PAUSE_DESC,
-    STR_UNFOCUS_PAUSE_OFF,
-    STR_UNFOCUS_PAUSE_ON,
-    STR_UNFOCUS_AUDIO_PAUSE_OPT,
-    STR_UNFOCUS_AUDIO_PAUSE_TITLE,
-    STR_UNFOCUS_AUDIO_PAUSE_DESC,
-    STR_UNFOCUS_AUDIO_PAUSE_OFF,
-    STR_UNFOCUS_AUDIO_PAUSE_ON,
-    STR_TIMER_OPT,
-    STR_TIMER_TITLE,
-    STR_TIMER_DESC,
-    STR_TIMER_ON,
-    STR_TIMER_OFF,
-    STR_SPRITES_OPT,
-    STR_SPRITES_TITLE,
-    STR_SPRITES_DESC,
-    STR_SPRITES_TRANSLATED,
-    STR_SPRITES_ALWAYS_EN,
-    STR_INTERACT_BUTTON_OPT,
-    STR_INTERACT_BUTTON_TITLE,
-    STR_INTERACT_BUTTON_DESC,
-    STR_E,
-    STR_ENTER,
-    STR_ESC,
-    STR_ACTION,
-    STR_INTERACT_BUTTON_SET,
-    STR_FAKE_LOAD_OPT,
-    STR_FAKE_LOAD_TITLE,
-    STR_FAKE_LOAD_DESC,
-    STR_FAKE_LOAD_OFF,
-    STR_FAKE_LOAD_ON,
-    STR_RNBG_OPT,
-    STR_RNBG_TITLE,
-    STR_RNBG_DESC,
-    STR_RNBG_TRANSLUCENT,
-    STR_RNBG_OPAQUE,
-    STR_SPEEDRUN_OPTS_OPT,
-    STR_SPEEDRUN_OPTS_TITLE,
-    STR_SPEEDRUN_OPTS_DESC,
-    STR_GLITCH_OPT,
-    STR_GLITCH_TITLE,
-    STR_GLITCH_DESC,
-    STR_GLITCH_IS_OFF,
-    STR_GLITCH_IS_VERSION,
-    STR_SELECT_GLITCH,
-    STR_GLITCH_NONE,
-    STR_GLITCH_2_0,
-    STR_GLITCH_2_2,
-    STR_DELAY_OPT,
-    STR_DELAY_TITLE,
-    STR_DELAY_DESC,
-    STR_DELAY_ON,
-    STR_DELAY_OFF,
-    STR_ACCESSIBILITY_OPT,
-    STR_ACCESSIBILITY_TITLE,
-    STR_ACCESSIBILITY_DESC,
-    STR_BACKGROUND_OPT,
-    STR_BACKGROUND_TITLE,
-    STR_BACKGROUND_DESC,
-    STR_BACKGROUND_ON,
-    STR_BACKGROUND_OFF,
-    STR_SCREENFX_OPT,
-    STR_SCREENFX_TITLE,
-    STR_SCREENFX_DESC,
-    STR_SCREENFX_ON,
-    STR_SCREENFX_OFF,
-    STR_TEXT_OUTLINE,
-    STR_TEXT_OUTLINE_TITLE,
-    STR_TEXT_OUTLINE_DESC,
-    STR_TEXT_OUTLINE_ON,
-    STR_TEXT_OUTLINE_OFF,
-    STR_INVINCIBILITY,
-    STR_INVINCIBILITY_TITLE,
-    STR_INVINCIBILITY_DESC,
-    STR_INVINCIBILITY_ON,
-    STR_INVINCIBILITY_OFF,
-    STR_WANNA_ENABLE_INVINCIBILITY,
-    STR_NO_RETURN_TO_OPTIONS,
-    STR_YES_ENABLE,
-    STR_SLOWDOWN_OPT,
-    STR_SLOWDOWN_TITLE,
-    STR_GAME_SPEED_TITLE,
-    STR_SLOWDOWN_DESC,
-    STR_GAME_SPEED_DESC,
-    STR_SPEED_IS_NORMAL,
-    STR_SPEED_IS_80,
-    STR_SPEED_IS_60,
-    STR_SPEED_IS_40,
-    STR_NORMAL_SPEED,
-    STR_80_SPEED,
-    STR_60_SPEED,
-    STR_40_SPEED,
-    STR_PLAY_IM1,
-    STR_PLAY_IM2,
-    STR_WITH_WHO,
-    STR_TIME_TRIALS_OPT,
-    STR_TIME_TRIALS_TITLE,
-    STR_TIME_TRIALS_DESC,
-    STR_TIME_TRIALS_ARE_LEGIT,
-    STR_UNLOCK_TRIALS_OPT,
-    STR_UNLOCK_TRIALS_TITLE,
-    STR_UNLOCK_TRIALS_SEPARATELY,
-    STR_INTERMISSIONS_OPT,
-    STR_INTERMISSIONS_TITLE,
-    STR_INTERMISSIONS_DESC,
-    STR_UNLOCK_IMS,
-    STR_TO_UNLOCK_IMS,
-    STR_NO_DEATH_OPT,
-    STR_NO_DEATH_TITLE,
-    STR_NO_DEATH_DESC,
-    STR_NO_DEATH_IS_LEGIT,
-    STR_UNLOCK_NO_DEATH,
-    STR_TO_UNLOCK_NO_DEATH,
-    STR_FLIP_MODE_OPT,
-    STR_FLIP_MODE_TITLE,
-    STR_FLIP_MODE_DESC,
-    STR_FLIP_MODE_DESC_COMPAT,
-    STR_UNLOCK_FLIP_MODE,
-    STR_CURRENTLY_ENABLED,
-    STR_CURRENTLY_DISABLED,
-    STR_TO_UNLOCK_FLIP_MODE,
-    STR_INVINCIBILITY_ENABLED,
-    STR_GLITCH_ENABLED_VERSION,
-    STR_FLIP_MODE_ENABLED,
-    STR_WANNA_QUIT,
-    STR_GAME_OVER,
-    STR_REACHED,
-    STR_KEEP_TRYING,
-    STR_NICE_ONE,
-    STR_WOW_CONGRATS,
-    STR_INCREDIBLE,
-    STR_UNBELIEVABLE,
-    STR_ER_HOW,
-    STR_WOW_MEGA,
-    STR_RESCUED_ALL_CREWMATE,
-    STR_NEW_TROPHY_AWARDED,
-    STR_MM_TRINKETS_FOUND,
-    STR_MM_NUM_DEATHS,
-    STR_MM_TIME_TAKEN,
-    STR_TRINKETS_FOUND,
-    STR_GAME_TIME,
-    STR_TOTAL_FLIPS,
-    STR_TOTAL_DEATHS,
-    STR_RESULTS,
-    STR_TIME_TAKEN,
-    STR_NUM_DEATHS,
-    STR_SHINY_TRINKETS,
-    STR_TIMES_DELIM,
-    STR_TOTAL_TRINKETS,
-    STR_TOTAL_TRINKETS_OF,
-    STR_TOTAL_TRINKETS_WORDY,
-    STR_SAVEBOX_TRINKETS_WORDY,
-    STR_GAMECOMPLETE_TRINKET_COUNT,
-    STR_RANK_UP,
-    STR_RANK,
-    STR_B,
-    STR_A,
-    STR_S,
-    STR_V,
-    STR_SPACE_STATION_1_OPT,
-    STR_SPACE_STATION_1_TITLE,
-    STR_SPACE_STATION_2_OPT,
-    STR_SPACE_STATION_2_TITLE,
-    STR_THE_LABORATORY_OPT,
-    STR_THE_LABORATORY_TITLE,
-    STR_THE_TOWER_OPT,
-    STR_THE_TOWER_TITLE,
-    STR_THE_WARP_ZONE_OPT,
-    STR_THE_WARP_ZONE_TITLE,
-    STR_THE_FINAL_LEVEL_OPT,
-    STR_THE_FINAL_LEVEL_TITLE,
-    STR_INTERMISSION_1_OPT,
-    STR_INTERMISSION_1_TITLE,
-    STR_INTERMISSION_2_OPT,
-    STR_INTERMISSION_2_TITLE,
-    STR_QQQ,
-    STR_NOT_ATTEMPTED,
-    STR_TO_UNLOCK,
-    STR_RESCUE_VIOLET,
-    STR_RESCUE_VICTORIA,
-    STR_RESCUE_VERMILION,
-    STR_RESCUE_VITELLARY,
-    STR_RESCUE_VERDIGRIS,
-    STR_COMPLETE_THE_GAME,
-    STR_FIND_3_TRINKETS,
-    STR_FIND_6_TRINKETS,
-    STR_FIND_9_TRINKETS,
-    STR_FIND_12_TRINKETS,
-    STR_FIND_15_TRINKETS,
-    STR_FIND_18_TRINKETS,
-    STR_RECORDS,
-    STR_TIME,
-    STR_SHINY,
-    STR_LIVES,
-    STR_PAR_TIME,
-    STR_TRIAL_TIME,
-    STR_TRIAL_DEATH,
-    STR_TRIAL_SHINY,
-    STR_TRIAL_PAR_TIME,
-    STR_BEST_RANK,
-    STR_GO_CAP,
-    STR_GO,
-    STR_CONGRATS_TITLE,
-    STR_SAVES_UPDATED,
-    STR_KEEP_EXPLORING,
-    STR_UNLOCKED_NEW_TRIAL,
-    STR_UNLOCKED_NEW_TRIALS,
-    STR_UNLOCKED_NO_DEATH,
-    STR_UNLOCKED_FLIP_MODE,
-    STR_UNLOCKED_IMS,
-    STR_PLAY_LEVEL,
-    STR_LEVEL_EDITOR,
-    STR_OPEN_LEVEL_FOLDER,
-    STR_SHOW_LEVEL_FOLDER_PATH,
-    STR_RETURN,
-    STR_RETURN_TO_LEVELS,
-    STR_DONT_SHOW,
-    STR_YES_REVEAL,
-    STR_RETURN_TO_PLAY_MENU,
-    STR_TRY_AGAIN,
-    STR_OK,
-    STR_NEXT_PAGE,
-    STR_PREV_PAGE,
-    STR_FIRST_PAGE,
-    STR_LAST_PAGE,
-    STR_SILENCE,
-    STR_CONTINUE_SAVE,
-    STR_START_FROM_BEGIN,
-    STR_DELETE_SAVE,
-    STR_BACK_TO_LEVELS,
-    STR_EDITOR_UNSUPPORTED_DECK,
-    STR_EDITOR_UNSUPPORTED,
-    STR_TO_INSTALL_LEVELS,
-    STR_WANNA_SHOW_LEVELS_PATH,
-    STR_LEVELS_PATH,
-    STR_PROMPT_START,
-    STR_ACTION_IS,
-    STR_PROMPT_RETURN_TO_ED,
-    STR_PROMPT_ADVANCE_TEXT,
-    STR_PROMPT_CONTINUE,
-    STR_PROMPT_UNFREEZE,
-    STR_PROMPT_FREEZE,
-    STR_CURRENT_TIME,
-    STR_BEST_TIME,
-    STR_NEXT_TROPHY_5_SECONDS,
-    STR_NEXT_TROPHY_10_SECONDS,
-    STR_NEXT_TROPHY_15_SECONDS,
-    STR_NEXT_TROPHY_20_SECONDS,
-    STR_NEXT_TROPHY_30_SECONDS,
-    STR_NEXT_TROPHY_1_MINUTE,
-    STR_GOT_ALL_TROPHIES,
-    STR_NEW_RECORD,
-    STR_NEW_TROPHY,
-    STR_PROMPT_STOP,
-    STR_SUPER_GRAVITRON,
-    STR_SUPER_GRAVITRON_HIGHSCORE,
-    STR_MAP,
-    STR_GRAV,
-    STR_SHIP,
-    STR_CREW,
-    STR_STATS,
-    STR_SAVE,
-    STR_IGM_PAUSE,
-    STR_IGM_QUIT,
-    STR_IGM_GRAVITRON,
-    STR_NO_SIGNAL,
-    STR_PROMPT_WARP_SHIP,
-    STR_MISSING_MALE,
-    STR_MISSING_FEMALE,
-    STR_MISSING_YOU,
-    STR_RESCUED_MALE,
-    STR_RESCUED_FEMALE,
-    STR_THATS_YOU,
-    STR_CANT_SAVE_IN_REPLAY,
-    STR_CANT_SAVE_IN_NO_DEATH,
-    STR_HOWD_YOU_GET_HERE,
-    STR_CANT_SAVE_IN_SECRET_LAB,
-    STR_ERR_SAVE_GAME,
-    STR_ERR_SAVE_SETTINGS,
-    STR_SAVED_OK,
-    STR_PROMPT_SAVE,
-    STR_NOTE_AUTOSAVE,
-    STR_LAST_SAVE,
-    STR_WANNA_RETURN_TO_MAIN,
-    STR_WANNA_QUIT_UNSAVED,
-    STR_WANNA_RETURN_TO_SECRET_LAB,
-    STR_NO_KEEP_PLAYING,
-    STR_NO_KEEP_PLAYING_HOVER,
-    STR_YES_QUIT_TO_MENU,
-    STR_YES_QUIT_TO_MENU_HOVER,
-    STR_YES_RETURN,
-    STR_YES_RETURN_HOVER,
-    STR_NO_RETURN,
-    STR_YES_QUIT,
-    STR_RETURN_TO_GAME,
-    STR_QUIT_TO_MENU,
-    STR_PROMPT_CHOOSE_TELE,
-    STR_PROMPT_TELEPORT,
-    STR_PROMPT_TELEPORT_2,
-    STR_PROMPT_EXPLODE,
-    STR_PROMPT_VIOLET,
-    STR_PROMPT_VITELLARY,
-    STR_PROMPT_VERMILION,
-    STR_PROMPT_VERDIGRIS,
-    STR_PROMPT_VICTORIA,
-    STR_PROMPT_TERMINAL,
-    STR_PROMPT_TERMINALS,
-    STR_PROMPT_INTERACT,
-    STR_PROMPT_SKIP,
-    STR_PASSION_FOR_EXPLORING,
-    STR_PUSHING_ONWARDS,
-    STR_POSITIVE_FORCE,
-    STR_PRESENTING_VVVVVV,
-    STR_POTENTIAL_FOR_ANYTHING,
-    STR_PREDESTINED_FATE,
-    STR_PIPE_DREAM,
-    STR_POPULAR_POTPOURRI,
-    STR_PRESSURE_COOKER,
-    STR_ECROF_EVITISOP,
-    STR_MAP_SETTINGS_TITLE,
-    STR_EDIT_SCRIPTS,
-    STR_CHANGE_MUSIC,
-    STR_EDITOR_GHOSTS,
-    STR_EDITOR_GHOSTS_OFF,
-    STR_EDITOR_GHOSTS_ON,
-    STR_LOAD_LEVEL,
-    STR_SAVE_LEVEL,
-    STR_QUIT_TO_MAIN,
-    STR_CHANGE_NAME,
-    STR_CHANGE_AUTHOR,
-    STR_CHANGE_DESCRIPTION,
-    STR_CHANGE_WEBSITE,
-    STR_CHANGE_FONT,
-    STR_ED_LEVEL_FONT_TITLE,
-    STR_ED_LEVEL_FONT_DESC,
-    STR_ED_FONT,
-    STR_ED_MAP_MUSIC_TITLE,
-    STR_ED_CURRENT_MUSIC,
-    STR_ED_MUSIC_NONE,
-    STR_ED_MUSIC_1,
-    STR_ED_MUSIC_2,
-    STR_ED_MUSIC_3,
-    STR_ED_MUSIC_4,
-    STR_ED_MUSIC_NA_PAUSE,
-    STR_ED_MUSIC_5,
-    STR_ED_MUSIC_NA_PLENARY,
-    STR_ED_MUSIC_6,
-    STR_ED_MUSIC_NA_ECROF,
-    STR_ED_MUSIC_7,
-    STR_ED_MUSIC_8,
-    STR_ED_MUSIC_9,
-    STR_ED_MUSIC_10,
-    STR_ED_MUSIC_11,
-    STR_ED_MUSIC_NA_PF_REMIX,
-    STR_ED_MUSIC_ELSE,
-    STR_NEXT_SONG,
-    STR_PREV_SONG,
-    STR_ED_BACK,
-    STR_ED_SAVE_B4_QUIT,
-    STR_YES_SAVE_QUIT,
-    STR_NO_QUIT_UNSAVED,
-    STR_RETURN_TO_EDITOR,
-    STR_UNTITLED_LEVEL,
-    STR_UNKNOWN_AUTHOR,
-    STR_ED_TILE,
-    STR_ED_SCRIPTBOX_FIRST,
-    STR_ED_SCRIPTBOX_LAST,
-    STR_ED_ENEMYBOUND_FIRST,
-    STR_ED_ENEMYBOUND_LAST,
-    STR_ED_PLATBOUND_FIRST,
-    STR_ED_PLATBOUND_LAST,
-    STR_ED_FIRST_CORNER,
-    STR_ED_LAST_CORNER,
-    STR_ED_V6_SCRIPT_EDITOR,
-    STR_ED_PROMPT_ESC_RETURN,
-    STR_ED_NO_SCRIPT_IDS,
-    STR_ED_CREATE_A_SCRIPT,
-    STR_ED_CURRENT_SCRIPT,
-    STR_ED_PROMPT_PLACE_DEST,
-    STR_ED_PROMPT_CANCEL,
-    STR_ED_PROMPT_CHANGE_TOOL,
-    STR_ED_1,
-    STR_ED_2,
-    STR_ED_3,
-    STR_ED_4,
-    STR_ED_5,
-    STR_ED_6,
-    STR_ED_7,
-    STR_ED_8,
-    STR_ED_9,
-    STR_ED_0,
-    STR_ED_R,
-    STR_ED_T,
-    STR_ED_Y,
-    STR_ED_U,
-    STR_ED_I,
-    STR_ED_O,
-    STR_ED_P,
-    STR_ED_START,
-    STR_ED_HINT_MENU,
-    STR_ED_F1,
-    STR_ED_F2,
-    STR_ED_F3,
-    STR_ED_F4,
-    STR_ED_F5,
-    STR_ED_F9,
-    STR_ED_F10,
-    STR_ED_W,
-    STR_ED_E,
-    STR_ED_S,
-    STR_ED_L,
-    STR_ED_SAVE_AS,
-    STR_ED_LOAD,
-    STR_ED_NEW_ROOM_NAME,
-    STR_ED_ROOM_COORDS,
-    STR_ED_SCRIPT_NAME,
-    STR_ED_ROOM_TEXT,
-    STR_ED_TILES_SS1,
-    STR_ED_TILES_OUTSIDE,
-    STR_ED_TILES_LAB,
-    STR_ED_TILES_WARP_ZONE,
-    STR_ED_TILES_SHIP,
-    STR_ED_USING_TILESET,
-    STR_ED_CHANGED_TILES_COLOR,
-    STR_ED_CHANGED_ENEMY_COLOR,
-    STR_ED_PLAT_SPEED_IS,
-    STR_ED_RELOADED_RES,
-    STR_ED_ERR_INVALID_FMT,
-    STR_ED_LOADED_MAP,
-    STR_ED_SAVED_MAP,
-    STR_ED_ERR_LOAD_LEVEL,
-    STR_ED_ERR_SAVE_LEVEL,
-    STR_ED_MAPSIZE_IS,
-    STR_ED_DIRECT_MODE_DISABLED,
-    STR_ED_DIRECT_MODE_ENABLED,
-    STR_ED_ERR_WARPLINES_EDGES,
-    STR_ED_WARP_ALL,
-    STR_ED_WARP_HOR,
-    STR_ED_WARP_VER,
-    STR_ED_WARP_OFF,
-    STR_ED_ERR_NO_CHECK,
-    STR_ED_ERR_MAX_TRINKETS,
-    STR_ED_ERR_MAX_CREWMATES,
-    STR_ED_LEVEL_QUITS_TO_MENU,
-    STR_ED_LEVEL_COMPLETED,
-    STR_ED_ROLLED_CREDITS,
-    STR_ED_TIME_TRIAL_COMPLETED,
-    STR_FMT_HMMSS,
-    STR_FMT_HMMSSCC,
-    STR_FMT_MSS,
-    STR_FMT_MSSCC,
-    STR_FMT_SCC,
-    STR_POINT_99,
-    STR_AREA_TIME,
-    STR_LEVEL_COMPLETE,
-    STR_GAME_COMPLETE,
-    STR_YOU_RESCUED_CREW,
-    STR_ALL_CREW_RESCUED,
-    STR_ALL_CREWMATE_RESCUED,
-    STR_GAME_SAVED,
-    STR_ARROW_WASD_MOVE,
-    STR_L_R_MOVE,
-    STR_PROMPT_FLIP,
-    STR_PROMPT_MAPMENU,
-    STR_U_D_FLIP,
-    STR_COMMS_RELAY_0,
-    STR_COMMS_RELAY_1,
-    STR_COMMS_RELAY_2,
-    STR_COMMS_RELAY_3,
-    STR_COMMS_RELAY_4,
-    STR_COMMS_RELAY_5,
-    STR_COMMS_RELAY_6,
-    STR_CONGRATS_TRINKET,
-    STR_CONGRATS_CREWMATE,
-    STR_CONGRATS_SECRET_LAB,
-    STR_SECRET_LAB_IS_SEPERATE,
-    STR_VIRIDIAN,
-    STR_VIOLET,
-    STR_VITELLARY,
-    STR_VERMILION,
-    STR_VERDIGRIS,
-    STR_VICTORA,
-    STR_WITH_VITELLARY,
-    STR_WITH_VERMILION,
-    STR_WITH_VERDIGRIS,
-    STR_WITH_VICTORIA,
-    STR_STARRING,
-    STR_CPT_VIRIDIAN,
-    STR_DR_VIOLET,
-    STR_PROF_VITELLARY,
-    STR_OFC_VERMILION,
-    STR_CHF_VERDIGRIS,
-    STR_DR_VICTORIA,
-    STR_IM1_FLOOR_VITELLARY,
-    STR_IM1_FLOOR_VERMILION,
-    STR_IM1_FLOOR_VERDIGRIS,
-    STR_IM1_FLOOR_VICTORIA,
-    STR_IM1_FLOOR_COMPANION,
-    STR_IM1_CEIL_VITELLARY,
-    STR_IM1_CEIL_VERMILION,
-    STR_IM1_CEIL_VERDIGRIS,
-    STR_IM1_CEIL_VICTORIA,
-    STR_IM1_CEIL_COMPANION,
-    STR_IM1_NOT_FLOOR_VITELLARY,
-    STR_IM1_NOT_FLOOR_VERMILION,
-    STR_IM1_NOT_FLOOR_VERDIGRIS,
-    STR_IM1_NOT_FLOOR_VICTORIA,
-    STR_IM1_NOT_FLOOR_COMPANION,
-    STR_IM1_NOT_CEIL_VITELLARY,
-    STR_IM1_NOT_CEIL_VERMILION,
-    STR_IM1_NOT_CEIL_VERDIGRIS,
-    STR_IM1_NOT_CEIL_VICTORIA,
-    STR_IM1_NOT_CEIL_COMPANION,
-    STR_IM1_WAIT_MALE,
-    STR_IM1_WAIT_FEMALE,
-    STR_IM1_WAIT_NONBINARY,
-    STR_SURVIVE_FOR,
-    STR_60_SECONDS,
-    STR_THANKS_FOR,
-    STR_PLAYING,
-    STR_MASTERED_SS1,
-    STR_MASTERED_LAB,
-    STR_MASTERED_TOWER,
-    STR_MASTERED_SS2,
-    STR_MASTERED_WARP_ZONE,
-    STR_MASTERED_FINAL,
-    STR_OBTAIN_A_V_RANK,
-    STR_GAME_COMPLETE_TROPHY,
-    STR_COMPLETE_THE_GAME_TROPHY,
-    STR_FLIP_MODE_COMPLETE,
-    STR_COMPLETE_FLIP_MODE,
-    STR_UNDER_50_DEATHS,
-    STR_UNDER_100_DEATHS,
-    STR_UNDER_250_DEATHS,
-    STR_UNDER_500_DEATHS,
-    STR_LAST_5_SECONDS,
-    STR_LAST_10_SECONDS,
-    STR_LAST_15_SECONDS,
-    STR_LAST_20_SECONDS,
-    STR_LAST_30_SECONDS,
-    STR_LAST_1_MINUTE,
-    STR_MASTER_OF_THE_UNIVERSE,
-    STR_COMPLETE_NO_DEATH,
-    STR_MISSING_ERROR,
-    STR_FAILED_MOUNT,
-    STR_LEVEL_NOT_FOUND,
-    STR_ERR_PARSE_PATH,
-    STR_BAD_DIMENSIONS,
-    STR_ERR_WRITE_LANG,
-    STR_LOCALISATION,
-    STR_LOCALIZED_LED_BY,
-    STR_UNUSED_TRANSLATIONS_BY,
-    STR_TRANSLATORS,
-    STR_PE_FONT_BY,
-    STR_UNUSED_FONTS_BY,
-    STR_UNUSED_OTHER_FONTS_BY,
-    STR_EDITING_LQA,
-    STR_ARABIC,
-    STR_CATALAN,
-    STR_WELSH,
-    STR_GERMAN,
-    STR_ESPERANTO,
-    STR_SPANISH,
-    STR_FRENCH,
-    STR_IRISH,
-    STR_ITALIAN,
-    STR_JAPANESE,
-    STR_KOREAN,
-    STR_DUTCH,
-    STR_POLISH,
-    STR_BRAZIL_PORTUGUESE,
-    STR_EUROPE_PORTUGUESE,
-    STR_RUSSIAN,
-    STR_SILESIAN,
-    STR_TURKISH,
-    STR_UKRAINIAN,
-    STR_CHINESE_SIMPLE,
-    STR_CHINESE_TRAD,
-    STR_SPANISH_ES,
-    STR_SPANISH_LATAM,
-    STR_SPANISH_ARG,
-	STR_BLANK_0,
-	STR_BLANK_1,
+    STR_LOADING, // "LOADING... {percent|digits=2|spaces}%"
+    STR_GAME_PAUSED, // "Game paused"
+    STR_CLICK_RESUME, // "[click to resume]"
+    STR_M_MUTE, // "Press M to mute in game"
+    STR_N_MUTE_MUSIC, // "Press N to mute music only"
+    STR_MAKE_AND_PLAY, // "MAKE AND PLAY EDITION"
+    STR_M6_INSTALLED, // "[MMMMMM Mod Installed]"
+    STR_PLAY, // "play"
+    STR_LEVELS, // "levels"
+    STR_OPTIONS, // "options"
+    STR_TRANSLATOR, // "translator"
+    STR_CREDITS, // "credits"
+    STR_QUIT, // "quit"
+    STR_GAMEPLAY_OPT, // "gameplay"
+    STR_GAMEPLAY_TITLE, // "Gameplay Options"
+    STR_GAMEPLAY_DESC, // "Adjust various gameplay settings."
+    STR_GRAPHICS_OPT, // "graphics"
+    STR_GRAPHICS_TITLE, // "Graphics Options"
+    STR_GRAPHICS_DESC, // "Adjust screen settings."
+    STR_AUDIO_OPT, // "audio"
+    STR_AUDIO_TITLE, // "Audio Options"
+    STR_AUDIO_DESC_M6, // "Adjust volume settings and soundtrack."
+    STR_AUDIO_DESC, // "Adjust volume settings."
+    STR_CONTINUE, // "continue"
+    STR_CONTINUE_TELE, // "continue from teleporter"
+    STR_TELE_SAVE_TITLE, // "Tele Save"
+    STR_CONTINUE_QUICK, // "continue from quicksave" checkpoint)"
+    STR_QUICK_SAVE_TITLE, // "Quick Save"
+    STR_PROCEED, // "proceed"
+    STR_NEW_GAME, // "new game"
+    STR_START_NEW_GAME, // "start new game"
+    STR_SECRET_LAB, // "secret lab"
+    STR_PLAY_MODES, // "play modes"
+    STR_ERR_NO_LEVELS, // "ERROR: No levels found."
+    STR_ERR_NO_START_POINT, // "ERROR: This level has no start point!"
+    STR_ERROR, // "ERROR"
+    STR_WARNING, // "WARNING"
+    STR_UNLOCK_MODES_OPT, // "unlock play modes"
+    STR_UNLOCK_MODES_TITLE, // "Unlock Play Modes"
+    STR_UNLOCK_MODES_DESC, // "Unlock parts of the game normally unlocked as you progress."
+    STR_UNLOCK_MODES_DESC_MENU, // "From here, you may unlock parts of the game that are normally unlocked as you play."
+    STR_UNLOCK_JUKEBOX, // "unlock ship jukebox"
+    STR_UNLOCK_SECRET_LAB, // "unlock secret lab"
+    STR_GAME_PAD_OPT, // "game pad"
+    STR_GAME_PAD_OPTS_TITLE, // "Game Pad Options"
+    STR_GAME_PAD_TITLE, // "Game Pad"
+    STR_GAME_PAD_OPTS_DESC, // "Rebind your controller's buttons and adjust sensitivity."
+    STR_GAME_PAD_DESC, // "Change controller options."
+    STR_LANGUAGE_OPT, // "language"
+    STR_LANGUAGE_TITLE, // "Language"
+    STR_LANGUAGE_DESC, // "Change the language."
+    STR_UNUSED_CHANGE_LANG_TEXTBOX, // "Can not change the language while a textbox is displayed in-game."
+    STR_CLEAR_MAIN_DATA, // "clear main game data"
+    STR_CLEAR_CUSTOM_DATA, // "clear custom level data"
+    STR_CLEAR_DATA_TITLE, // "Clear Data"
+    STR_CLEAR_MAIN_DATA_DESC, // "Delete your main game save data and unlocked play modes."
+    STR_CLEAR_CUSTOM_DATA_DESC, // "Delete your custom level save data and completion stars."
+    STR_WARNING_NEW_GAME, // "Are you sure? This will delete your current saves..."
+    STR_WANNA_DELETE_DATA, // "Are you sure you want to delete all your saved data?"
+    STR_WANNA_DELETE_QUICKSAVE, // "Are you sure you want to delete your quicksave?"
+    STR_DONT_DELETE, // "no! don't delete"
+    STR_YES_DELETE_ALL, // "yes, delete everything"
+    STR_YES_DELETE_SAVE, // "yes, delete save"
+    STR_SOUNDTRACK_OPT, // "soundtrack"
+    STR_SOUNDTRACK_TITLE, // "Soundtrack"
+    STR_SOUNDTRACK_DESC, // "Toggle between MMMMMM and PPPPPP."
+    STR_SOUNDTRACK_P6, // "Current soundtrack: PPPPPP"
+    STR_SOUNDTRACK_M6, // "Current soundtrack: MMMMMM"
+    STR_FULLSCREEN_OPT, // "toggle fullscreen"
+    STR_FULLSCREEN_TITLE, // "Toggle Fullscreen"
+    STR_FULLSCREEN_DESC, // "Change to fullscreen/windowed mode."
+    STR_MODE_FULLSCREEN, // "Current mode: FULLSCREEN"
+    STR_MODE_WINDOWED, // "Current mode: WINDOWED"
+    STR_SCALING_MODE_OPT, // "scaling mode"
+    STR_SCALING_MODE_TITLE, // "Scaling Mode"
+    STR_SCALING_MODE_DESC, // "Choose letterbox/stretch/integer mode."
+    STR_MODE_INTEGER, // "Current mode: INTEGER"
+    STR_MODE_STRETCH, // "Current mode: STRETCH"
+    STR_MODE_LETTERBOX, // "Current mode: LETTERBOX"
+    STR_RESIZE_OPT, // "resize to nearest"
+    STR_RESIZE_TITLE, // "Resize to Nearest"
+    STR_RESIZE_DESC, // "Resize to the nearest window size that is of an integer multiple."
+    STR_YOU_MUST_BE_WINDOWED, // "You must be in windowed mode to use this option."
+    STR_FILTER_OPT, // "toggle filter"
+    STR_FILTER_TITLE, // "Toggle Filter"
+    STR_FILTER_DESC, // "Change to nearest/linear filter."
+    STR_MODE_LINEAR, // "Current mode: LINEAR"
+    STR_MODE_NEAREST, // "Current mode: NEAREST"
+    STR_ANALOGUE_OPT, // "toggle analogue"
+    STR_ANALOGUE_TITLE, // "Analogue Mode"
+    STR_ANALOGUE_DESC, // "There is nothing wrong with your television set. Do not attempt to adjust the picture."
+    STR_TOGGLE_FPS_OPT, // "toggle fps"
+    STR_TOGGLE_FPS_TITLE, // "Toggle 30+ FPS"
+    STR_TOGGLE_FPS_DESC, // "Change whether the game runs at 30 or over 30 FPS."
+    STR_AT_30_FPS, // "Current mode: 30 FPS"
+    STR_OVER_30_FPS, // "Current mode: Over 30 FPS"
+    STR_VSYNC_OPT, // "toggle vsync"
+    STR_VSYNC_TITLE, // "Toggle VSync"
+    STR_VSYNC_DESC, // "Turn VSync on or off."
+    STR_VSYNC_OFF, // "Current mode: VSYNC OFF"
+    STR_VSYNC_ON, // "Current mode: VSYNC ON"
+    STR_MUSIC_VOLUME_OPT, // "music volume"
+    STR_MUSIC_VOLUME_TITLE, // "Music Volume"
+    STR_MUSIC_VOLUME_DESC, // "Change the volume of the music."
+    STR_SOUND_VOLUME_OPT, // "sound volume"
+    STR_SOUND_VOLUME_TITLE, // "Sound Volume"
+    STR_SOUND_VOLUME_DESC, // "Change the volume of sound effects."
+    STR_CREDITS_TITLE, // "Credits"
+    STR_V6_IS_BY, // "VVVVVV is a game by"
+    STR_FEATURES_MUSIC_BY, // "and features music by"
+    STR_ROOMNAMES_BY, // "Roomnames are by"
+    STR_CPP_VERSION_BY, // "C++ version by"
+    STR_BETA_TESTED_BY, // "Beta Testing by"
+    STR_END_PICTURE_BY, // "Ending Picture by"
+    STR_CREATED_BY, // "Created by"
+    STR_WITH_MUSIC_BY, // "With Music by"
+    STR_ROOMS_NAMED_BY, // "Rooms Named by"
+    STR_CPP_PORT_BY, // "C++ Port by"
+    STR_PATRONS, // "Patrons"
+    STR_V6_SUPPORTED_BY_PATRONS, // "VVVVVV is supported by the following patrons"
+    STR_AND_ALSO_BY, // "and also by"
+    STR_AND, // "and"
+    STR_GH_CONTRIBUTORS, // "GitHub Contributors"
+    STR_WITH_CONTRIB_FROM, // "With contributions on GitHub from"
+    STR_ALSO_THANKS_TO, // "and thanks also to:"
+    STR_YOU, // "You!"
+    STR_THANKS_TO_YOUR_SUPPORT, // "Your support makes it possible for me to continue making the games I want to make, now and into the future."
+    STR_THANK_YOU, // "Thank you!"
+    STR_GOOD_LUCK, // "Good luck!"
+    STR_CANT_SAVE_MODE, // "You cannot save in this mode."
+    STR_WANNA_DISABLE_CUTSCENES, // "Would you like to disable the cutscenes during the game?"
+    STR_DISABLE_CUTSCENES, // "disable cutscenes"
+    STR_ENABLE_CUTSCENES, // "enable cutscenes"
+    STR_STICK_SENS, // "analog stick sensitivity"
+    STR_LOW, // "Low"
+    STR_MEDIUM, // "Medium"
+    STR_HIGH, // "High"
+    STR_BIND_FLIP, // "bind flip"
+    STR_BIND_ENTER, // "bind enter"
+    STR_BIND_MENU, // "bind menu"
+    STR_BIND_RESTART, // "bind restart"
+    STR_BIND_INTERACT, // "bind interact"
+    STR_BOUND_FLIP, // "Flip is bound to: "
+    STR_BOUND_ENTER, // "Enter is bound to: "
+    STR_BOUND_MENU, // "Menu is bound to: "
+    STR_BOUND_RESTART, // "Restart is bound to: "
+    STR_BOUND_INTERACT, // "Interact is bound to: "
+    STR_ERR_NO_LANG_FILES, // "ERROR: No language files found."
+    STR_LANG_FOLDER, // "Language folder:"
+    STR_REPO_LANG_FOLDER, // "Repository language folder:"
+    STR_TRANSLATOR_OPTS_OPT, // "translator options"
+    STR_TRANSLATOR_OPTS_TITLE, // "Translator options"
+    STR_TRANSLATOR_OPTS_DESC, // "Some options that are useful for translators and developers."
+    STR_MAINTENANCE_OPT, // "maintenance"
+    STR_MAINTENANCE_TITLE, // "Maintenance"
+    STR_OPEN_LANG_FOLDER, // "open lang folder"
+    STR_MAINTENANCE_DESC, // "Sync all language files after adding new strings."
+    STR_TRANSLATE_ROOMS_OPT, // "translate room names"
+    STR_TRANSLATE_ROOMS_TITLE, // "Translate rooms"
+    STR_TRANSLATE_ROOMS_DESC, // "Enable room name translation mode, so you can translate room names in context. Press I for invincibility."
+    STR_NOT_ENABLED_TRANSLATOR, // "You have not enabled room name translation mode!"
+    STR_MENU_TEST_OPT, // "menu test"
+    STR_MENU_TEST_TITLE, // "Menu test"
+    STR_MENU_TEST_DESC, // "Cycle through most menus in the game. The menus will not actually work, all options take you to the next menu instead. Press Escape to stop."
+    STR_CUTSCENE_TEST_OPT, // "cutscene test"
+    STR_CUTSCENE_TEST_TITLE, // "Cutscene test"
+    STR_CUTSCENE_TEST_DESC, // "Display all text boxes from cutscenes.xml. Only tests the basic appearance of each individual text box."
+    STR_FROM_CLIPBOARD, // "from clipboard"
+    STR_EXPLORE_GAME_OPT, // "explore game"
+    STR_EXPLORE_GAME_TITLE, // "Explore game"
+    STR_EXPLORE_GAME_DESC, // "Explore the rooms of any level in the game, to find all room names to translate."
+    STR_LIMITS_CHECK_OPT, // "limits check"
+    STR_GLOBAL_LIMITS_CHECK_OPT, // "global limits check"
+    STR_LIMITS_CHECK_TITLE, // "Limits check"
+    STR_LIMITS_CHECK_DESC, // "Find translations that don't fit within their defined bounds."
+    STR_NO_OVERFLOWS_FOUND, // "No text overflows found!"
+    STR_NO_OVERFLOWS_LEFT, // "No text overflows left!"
+    STR_NOTE_DETECTION, // "Note that this detection isn't perfect."
+    STR_SYNC_LANGS_OPT, // "sync language files"
+    STR_SYNC_LANGS_TITLE, // "Sync language files"
+    STR_SYNC, // "sync"
+    STR_SYNC_LANGS_DESC, // "Merge all new strings from the template files into the translation files, keeping existing translations."
+    STR_LANG_STATS_OPT, // "language statistics"
+    STR_GLOBAL_STATS_OPT, // "global statistics"
+    STR_STATS_TITLE, // "Statistics"
+    STR_LANG_STATS_DESC, // "Count the amount of untranslated strings for this language."
+    STR_GLOBAL_STATS_DESC, // "Count the amount of untranslated strings for each language."
+    STR_IF_NEW_STRINGS, // "If new strings were added to the English template language files, this feature will insert them in the translation files for all languages. Make a backup, just in case."
+    STR_FULL_SYNCING, // "Full syncing EN→All:"
+    STR_SYNC_NOT_SUPPORTED, // "Syncing not supported:"
+    STR_ADVANCED_OPTS_OPT, // "advanced options"
+    STR_ADVANCED_OPTS_TITLE, // "Advanced Options"
+    STR_ADVANCED_OPTS_DESC, // "All other gameplay settings."
+    STR_UNFOCUS_PAUSE_OPT, // "unfocus pause"
+    STR_UNFOCUS_PAUSE_TITLE, // "Unfocus Pause"
+    STR_UNFOCUS_PAUSE_DESC, // "Toggle if the game will pause when the window is unfocused."
+    STR_UNFOCUS_PAUSE_OFF, // "Unfocus pause is OFF"
+    STR_UNFOCUS_PAUSE_ON, // "Unfocus pause is ON"
+    STR_UNFOCUS_AUDIO_PAUSE_OPT, // "unfocus audio pause"
+    STR_UNFOCUS_AUDIO_PAUSE_TITLE, // "Unfocus Audio"
+    STR_UNFOCUS_AUDIO_PAUSE_DESC, // "Toggle if the audio will pause when the window is unfocused."
+    STR_UNFOCUS_AUDIO_PAUSE_OFF, // "Unfocus audio pause is OFF"
+    STR_UNFOCUS_AUDIO_PAUSE_ON, // "Unfocus audio pause is ON"
+    STR_TIMER_OPT, // "toggle in-game timer"
+    STR_TIMER_TITLE, // "In-Game Timer"
+    STR_TIMER_DESC, // "Toggle the in-game timer outside of time trials."
+    STR_TIMER_ON, // "In-Game Timer is ON"
+    STR_TIMER_OFF, // "In-Game Timer is OFF"
+    STR_SPRITES_OPT, // "english sprites"
+    STR_SPRITES_TITLE, // "English Sprites"
+    STR_SPRITES_DESC, // "Show the original English word enemies regardless of your language setting."
+    STR_SPRITES_TRANSLATED, // "Sprites are currently translated"
+    STR_SPRITES_ALWAYS_EN, // "Sprites are currently ALWAYS ENGLISH"
+    STR_INTERACT_BUTTON_OPT, // "interact button"
+    STR_INTERACT_BUTTON_TITLE, // "Interact Button"
+    STR_INTERACT_BUTTON_DESC, // "Toggle whether you interact with prompts using ENTER or E."
+    STR_E, // "E"
+    STR_ENTER, // "ENTER"
+    STR_ESC, // "ESC"
+    STR_ACTION, // "ACTION"
+    STR_INTERACT_BUTTON_SET, // "Interact button: {button}"
+    STR_FAKE_LOAD_OPT, // "fake load screen"
+    STR_FAKE_LOAD_TITLE, // "Fake Load Screen"
+    STR_FAKE_LOAD_DESC, // "Disable the fake loading screen which appears on game launch."
+    STR_FAKE_LOAD_OFF, // "Fake loading screen is OFF"
+    STR_FAKE_LOAD_ON, // "Fake loading screen is ON"
+    STR_RNBG_OPT, // "room name background"
+    STR_RNBG_TITLE, // "Room Name BG"
+    STR_RNBG_DESC, // "Lets you see through what is behind the name at the bottom of the screen."
+    STR_RNBG_TRANSLUCENT, // "Room name background is TRANSLUCENT"
+    STR_RNBG_OPAQUE, // "Room name background is OPAQUE"
+    STR_SPEEDRUN_OPTS_OPT, // "speedrun options"
+    STR_SPEEDRUN_OPTS_TITLE, // "Speedrunner Options"
+    STR_SPEEDRUN_OPTS_DESC, // "Access some advanced settings that might be of interest to speedrunners."
+    STR_GLITCH_OPT, // "glitchrunner mode"
+    STR_GLITCH_TITLE, // "Glitchrunner Mode"
+    STR_GLITCH_DESC, // "Re-enable glitches that existed in previous versions of the game."
+    STR_GLITCH_IS_OFF, // "Glitchrunner mode is OFF"
+    STR_GLITCH_IS_VERSION, // "Glitchrunner mode is {version}" 2.2"
+    STR_SELECT_GLITCH, // "Select a new glitchrunner version below."
+    STR_GLITCH_NONE, // "none"
+    STR_GLITCH_2_0, // "2.0"
+    STR_GLITCH_2_2, // "2.2"
+    STR_DELAY_OPT, // "input delay"
+    STR_DELAY_TITLE, // "Input Delay"
+    STR_DELAY_DESC, // "Re-enable the 1-frame input delay from previous versions of the game."
+    STR_DELAY_ON, // "Input delay is ON"
+    STR_DELAY_OFF, // "Input delay is OFF"
+    STR_ACCESSIBILITY_OPT, // "accessibility"
+    STR_ACCESSIBILITY_TITLE, // "Accessibility"
+    STR_ACCESSIBILITY_DESC, // "Disable screen effects, enable slowdown modes or invincibility."
+    STR_BACKGROUND_OPT, // "animated backgrounds"
+    STR_BACKGROUND_TITLE, // "Backgrounds"
+    STR_BACKGROUND_DESC, // "Disable animated backgrounds in menus and during gameplay."
+    STR_BACKGROUND_ON, // "Backgrounds are ON."
+    STR_BACKGROUND_OFF, // "Backgrounds are OFF."
+    STR_SCREENFX_OPT, // "screen effects"
+    STR_SCREENFX_TITLE, // "Screen Effects"
+    STR_SCREENFX_DESC, // "Disables screen shakes and flashes."
+    STR_SCREENFX_ON, // "Screen Effects are ON."
+    STR_SCREENFX_OFF, // "Screen Effects are OFF."
+    STR_TEXT_OUTLINE, // "text outline"
+    STR_TEXT_OUTLINE_TITLE, // "Text Outline"
+    STR_TEXT_OUTLINE_DESC, // "Disables outline on game text."
+    STR_TEXT_OUTLINE_ON, // "Text outlines are ON."
+    STR_TEXT_OUTLINE_OFF, // "Text outlines are OFF."
+    STR_INVINCIBILITY, // "invincibility"
+    STR_INVINCIBILITY_TITLE, // "Invincibility"
+    STR_INVINCIBILITY_DESC, // "Explore the game freely without dying. (Can cause glitches.)"
+    STR_INVINCIBILITY_ON, // "Invincibility is ON."
+    STR_INVINCIBILITY_OFF, // "Invincibility is OFF."
+    STR_WANNA_ENABLE_INVINCIBILITY, // "Are you sure you want to enable invincibility?"
+    STR_NO_RETURN_TO_OPTIONS, // "no, return to options"
+    STR_YES_ENABLE, // "yes, enable"
+    STR_SLOWDOWN_OPT, // "slowdown"
+    STR_SLOWDOWN_TITLE, // "Slowdown"
+    STR_GAME_SPEED_TITLE, // "Game Speed"
+    STR_SLOWDOWN_DESC, // "Reduce the game speed."
+    STR_GAME_SPEED_DESC, // "Select a new game speed below."
+    STR_SPEED_IS_NORMAL, // "Game speed is normal."
+    STR_SPEED_IS_80, // "Game speed is at 80%"
+    STR_SPEED_IS_60, // "Game speed is at 60%"
+    STR_SPEED_IS_40, // "Game speed is at 40%"
+    STR_NORMAL_SPEED, // "normal speed"
+    STR_80_SPEED, // "80% speed"
+    STR_60_SPEED, // "60% speed"
+    STR_40_SPEED, // "40% speed"
+    STR_PLAY_IM1, // "play intermission 1"
+    STR_PLAY_IM2, // "play intermission 2"
+    STR_WITH_WHO, // "Who do you want to play the level with?"
+    STR_TIME_TRIALS_OPT, // "time trials"
+    STR_TIME_TRIALS_TITLE, // "Time Trials"
+    STR_TIME_TRIALS_DESC, // "Replay any level in the game in a competitive time trial mode."
+    STR_TIME_TRIALS_ARE_LEGIT, // "Time Trials are not available with slowdown or invincibility."
+    STR_UNLOCK_TRIALS_OPT, // "unlock time trials"
+    STR_UNLOCK_TRIALS_TITLE, // "Unlock Time Trials"
+    STR_UNLOCK_TRIALS_SEPARATELY, // "You can unlock each time trial separately."
+    STR_INTERMISSIONS_OPT, // "intermissions"
+    STR_INTERMISSIONS_TITLE, // "Intermissions"
+    STR_INTERMISSIONS_DESC, // "Replay the intermission levels."
+    STR_UNLOCK_IMS, // "unlock intermissions"
+    STR_TO_UNLOCK_IMS, // "TO UNLOCK: Complete the intermission levels in-game."
+    STR_NO_DEATH_OPT, // "no death mode"
+    STR_NO_DEATH_TITLE, // "No Death Mode"
+    STR_NO_DEATH_DESC, // "Play the entire game without dying once."
+    STR_NO_DEATH_IS_LEGIT, // "No Death Mode is not available with slowdown or invincibility."
+    STR_UNLOCK_NO_DEATH, // "unlock no death mode"
+    STR_TO_UNLOCK_NO_DEATH, // "TO UNLOCK: Achieve an S-rank or above in at least 4 time trials."
+    STR_FLIP_MODE_OPT, // "flip mode"
+    STR_FLIP_MODE_TITLE, // "Flip Mode"
+    STR_FLIP_MODE_DESC, // "Flip the entire game vertically."
+    STR_FLIP_MODE_DESC_COMPAT, // "Flip the entire game vertically. Compatible with other game modes."
+    STR_UNLOCK_FLIP_MODE, // "unlock flip mode"
+    STR_CURRENTLY_ENABLED, // "Currently ENABLED!"
+    STR_CURRENTLY_DISABLED, // "Currently Disabled."
+    STR_TO_UNLOCK_FLIP_MODE, // "TO UNLOCK: Complete the game."
+    STR_INVINCIBILITY_ENABLED, // "Invincibility mode enabled"
+    STR_GLITCH_ENABLED_VERSION, // "Glitchrunner mode enabled ({version})"
+    STR_FLIP_MODE_ENABLED, // "Flip Mode enabled"
+    STR_WANNA_QUIT, // "Are you sure you want to quit?"
+    STR_GAME_OVER, // "GAME OVER"
+    STR_REACHED, // "You managed to reach:"
+    STR_KEEP_TRYING, // "Keep trying! You'll get there!"
+    STR_NICE_ONE, // "Nice one!"
+    STR_WOW_CONGRATS, // "Wow! Congratulations!"
+    STR_INCREDIBLE, // "Incredible!"
+    STR_UNBELIEVABLE, // "Unbelievable! Well done!"
+    STR_ER_HOW, // "Er, how did you do that?"
+    STR_WOW_MEGA, // "WOW"
+    STR_RESCUED_ALL_CREWMATE, // "You rescued all the crewmates!"
+    STR_NEW_TROPHY_AWARDED, // "A new trophy has been awarded and placed in the secret lab to acknowledge your achievement!"
+    STR_MM_TRINKETS_FOUND, // "[Trinkets found]"
+    STR_MM_NUM_DEATHS, // "[Number of Deaths]"
+    STR_MM_TIME_TAKEN, // "[Time Taken]"
+    STR_TRINKETS_FOUND, // "Trinkets Found:"
+    STR_GAME_TIME, // "Game Time:"
+    STR_TOTAL_FLIPS, // "Total Flips:"
+    STR_TOTAL_DEATHS, // "Total Deaths:"
+    STR_RESULTS, // "Results"
+    STR_TIME_TAKEN, // "TIME TAKEN:"
+    STR_NUM_DEATHS, // "NUMBER OF DEATHS:"
+    STR_SHINY_TRINKETS, // "SHINY TRINKETS:"
+    STR_TIMES_DELIM, // " / "
+    STR_TOTAL_TRINKETS, // "{n_trinkets}/{max_trinkets}"
+    STR_TOTAL_TRINKETS_OF, // "{n_trinkets} of {max_trinkets}"
+    STR_TOTAL_TRINKETS_WORDY, // "{n_trinkets|wordy} out of {max_trinkets|wordy}"
+    STR_SAVEBOX_TRINKETS_WORDY, // "{savebox_n_trinkets|wordy}"
+    STR_GAMECOMPLETE_TRINKET_COUNT, // "{gamecomplete_n_trinkets|wordy}"
+    STR_RANK_UP, // "+1 Rank!"
+    STR_RANK, // "Rank:"
+    STR_B, // "B"
+    STR_A, // "A"
+    STR_S, // "S"
+    STR_V, // "V"
+    STR_SPACE_STATION_1_OPT, // "space station 1"
+    STR_SPACE_STATION_1_TITLE, // "Space Station 1"
+    STR_SPACE_STATION_2_OPT, // "space station 2"
+    STR_SPACE_STATION_2_TITLE, // "Space Station 2"
+    STR_THE_LABORATORY_OPT, // "the laboratory"
+    STR_THE_LABORATORY_TITLE, // "The Laboratory"
+    STR_THE_TOWER_OPT, // "the tower"
+    STR_THE_TOWER_TITLE, // "The Tower"
+    STR_THE_WARP_ZONE_OPT, // "the warp zone"
+    STR_THE_WARP_ZONE_TITLE, // "The Warp Zone"
+    STR_THE_FINAL_LEVEL_OPT, // "the final level"
+    STR_THE_FINAL_LEVEL_TITLE, // "The Final Level"
+    STR_INTERMISSION_1_OPT, // "intermission 1"
+    STR_INTERMISSION_1_TITLE, // "Intermission 1"
+    STR_INTERMISSION_2_OPT, // "intermission 2"
+    STR_INTERMISSION_2_TITLE, // "Intermission 2"
+    STR_QQQ, // "???"
+    STR_NOT_ATTEMPTED, // "Not yet attempted"
+    STR_TO_UNLOCK, // "TO UNLOCK:"
+    STR_RESCUE_VIOLET, // "Rescue Violet"
+    STR_RESCUE_VICTORIA, // "Rescue Victoria"
+    STR_RESCUE_VERMILION, // "Rescue Vermilion"
+    STR_RESCUE_VITELLARY, // "Rescue Vitellary"
+    STR_RESCUE_VERDIGRIS, // "Rescue Verdigris"
+    STR_COMPLETE_THE_GAME, // "Complete the game"
+    STR_FIND_3_TRINKETS, // "Find three trinkets"
+    STR_FIND_6_TRINKETS, // "Find six trinkets"
+    STR_FIND_9_TRINKETS, // "Find nine trinkets"
+    STR_FIND_12_TRINKETS, // "Find twelve trinkets"
+    STR_FIND_15_TRINKETS, // "Find fifteen trinkets"
+    STR_FIND_18_TRINKETS, // "Find eighteen trinkets"
+    STR_RECORDS, // "RECORDS"
+    STR_TIME, // "TIME"
+    STR_SHINY, // "SHINY"
+    STR_LIVES, // "LIVES"
+    STR_PAR_TIME, // "PAR TIME"
+    STR_TRIAL_TIME, // "TIME:"
+    STR_TRIAL_DEATH, // "DEATH:"
+    STR_TRIAL_SHINY, // "SHINY:"
+    STR_TRIAL_PAR_TIME, // "PAR TIME:"
+    STR_BEST_RANK, // "BEST RANK"
+    STR_GO_CAP, // "GO!"
+    STR_GO, // "Go!"
+    STR_CONGRATS_TITLE, // "Congratulations!"
+    STR_SAVES_UPDATED, // "Your save files have been updated."
+    STR_KEEP_EXPLORING, // "If you want to keep exploring the game, select CONTINUE from the play menu."
+    STR_UNLOCKED_NEW_TRIAL, // "You have unlocked a new Time Trial."
+    STR_UNLOCKED_NEW_TRIALS, // "You have unlocked some new Time Trials."
+    STR_UNLOCKED_NO_DEATH, // "You have unlocked No Death Mode."
+    STR_UNLOCKED_FLIP_MODE, // "You have unlocked Flip Mode."
+    STR_UNLOCKED_IMS, // "You have unlocked the intermission levels."
+    STR_PLAY_LEVEL, // "play a level"
+    STR_LEVEL_EDITOR, // "level editor"
+    STR_OPEN_LEVEL_FOLDER, // "open level folder"
+    STR_SHOW_LEVEL_FOLDER_PATH, // "show level folder path"
+    STR_RETURN, // "return"
+    STR_RETURN_TO_LEVELS, // "return to levels"
+    STR_DONT_SHOW, // "no, don't show me"
+    STR_YES_REVEAL, // "yes, reveal the path"
+    STR_RETURN_TO_PLAY_MENU, // "return to play menu"
+    STR_TRY_AGAIN, // "try again"
+    STR_OK, // "ok"
+    STR_NEXT_PAGE, // "next page"
+    STR_PREV_PAGE, // "previous page"
+    STR_FIRST_PAGE, // "first page"
+    STR_LAST_PAGE, // "last page"
+    STR_SILENCE, // "silence"
+    STR_CONTINUE_SAVE, // "continue from save"
+    STR_START_FROM_BEGIN, // "start from beginning"
+    STR_DELETE_SAVE, // "delete save"
+    STR_BACK_TO_LEVELS, // "back to levels"
+    STR_EDITOR_UNSUPPORTED_DECK, // "The level editor is not currently supported on Steam Deck, as it requires a keyboard and mouse to use."
+    STR_EDITOR_UNSUPPORTED, // "The level editor is not currently supported on this device, as it requires a keyboard and mouse to use."
+    STR_TO_INSTALL_LEVELS, // "To install new player levels, copy the .vvvvvv files to the levels folder."
+    STR_WANNA_SHOW_LEVELS_PATH, // "Are you sure you want to show the levels path? This may reveal sensitive information if you are streaming."
+    STR_LEVELS_PATH, // "The levels path is:"
+    STR_PROMPT_START, // "[ Press {button} to Start ]"
+    STR_ACTION_IS, // "ACTION = Space, Z, or V"
+    STR_PROMPT_RETURN_TO_ED, // "[Press {button} to return to editor]"
+    STR_PROMPT_ADVANCE_TEXT, // "- Press {button} to advance text -"
+    STR_PROMPT_CONTINUE, // "Press {button} to continue"
+    STR_PROMPT_UNFREEZE, // "[Press {button} to unfreeze gameplay]"
+    STR_PROMPT_FREEZE, // "[Press {button} to freeze gameplay]"
+    STR_CURRENT_TIME, // "Current Time"
+    STR_BEST_TIME, // "Best Time"
+    STR_NEXT_TROPHY_5_SECONDS, // "Next Trophy at 5 seconds"
+    STR_NEXT_TROPHY_10_SECONDS, // "Next Trophy at 10 seconds"
+    STR_NEXT_TROPHY_15_SECONDS, // "Next Trophy at 15 seconds"
+    STR_NEXT_TROPHY_20_SECONDS, // "Next Trophy at 20 seconds"
+    STR_NEXT_TROPHY_30_SECONDS, // "Next Trophy at 30 seconds"
+    STR_NEXT_TROPHY_1_MINUTE, // "Next Trophy at 1 minute"
+    STR_GOT_ALL_TROPHIES, // "All Trophies collected!"
+    STR_NEW_RECORD, // "New Record!"
+    STR_NEW_TROPHY, // "New Trophy!"
+    STR_PROMPT_STOP, // "[Press {button} to stop]"
+    STR_SUPER_GRAVITRON, // "SUPER GRAVITRON"
+    STR_SUPER_GRAVITRON_HIGHSCORE, // "SUPER GRAVITRON HIGHSCORE"
+    STR_MAP, // "MAP"
+    STR_GRAV, // "GRAV"
+    STR_SHIP, // "SHIP"
+    STR_CREW, // "CREW"
+    STR_STATS, // "STATS"
+    STR_SAVE, // "SAVE"
+    STR_IGM_PAUSE, // "[ PAUSE ]"
+    STR_IGM_QUIT, // "[ QUIT ]"
+    STR_IGM_GRAVITRON, // "[ GRAVITRON ]"
+    STR_NO_SIGNAL, // "NO SIGNAL"
+    STR_PROMPT_WARP_SHIP, // "Press {button} to warp to the ship."
+    STR_MISSING_MALE, // "Missing..."
+    STR_MISSING_FEMALE, // "Missing..."
+    STR_MISSING_YOU, // "Missing..."
+    STR_RESCUED_MALE, // "Rescued!"
+    STR_RESCUED_FEMALE, // "Rescued!"
+    STR_THATS_YOU, // "(that's you!)"
+    STR_CANT_SAVE_IN_REPLAY, // "Cannot Save in Level Replay"
+    STR_CANT_SAVE_IN_NO_DEATH, // "Cannot Save in No Death Mode"
+    STR_HOWD_YOU_GET_HERE, // "How'd you get here?"
+    STR_CANT_SAVE_IN_SECRET_LAB, // "Cannot Save in Secret Lab"
+    STR_ERR_SAVE_GAME, // "ERROR: Could not save game!"
+    STR_ERR_SAVE_SETTINGS, // "ERROR: Could not save settings file!"
+    STR_SAVED_OK, // "Game saved ok!"
+    STR_PROMPT_SAVE, // "[Press {button} to save your game]"
+    STR_NOTE_AUTOSAVE, // "(Note: The game is autosaved at every teleporter.)"
+    STR_LAST_SAVE, // "Last Save:"
+    STR_WANNA_RETURN_TO_MAIN, // "Return to main menu?"
+    STR_WANNA_QUIT_UNSAVED, // "Do you want to quit? You will lose any unsaved progress."
+    STR_WANNA_RETURN_TO_SECRET_LAB, // "Do you want to return to the secret laboratory?"
+    STR_NO_KEEP_PLAYING, // "no, keep playing"
+    STR_NO_KEEP_PLAYING_HOVER, // "[ NO, KEEP PLAYING ]"
+    STR_YES_QUIT_TO_MENU, // "yes, quit to menu"
+    STR_YES_QUIT_TO_MENU_HOVER, // "[ YES, QUIT TO MENU ]"
+    STR_YES_RETURN, // "yes, return"
+    STR_YES_RETURN_HOVER, // "[ YES, RETURN ]"
+    STR_NO_RETURN, // "no, return"
+    STR_YES_QUIT, // "yes, quit"
+    STR_RETURN_TO_GAME, // "return to game"
+    STR_QUIT_TO_MENU, // "quit to menu"
+    STR_PROMPT_CHOOSE_TELE, // "Press Left/Right to choose a Teleporter"
+    STR_PROMPT_TELEPORT, // "Press {button} to Teleport"
+    STR_PROMPT_TELEPORT_2, // "- Press {button} to Teleport -"
+    STR_PROMPT_EXPLODE, // "Press {button} to explode"
+    STR_PROMPT_VIOLET, // "Press {button} to talk to Violet"
+    STR_PROMPT_VITELLARY, // "Press {button} to talk to Vitellary"
+    STR_PROMPT_VERMILION, // "Press {button} to talk to Vermilion"
+    STR_PROMPT_VERDIGRIS, // "Press {button} to talk to Verdigris"
+    STR_PROMPT_VICTORIA, // "Press {button} to talk to Victoria"
+    STR_PROMPT_TERMINAL, // "Press {button} to activate terminal"
+    STR_PROMPT_TERMINALS, // "Press {button} to activate terminals"
+    STR_PROMPT_INTERACT, // "Press {button} to interact"
+    STR_PROMPT_SKIP, // "- Press {button} to skip -"
+    STR_PASSION_FOR_EXPLORING, // "Passion for Exploring"
+    STR_PUSHING_ONWARDS, // "Pushing Onwards"
+    STR_POSITIVE_FORCE, // "Positive Force"
+    STR_PRESENTING_VVVVVV, // "Presenting VVVVVV"
+    STR_POTENTIAL_FOR_ANYTHING, // "Potential for Anything"
+    STR_PREDESTINED_FATE, // "Predestined Fate"
+    STR_PIPE_DREAM, // "Pipe Dream"
+    STR_POPULAR_POTPOURRI, // "Popular Potpourri"
+    STR_PRESSURE_COOKER, // "Pressure Cooker"
+    STR_ECROF_EVITISOP, // "ecroF evitisoP"
+    STR_MAP_SETTINGS_TITLE, // "Map Settings"
+    STR_EDIT_SCRIPTS, // "edit scripts"
+    STR_CHANGE_MUSIC, // "change music"
+    STR_EDITOR_GHOSTS, // "editor ghosts"
+    STR_EDITOR_GHOSTS_OFF, // "Editor ghost trail is OFF"
+    STR_EDITOR_GHOSTS_ON, // "Editor ghost trail is ON"
+    STR_LOAD_LEVEL, // "load level"
+    STR_SAVE_LEVEL, // "save level"
+    STR_QUIT_TO_MAIN, // "quit to main menu"
+    STR_CHANGE_NAME, // "change name"
+    STR_CHANGE_AUTHOR, // "change author"
+    STR_CHANGE_DESCRIPTION, // "change description"
+    STR_CHANGE_WEBSITE, // "change website"
+    STR_CHANGE_FONT, // "change font"
+    STR_ED_LEVEL_FONT_TITLE, // "Level Font"
+    STR_ED_LEVEL_FONT_DESC, // "Select the language in which the text in this level is written."
+    STR_ED_FONT, // "Font: "
+    STR_ED_MAP_MUSIC_TITLE, // "Map Music"
+    STR_ED_CURRENT_MUSIC, // "Current map music:"
+    STR_ED_MUSIC_NONE, // "No background music"
+    STR_ED_MUSIC_1, // "1: Pushing Onwards"
+    STR_ED_MUSIC_2, // "2: Positive Force"
+    STR_ED_MUSIC_3, // "3: Potential for Anything"
+    STR_ED_MUSIC_4, // "4: Passion for Exploring"
+    STR_ED_MUSIC_NA_PAUSE, // "N/A: Pause"
+    STR_ED_MUSIC_5, // "5: Presenting VVVVVV"
+    STR_ED_MUSIC_NA_PLENARY, // "N/A: Plenary"
+    STR_ED_MUSIC_6, // "6: Predestined Fate"
+    STR_ED_MUSIC_NA_ECROF, // "N/A: ecroF evitisoP"
+    STR_ED_MUSIC_7, // "7: Popular Potpourri"
+    STR_ED_MUSIC_8, // "8: Pipe Dream"
+    STR_ED_MUSIC_9, // "9: Pressure Cooker"
+    STR_ED_MUSIC_10, // "10: Paced Energy"
+    STR_ED_MUSIC_11, // "11: Piercing the Sky"
+    STR_ED_MUSIC_NA_PF_REMIX, // "N/A: Predestined Fate Remix"
+    STR_ED_MUSIC_ELSE, // "?: something else"
+    STR_NEXT_SONG, // "next song"
+    STR_PREV_SONG, // "previous song"
+    STR_ED_BACK, // "back"
+    STR_ED_SAVE_B4_QUIT, // "Save before quitting?"
+    STR_YES_SAVE_QUIT, // "yes, save and quit"
+    STR_NO_QUIT_UNSAVED, // "no, quit without saving"
+    STR_RETURN_TO_EDITOR, // "return to editor"
+    STR_UNTITLED_LEVEL, // "Untitled Level"
+    STR_UNKNOWN_AUTHOR, // "Unknown"
+    STR_ED_TILE, // "Tile:"
+    STR_ED_SCRIPTBOX_FIRST, // "SCRIPT BOX: Click on the first corner"
+    STR_ED_SCRIPTBOX_LAST, // "SCRIPT BOX: Click on the last corner"
+    STR_ED_ENEMYBOUND_FIRST, // "ENEMY BOUNDS: Click on the first corner"
+    STR_ED_ENEMYBOUND_LAST, // "ENEMY BOUNDS: Click on the last corner"
+    STR_ED_PLATBOUND_FIRST, // "PLATFORM BOUNDS: Click on the first corner"
+    STR_ED_PLATBOUND_LAST, // "PLATFORM BOUNDS: Click on the last corner"
+    STR_ED_FIRST_CORNER, // "Click on the first corner"
+    STR_ED_LAST_CORNER, // "Click on the last corner"
+    STR_ED_V6_SCRIPT_EDITOR, // "**** VVVVVV SCRIPT EDITOR ****"
+    STR_ED_PROMPT_ESC_RETURN, // "PRESS ESC TO RETURN TO MENU"
+    STR_ED_NO_SCRIPT_IDS, // "NO SCRIPT IDS FOUND"
+    STR_ED_CREATE_A_SCRIPT, // "CREATE A SCRIPT WITH EITHER THE TERMINAL OR SCRIPT BOX TOOLS"
+    STR_ED_CURRENT_SCRIPT, // "CURRENT SCRIPT: {name}"
+    STR_ED_PROMPT_PLACE_DEST, // "Left click to place warp destination"
+    STR_ED_PROMPT_CANCEL, // "Right click to cancel"
+    STR_ED_PROMPT_CHANGE_TOOL, // "{button1} and {button2} keys change tool"
+    STR_ED_1, // "1: Walls"
+    STR_ED_2, // "2: Backing"
+    STR_ED_3, // "3: Spikes"
+    STR_ED_4, // "4: Trinkets"
+    STR_ED_5, // "5: Checkpoints"
+    STR_ED_6, // "6: Disappearing Platforms"
+    STR_ED_7, // "7: Conveyors"
+    STR_ED_8, // "8: Moving Platforms"
+    STR_ED_9, // "9: Enemies"
+    STR_ED_0, // "0: Gravity Lines"
+    STR_ED_R, // "R: Roomtext"
+    STR_ED_T, // "T: Terminals"
+    STR_ED_Y, // "Y: Script Boxes"
+    STR_ED_U, // "U: Warp Tokens"
+    STR_ED_I, // "I: Warp Lines"
+    STR_ED_O, // "O: Crewmates"
+    STR_ED_P, // "P: Start Point"
+    STR_ED_START, // "START"
+    STR_ED_HINT_MENU, // "SPACE ^  SHIFT ^"
+    STR_ED_F1, // "F1: Change Tileset"
+    STR_ED_F2, // "F2: Change Colour"
+    STR_ED_F3, // "F3: Change Enemies"
+    STR_ED_F4, // "F4: Enemy Bounds"
+    STR_ED_F5, // "F5: Platform Bounds"
+    STR_ED_F9, // "F9: Reload Resources"
+    STR_ED_F10, // "F10: Direct Mode"
+    STR_ED_W, // "W: Change Warp Dir"
+    STR_ED_E, // "E: Change Roomname"
+    STR_ED_S, // "S: Save Map"
+    STR_ED_L, // "L: Load Map"
+    STR_ED_SAVE_AS, // "Enter map filename to save as:"
+    STR_ED_LOAD, // "Enter map filename to load:"
+    STR_ED_NEW_ROOM_NAME, // "Enter new room name:"
+    STR_ED_ROOM_COORDS, // "Enter room coordinates x,y:"
+    STR_ED_SCRIPT_NAME, // "Enter script name:"
+    STR_ED_ROOM_TEXT, // "Enter roomtext:"
+    STR_ED_TILES_SS1, // "Space Station"
+    STR_ED_TILES_OUTSIDE, // "Outside"
+    STR_ED_TILES_LAB, // "Lab"
+    STR_ED_TILES_WARP_ZONE, // "Warp Zone"
+    STR_ED_TILES_SHIP, // "Ship"
+    STR_ED_USING_TILESET, // "Now using {area} Tileset"
+    STR_ED_CHANGED_TILES_COLOR, // "Tileset Colour Changed"
+    STR_ED_CHANGED_ENEMY_COLOR, // "Enemy Type Changed"
+    STR_ED_PLAT_SPEED_IS, // "Platform speed is now {speed}"
+    STR_ED_RELOADED_RES, // "Reloaded resources" effects"
+    STR_ED_ERR_INVALID_FMT, // "ERROR: Invalid format"
+    STR_ED_LOADED_MAP, // "Loaded map: {filename}.vvvvvv"
+    STR_ED_SAVED_MAP, // "Saved map: {filename}.vvvvvv"
+    STR_ED_ERR_LOAD_LEVEL, // "ERROR: Could not load level"
+    STR_ED_ERR_SAVE_LEVEL, // "ERROR: Could not save level!"
+    STR_ED_MAPSIZE_IS, // "Mapsize is now [{width},{height}]"
+    STR_ED_DIRECT_MODE_DISABLED, // "Direct Mode Disabled" nice, now changed to automatic mode"
+    STR_ED_DIRECT_MODE_ENABLED, // "Direct Mode Enabled" nice, now changed to manual mode"
+    STR_ED_ERR_WARPLINES_EDGES, // "ERROR: Warp lines must be on edges"
+    STR_ED_WARP_ALL, // "Room warps in all directions"
+    STR_ED_WARP_HOR, // "Room warps horizontally"
+    STR_ED_WARP_VER, // "Room warps vertically"
+    STR_ED_WARP_OFF, // "Room warping disabled"
+    STR_ED_ERR_NO_CHECK, // "ERROR: No checkpoint to spawn at"
+    STR_ED_ERR_MAX_TRINKETS, // "ERROR: Max number of trinkets is 100"
+    STR_ED_ERR_MAX_CREWMATES, // "ERROR: Max number of crewmates is 100"
+    STR_ED_LEVEL_QUITS_TO_MENU, // "Level quits to menu"
+    STR_ED_LEVEL_COMPLETED, // "Level completed"
+    STR_ED_ROLLED_CREDITS, // "Rolled credits"
+    STR_ED_TIME_TRIAL_COMPLETED, // "Time trial completed"
+    STR_FMT_HMMSS, // "{hrs}:{min|digits=2}:{sec|digits=2}"
+    STR_FMT_HMMSSCC, // "{hrs}:{min|digits=2}:{sec|digits=2}.{cen|digits=2}"
+    STR_FMT_MSS, // "{min}:{sec|digits=2}"
+    STR_FMT_MSSCC, // "{min}:{sec|digits=2}.{cen|digits=2}"
+    STR_FMT_SCC, // "{sec}.{cen|digits=2}"
+    STR_POINT_99, // ".99"
+    STR_AREA_TIME, // "{area}, {time}"
+    STR_LEVEL_COMPLETE, // "Level Complete!"
+    STR_GAME_COMPLETE, // "Game Complete!"
+    STR_YOU_RESCUED_CREW, // "You have rescued a crew member!"
+    STR_ALL_CREW_RESCUED, // "All Crew Members Rescued!"
+    STR_ALL_CREWMATE_RESCUED, // "All crewmates rescued!"
+    STR_GAME_SAVED, // "Game Saved"
+    STR_ARROW_WASD_MOVE, // "Press arrow keys or WASD to move"
+    STR_L_R_MOVE, // "Press left/right to move"
+    STR_PROMPT_FLIP, // "Press {button} to flip"
+    STR_PROMPT_MAPMENU, // "Press {button} to view map and quicksave"
+    STR_U_D_FLIP, // "If you prefer, you can press UP or DOWN instead of ACTION to flip."
+    STR_COMMS_RELAY_0, // "Help! Can anyone hear this message?"
+    STR_COMMS_RELAY_1, // "Verdigris? Are you out there? Are you ok?"
+    STR_COMMS_RELAY_2, // "Please help us! We've crashed and need assistance!"
+    STR_COMMS_RELAY_3, // "Hello? Anyone out there?"
+    STR_COMMS_RELAY_4, // "This is Doctor Violet from the D.S.S. Souleye! Please respond!"
+    STR_COMMS_RELAY_5, // "Please... Anyone..."
+    STR_COMMS_RELAY_6, // "Please be alright, everyone..."
+    STR_CONGRATS_TRINKET, /* "Congratulations!
 
-	STR_ID_COUNT
+    You have found a shiny trinket!" */
+    STR_CONGRATS_CREWMATE, /* "Congratulations!
+
+    You have found a lost crewmate!" */
+    STR_CONGRATS_SECRET_LAB, /* "Congratulations!
+
+    You have found the secret lab!" */
+    STR_SECRET_LAB_IS_SEPERATE, // "The secret lab is separate from the rest of the game. You can now come back here at any time by selecting the new SECRET LAB option in the play menu."
+    STR_VIRIDIAN, // "Viridian"
+    STR_VIOLET, // "Violet"
+    STR_VITELLARY, // "Vitellary"
+    STR_VERMILION, // "Vermilion"
+    STR_VERDIGRIS, // "Verdigris"
+    STR_VICTORA, // "Victoria"
+    STR_WITH_VITELLARY, // "Vitellary"
+    STR_WITH_VERMILION, // "Vermilion"
+    STR_WITH_VERDIGRIS, // "Verdigris"
+    STR_WITH_VICTORIA, // "Victoria"
+    STR_STARRING, // "Starring"
+    STR_CPT_VIRIDIAN, // "Captain Viridian"
+    STR_DR_VIOLET, // "Doctor Violet"
+    STR_PROF_VITELLARY, // "Professor Vitellary"
+    STR_OFC_VERMILION, // "Officer Vermilion"
+    STR_CHF_VERDIGRIS, // "Chief Verdigris"
+    STR_DR_VICTORIA, // "Doctor Victoria"
+    STR_IM1_FLOOR_VITELLARY, // "When you're standing on the floor, Vitellary will try to walk to you."
+    STR_IM1_FLOOR_VERMILION, // "When you're standing on the floor, Vermilion will try to walk to you."
+    STR_IM1_FLOOR_VERDIGRIS, // "When you're standing on the floor, Verdigris will try to walk to you."
+    STR_IM1_FLOOR_VICTORIA, // "When you're standing on the floor, Victoria will try to walk to you."
+    STR_IM1_FLOOR_COMPANION, // "When you're standing on the floor, your companion will try to walk to you."
+    STR_IM1_CEIL_VITELLARY, // "When you're standing on the ceiling, Vitellary will try to walk to you."
+    STR_IM1_CEIL_VERMILION, // "When you're standing on the ceiling, Vermilion will try to walk to you."
+    STR_IM1_CEIL_VERDIGRIS, // "When you're standing on the ceiling, Verdigris will try to walk to you."
+    STR_IM1_CEIL_VICTORIA, // "When you're standing on the ceiling, Victoria will try to walk to you."
+    STR_IM1_CEIL_COMPANION, // "When you're standing on the ceiling, your companion will try to walk to you."
+    STR_IM1_NOT_FLOOR_VITELLARY, // "When you're NOT standing on the floor, Vitellary will stop and wait for you."
+    STR_IM1_NOT_FLOOR_VERMILION, // "When you're NOT standing on the floor, Vermilion will stop and wait for you."
+    STR_IM1_NOT_FLOOR_VERDIGRIS, // "When you're NOT standing on the floor, Verdigris will stop and wait for you."
+    STR_IM1_NOT_FLOOR_VICTORIA, // "When you're NOT standing on the floor, Victoria will stop and wait for you."
+    STR_IM1_NOT_FLOOR_COMPANION, // "When you're NOT standing on the floor, your companion will stop and wait for you."
+    STR_IM1_NOT_CEIL_VITELLARY, // "When you're NOT standing on the ceiling, Vitellary will stop and wait for you."
+    STR_IM1_NOT_CEIL_VERMILION, // "When you're NOT standing on the ceiling, Vermilion will stop and wait for you."
+    STR_IM1_NOT_CEIL_VERDIGRIS, // "When you're NOT standing on the ceiling, Verdigris will stop and wait for you."
+    STR_IM1_NOT_CEIL_VICTORIA, // "When you're NOT standing on the ceiling, Victoria will stop and wait for you."
+    STR_IM1_NOT_CEIL_COMPANION, // "When you're NOT standing on the ceiling, your companion will stop and wait for you."
+    STR_IM1_WAIT_MALE, // "You can't continue to the next room until he is safely across."
+    STR_IM1_WAIT_FEMALE, // "You can't continue to the next room until she is safely across."
+    STR_IM1_WAIT_NONBINARY, // "You can't continue to the next room until they are safely across."
+    STR_SURVIVE_FOR, // "Survive for"
+    STR_60_SECONDS, // "60 seconds!"
+    STR_THANKS_FOR, // "Thanks for"
+    STR_PLAYING, // "playing!"
+    STR_MASTERED_SS1, // "SPACE STATION 1 MASTERED"
+    STR_MASTERED_LAB, // "LABORATORY MASTERED"
+    STR_MASTERED_TOWER, // "THE TOWER MASTERED"
+    STR_MASTERED_SS2, // "SPACE STATION 2 MASTERED"
+    STR_MASTERED_WARP_ZONE, // "WARP ZONE MASTERED"
+    STR_MASTERED_FINAL, // "FINAL LEVEL MASTERED"
+    STR_OBTAIN_A_V_RANK, // "Obtain a V Rank in this Time Trial"
+    STR_GAME_COMPLETE_TROPHY, // "GAME COMPLETE"
+    STR_COMPLETE_THE_GAME_TROPHY, // "Complete the game"
+    STR_FLIP_MODE_COMPLETE, // "FLIP MODE COMPLETE"
+    STR_COMPLETE_FLIP_MODE, // "Complete the game in flip mode"
+    STR_UNDER_50_DEATHS, // "Win with less than 50 deaths"
+    STR_UNDER_100_DEATHS, // "Win with less than 100 deaths"
+    STR_UNDER_250_DEATHS, // "Win with less than 250 deaths"
+    STR_UNDER_500_DEATHS, // "Win with less than 500 deaths"
+    STR_LAST_5_SECONDS, // "Last 5 seconds on the Super Gravitron"
+    STR_LAST_10_SECONDS, // "Last 10 seconds on the Super Gravitron"
+    STR_LAST_15_SECONDS, // "Last 15 seconds on the Super Gravitron"
+    STR_LAST_20_SECONDS, // "Last 20 seconds on the Super Gravitron"
+    STR_LAST_30_SECONDS, // "Last 30 seconds on the Super Gravitron"
+    STR_LAST_1_MINUTE, // "Last 1 minute on the Super Gravitron"
+    STR_MASTER_OF_THE_UNIVERSE, // "MASTER OF THE UNIVERSE"
+    STR_COMPLETE_NO_DEATH, // "Complete the game in no death mode"
+    STR_MISSING_ERROR, // "Something went wrong, but we forgot the error message."
+    STR_FAILED_MOUNT, // "Could not mount {path}: real directory doesn't exist"
+    STR_LEVEL_NOT_FOUND, // "Level {path} not found"
+    STR_ERR_PARSE_PATH, // "Error parsing {path}: {error}"
+    STR_BAD_DIMENSIONS, // "{filename} dimensions not exact multiples of {width} by {height}!"
+    STR_ERR_WRITE_LANG, // "ERROR: Could not write to language folder! Make sure there is no "lang" folder next to the regular saves."
+    STR_LOCALISATION, // "Localisation"
+    STR_LOCALIZED_LED_BY, // "Localisation Project Led by"
+    STR_UNUSED_TRANSLATIONS_BY, // "Translations by"
+    STR_TRANSLATORS, // "Translators"
+    STR_PE_FONT_BY, // "Pan-European Font Design by"
+    STR_UNUSED_FONTS_BY, // "Fonts by"
+    STR_UNUSED_OTHER_FONTS_BY, // "Other Fonts by"
+    STR_EDITING_LQA, // "Editing and LQA"
+    STR_ARABIC, // "Arabic"
+    STR_CATALAN, // "Catalan"
+    STR_WELSH, // "Welsh"
+    STR_GERMAN, // "German"
+    STR_ESPERANTO, // "Esperanto"
+    STR_SPANISH, // "Spanish"
+    STR_FRENCH, // "French"
+    STR_IRISH, // "Irish"
+    STR_ITALIAN, // "Italian"
+    STR_JAPANESE, // "Japanese"
+    STR_KOREAN, // "Korean"
+    STR_DUTCH, // "Dutch"
+    STR_POLISH, // "Polish"
+    STR_BRAZIL_PORTUGUESE, // "Brazilian Portuguese"
+    STR_EUROPE_PORTUGUESE, // "European Portuguese"
+    STR_RUSSIAN, // "Russian"
+    STR_SILESIAN, // "Silesian"
+    STR_TURKISH, // "Turkish"
+    STR_UKRAINIAN, // "Ukrainian"
+    STR_CHINESE_SIMPLE, // "Chinese (Simplified)"
+    STR_CHINESE_TRAD, // "Chinese (Traditional)"
+    STR_SPANISH_ES, // "Spanish (ES)"
+    STR_SPANISH_LATAM, // "Spanish (LATAM)"
+    STR_SPANISH_ARG, // "Spanish (ARG.)"
+    STR_BLANK_0, // ""
+    STR_BLANK_1, // ""
+
+    STR_ID_COUNT
 };
 
 enum Cutscene_String_ID {
