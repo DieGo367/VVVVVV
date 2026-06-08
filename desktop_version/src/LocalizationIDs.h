@@ -5,6 +5,7 @@
 #ifdef __NDS__
 #define ID(string, id) id
 #define IDP(string_plural, string_singular, id) id
+#define RN(string) ""
 /* This cast is an EGREGIOUS hack for the sake of saving memory.
  * Instead of storing string IDs as strings that would eat up static
  * memory, the ID value is stored in the pointer value. At the load
@@ -17,6 +18,7 @@
 #else
 #define ID(string, id) string
 #define IDP(string_plural, string_singular, id) string_plural, string_singular
+#define RN(string) string
 #define IDC(string, id) string
 #define NUL(string) string
 #endif

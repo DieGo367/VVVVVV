@@ -3,6 +3,9 @@
 #include "Game.h"
 #include "Entity.h"
 #include "MakeAndPlay.h"
+#ifdef __NDS__
+#include "LocalizationIDs.h"
+#endif
 
 const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
 {
@@ -78,7 +81,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         }
 
         rcol=1;
-        roomname = "Get Ready To Bounce";
+        roomname = RN("Get Ready To Bounce");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -107,7 +110,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(112, 180, 11, 192);  // (horizontal gravity line)
         rcol = 0;
 
-        roomname = "It's Perfectly Safe";
+        roomname = RN("It's Perfectly Safe");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -135,7 +138,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(248, 48, 10, 0, 251490);  // (savepoint)
         rcol = 4;
 
-        roomname = "Rascasse";
+        roomname = RN("Rascasse");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -180,7 +183,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(160, 164, 11, 64);  // (horizontal gravity line)
         rcol = 2;
 
-        roomname = "Keep Going";
+        roomname = RN("Keep Going");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -220,7 +223,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(152, 196, 11, 40);  // (horizontal gravity line)
         rcol=3;
 
-        roomname = "Single-slit Experiment";
+        roomname = RN("Single-slit Experiment");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -247,7 +250,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(107, 88, 12, 56);  // (vertical gravity line)
         rcol = 5;
 
-        roomname = "Don't Flip Out";
+        roomname = RN("Don't Flip Out");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -276,7 +279,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createblock(5, 156-8, 128, 20, 16, 19);
         rcol = 1;
 
-        roomname = "Shuffled Hallway";
+        roomname = RN("Shuffled Hallway");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -304,7 +307,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(163, 32, 12, 168);  // (vertical gravity line)
         rcol = 3;
 
-        roomname = "Double-slit Experiment";
+        roomname = RN("Double-slit Experiment");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -332,7 +335,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(187, 16, 12, 96);  // (vertical gravity line)
         obj.createentity(40, 112, 10, 0, 253511);  // (savepoint)
         rcol = 2;
-        roomname = "They Call Him Flipper";
+        roomname = RN("They Call Him Flipper");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -372,7 +375,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24, 184, 10, 1, 253520);  // (savepoint)
         obj.createentity(64, 164, 11, 200);  // (horizontal gravity line)
         rcol = 4;
-        roomname = "Three's a Crowd";
+        roomname = RN("Three's a Crowd");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -402,7 +405,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(80, 120, 10, 0, 252520);  // (savepoint)
         obj.createentity(80, 96, 10, 1, 252521);  // (savepoint)
         rcol = 2;
-        roomname = "Hitting the Apex";
+        roomname = RN("Hitting the Apex");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -442,7 +445,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createblock(5, 204-8, 32, 20, 16, 20);
         rcol=0;
 
-        roomname = "Square Root";
+        roomname = RN("Square Root");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -482,7 +485,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24, 44, 11, 112);  // (horizontal gravity line)
         obj.createentity(176, 180, 11, 112);  // (horizontal gravity line)
         rcol = 4;
-        roomname = "Thorny Exchange";
+        roomname = RN("Thorny Exchange");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -518,7 +521,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(32, 196, 11, 112);  // (horizontal gravity line)
         obj.createentity(128, 100, 11, 160);  // (horizontal gravity line)
         obj.createentity(88, 112, 10, 0, 250510);  // (savepoint)
-        roomname = "Brought to you by the letter G";
+        roomname = RN("Brought to you by the letter G");
         rcol = 1;
         result = contents;
         *dataLen = sizeof(contents);
@@ -543,7 +546,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(32, 72, 10, 1, 250520);  // (savepoint)
         rcol=2;
 
-        roomname = "Free Your Mind";
+        roomname = RN("Free Your Mind");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -569,7 +572,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(80, 180, 11, 248);  // (horizontal gravity line)
         rcol=0;
-        roomname = "I Changed My Mind, Thelma...";
+        roomname = RN("I Changed My Mind, Thelma...");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -600,7 +603,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(240, 180, 11, 88);  // (horizontal gravity line)
         rcol=4;
 
-        roomname = "Indirect Jump Vector";
+        roomname = RN("Indirect Jump Vector");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -626,7 +629,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(-8, 28, 11, 336);  // (horizontal gravity line)
         rcol=5;
 
-        roomname = "In a Single Bound";
+        roomname = RN("In a Single Bound");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -665,7 +668,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(248, 28, 11, 80);  // (horizontal gravity line)
         rcol=1;
 
-        roomname = "Barani, Barani";
+        roomname = RN("Barani, Barani");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -704,7 +707,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(248, 180, 11, 80);  // (horizontal gravity line)
         rcol=2;
 
-        roomname = "Safety Dance";
+        roomname = RN("Safety Dance");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -737,7 +740,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(-8, 28, 11, 40);  // (horizontal gravity line)
 
         rcol=3;
-        roomname = "Heady Heights";
+        roomname = RN("Heady Heights");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -783,7 +786,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         }
         rcol = 5;
 
-        roomname = "Entanglement Generator";
+        roomname = RN("Entanglement Generator");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -820,7 +823,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(-8, 180, 11, 224);  // (horizontal gravity line)
 
         rcol = 0;
-        roomname = "Exhausted?";
+        roomname = RN("Exhausted?");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -863,7 +866,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(120, 72, 10, 1, 252550);  // (savepoint)
         rcol = 4;
 
-        roomname = "The Tantalizing Trinket";
+        roomname = RN("The Tantalizing Trinket");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -914,7 +917,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(139, 144, 12, 72);  // (vertical gravity line)
         rcol=1;
 
-        roomname = "The Bernoulli Principle";
+        roomname = RN("The Bernoulli Principle");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -948,7 +951,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(-8, 172, 11, 136);  // (horizontal gravity line)
         rcol = 5;
 
-        roomname = "Standing Wave";
+        roomname = RN("Standing Wave");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -969,7 +972,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         rcol=2;
 
         obj.fatal_top();
-        roomname = "Topsy Turvyism";
+        roomname = RN("Topsy Turvyism");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -998,7 +1001,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         rcol=3;
 
         obj.fatal_top();
-        roomname = "Spike Strip Deployed";
+        roomname = RN("Spike Strip Deployed");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1018,7 +1021,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(152, 152, 1, 1, 8, 72, 64, 248, 168);  // Enemy, bounded
 
         obj.fatal_top();
-        roomname = "Vibrating String Problem";
+        roomname = RN("Vibrating String Problem");
         rcol = 5;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1045,7 +1048,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         rcol=1;
 
         obj.fatal_top();
-        roomname = "Merge";
+        roomname = RN("Merge");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1067,7 +1070,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.fatal_top();
 
-        roomname = "Kids His Age Bounce";
+        roomname = RN("Kids His Age Bounce");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1112,7 +1115,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(120, 148, 11, 208);  // (horizontal gravity line)
         rcol=2;
 
-        roomname = "I'm Sorry";
+        roomname = RN("I'm Sorry");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1149,7 +1152,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(216, 56, 10, 0, 255490);  // (savepoint)
         rcol=4;
 
-        roomname = "Please Forgive Me!";
+        roomname = RN("Please Forgive Me!");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1174,7 +1177,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(275, 48, 12, 152);  // (vertical gravity line)
         rcol=1;
 
-        roomname = "Playing Foosball";
+        roomname = RN("Playing Foosball");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1204,7 +1207,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(8, 48, 10, 0, 255510);  // (savepoint)
         rcol=5;
 
-        roomname = "A Difficult Chord";
+        roomname = RN("A Difficult Chord");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1246,7 +1249,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(195, 56, 12, 80);  // (vertical gravity line)
         rcol = 0;
 
-        roomname = "The Living Dead End";
+        roomname = RN("The Living Dead End");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1276,7 +1279,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         };
         rcol=3;
 
-        roomname = "AAAAAA";
+        roomname = RN("AAAAAA");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1318,7 +1321,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         };
         rcol = 2;
 
-        roomname = "Diode";
+        roomname = RN("Diode");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1365,7 +1368,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(99, 24, 12, 80);  // (vertical gravity line)
         rcol=0;
 
-        roomname = "Young Man, It's Worth the Challenge";
+        roomname = RN("Young Man, It's Worth the Challenge");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1424,7 +1427,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
 
         rcol = 6;
 
-        roomname = "Anomaly";
+        roomname = RN("Anomaly");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1476,7 +1479,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(104, 128, 9, 11);  // (shiny trinket)
         rcol = 6;
 
-        roomname = "Purest Unobtainium";
+        roomname = RN("Purest Unobtainium");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1540,7 +1543,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(112, 184, 10, 1, 258520);  // (savepoint)
         rcol = 5;
 
-        roomname = "I Smell Ozone";
+        roomname = RN("I Smell Ozone");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1563,7 +1566,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
             }
         }
 
-        roomname = "Why So Blue?";
+        roomname = RN("Why So Blue?");
 
         result = contents;
         *dataLen = sizeof(contents);
@@ -1602,7 +1605,7 @@ const unsigned char* labclass::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 280, 0, 32, 240, 82);
         }
 
-        roomname = "Philadelphia Experiment";
+        roomname = RN("Philadelphia Experiment");
         result = contents;
         *dataLen = sizeof(contents);
         break;

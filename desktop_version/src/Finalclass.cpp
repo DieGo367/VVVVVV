@@ -3,6 +3,9 @@
 #include "Game.h"
 #include "Entity.h"
 #include "MakeAndPlay.h"
+#ifdef __NDS__
+#include "LocalizationIDs.h"
+#endif
 
 const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 {
@@ -36,7 +39,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(291, 32, 12, 168);  // (vertical gravity line)
 
         warpx = true;
-        roomname = "1954 World Cup Vinyl";
+        roomname = RN("1954 World Cup Vinyl");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -78,7 +81,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(256, 88, 10, 1, 51502);  // (savepoint)
         obj.createentity(256, 128, 10, 0, 51503);  // (savepoint)
         warpy = true;
-        roomname = "The V Stooges";
+        roomname = RN("The V Stooges");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -109,7 +112,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(192, 116, 11, 64);  // (horizontal gravity line)
 
         warpy = true;
-        roomname = "The Untouchables";
+        roomname = RN("The Untouchables");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -138,7 +141,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(32, 48, 10, 1, 51481);  // (savepoint)
 
         warpy = true;
-        roomname = "On the Waterfront";
+        roomname = RN("On the Waterfront");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -170,7 +173,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(128, 56, 10, 1, 51471);  // (savepoint)
 
         warpy = true;
-        roomname = "Gvnsmoke";
+        roomname = RN("Gvnsmoke");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -193,7 +196,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(288, 120, 1, 2, 4);  // Enemy
 
         warpy = true;
-        roomname = "Vwitched";
+        roomname = RN("Vwitched");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -224,7 +227,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(176, 96, 10, 0, 51451);  // (savepoint)
 
         warpy = true;
-        roomname = "Television Newsveel";
+        roomname = RN("Television Newsveel");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -254,7 +257,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(192+32-8, 192+24, 1, 0, 7, 0, -80, 320, 304);  // Enemy, bounded
 
         warpy = true;
-        roomname = "Vertigo";
+        roomname = RN("Vertigo");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -282,7 +285,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(240, 120, 1, 0, 8, 0, -48, 320, 296);  // Enemy, bounded
 
         warpy = true;
-        roomname = "The Voon Show";
+        roomname = RN("The Voon Show");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -313,7 +316,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24, 148, 11, 120);  // (horizontal gravity line)
 
         warpy = true;
-        roomname = "Rear Window";
+        roomname = RN("Rear Window");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -367,7 +370,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(96, 92, 11, 88);  // (horizontal gravity line)
 
         warpx = true;
-        roomname = "1950 Silverstone Grand V";
+        roomname = RN("1950 Silverstone Grand V");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -416,7 +419,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 
         warpx = true;
         warpy = true;
-        roomname = "DIY V Repair";
+        roomname = RN("DIY V Repair");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -435,7 +438,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         156,3,154,3,98,156,3,164,11,211,154,3,98,156,3,154,3,98,156,3,
         164,11,199,154,3,98,156,3,154,3,98,156,3,164,11,201,
         };
-        roomname = "Party Time!";
+        roomname = RN("Party Time!");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -509,7 +512,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(240, 136, 1, 2, 8);  // Enemy
         obj.createentity(96, 88, 1, 3, 8);  // Enemy
         obj.createentity(72, 32, 10, 0, 52431);  // (savepoint)
-        roomname = "Upstairs, Downstairs";
+        roomname = RN("Upstairs, Downstairs");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -554,7 +557,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(176+24, 128, 1, 0, 5, 0, 120, 320, 200);  // Enemy, bounded
         //obj.createentity(224, 168, 1, 1, 5, 0, 120, 320, 200);  // Enemy, bounded
         obj.createentity(24, 184, 10, 1, 52440);  // (savepoint)
-        roomname = "Timeslip";
+        roomname = RN("Timeslip");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -608,7 +611,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(80, 156, 11, 176);  // (horizontal gravity line)
         obj.createentity(128, 88, 10, 1, 52451);  // (savepoint)
         obj.createentity(160, 76, 11, 96);  // (horizontal gravity line)
-        roomname = "Three's Company";
+        roomname = RN("Three's Company");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -654,7 +657,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(92, 104, 3);  //Disappearing Platform
         obj.createentity(120, 192, 2, 3, 6);  // Platform
         obj.createentity(264, 48, 2, 2, 6);  // Platform
-        roomname = "Cosmic Creepers";
+        roomname = RN("Cosmic Creepers");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -701,7 +704,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(187, 24, 12, 80);  // (vertical gravity line)
         obj.createentity(123, 128, 12, 88);  // (vertical gravity line)
 
-        roomname = "The Villi People";
+        roomname = RN("The Villi People");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -759,7 +762,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(120 + 4, 160 - 4, 1, 1, 5);  // Enemy
 
         warpx = true;
-        roomname = "Please enjoy these repeats";
+        roomname = RN("Please enjoy these repeats");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -802,7 +805,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(224, 52, 11, 80);  // (horizontal gravity line)
 
         warpx = true;
-        roomname = "Try Jiggling the Antenna";
+        roomname = RN("Try Jiggling the Antenna");
         roomname_special = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -831,7 +834,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(240, 80, 3);  //Disappearing Platform
         obj.createentity(272, 80, 3);  //Disappearing Platform
         obj.createentity(304, 80, 3);  //Disappearing Platform
-        roomname = "The Last Straw";
+        roomname = RN("The Last Straw");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -867,7 +870,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(256, 88, 3);  //Disappearing Platform
         obj.createentity(128, 88, 3);  //Disappearing Platform
         obj.createentity(160, 88, 3);  //Disappearing Platform
-        roomname = "W";
+        roomname = RN("W");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -912,7 +915,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         164,11,221,0,201,164,11,222,0,199,164,11,223,0,199,164,11,223,0,199,
         164,11,223,0,199,164,11,223,0,199,164,11,207,
         };
-        roomname = "VV";
+        roomname = RN("VV");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -932,7 +935,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         164,11,213,0,209,164,11,213,0,209,164,11,213,0,209,164,11,213,0,209,
         164,11,213,0,209,164,11,213,0,209,164,11,202,
         };
-        roomname = "VVV";
+        roomname = RN("VVV");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -952,7 +955,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         164,11,213,0,209,164,11,213,0,209,164,11,213,0,209,164,11,213,0,209,
         164,11,213,0,209,164,11,213,0,209,164,11,202,
         };
-        roomname = "VVVV";
+        roomname = RN("VVVV");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -972,7 +975,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         164,11,207,0,215,164,11,207,0,215,164,11,199,
         };
 
-        roomname = "VVVVV";
+        roomname = RN("VVVVV");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1003,7 +1006,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         {
             obj.createblock(1, 0, 0, 320, 120, 3500); //Game complete
         }
-        roomname = "VVVVVV";
+        roomname = RN("VVVVVV");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1041,7 +1044,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         };
 
         warpy = true;
-        roomname = "Temporary Fault...";
+        roomname = RN("Temporary Fault...");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1054,7 +1057,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         240,210,
         };
         warpy = true;
-        roomname = "Do Not Adjust the V-hold";
+        roomname = RN("Do Not Adjust the V-hold");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1092,7 +1095,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         }*/
 
         warpy = true;
-        roomname = "Regular Service Will Return Shortly";
+        roomname = RN("Regular Service Will Return Shortly");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1161,7 +1164,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(120, 116, 11, 80);  // (horizontal gravity line)
         warpy = true;
-        roomname = "Origami Room";
+        roomname = RN("Origami Room");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1208,7 +1211,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(40, 80, 10, 1, 50500);  // (savepoint)
 
-        roomname = "Teleporter Divot";
+        roomname = RN("Teleporter Divot");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1232,7 +1235,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(16, 112, 10, 1, 50520);  // (savepoint)
-        roomname = "Seeing Red";
+        roomname = RN("Seeing Red");
 
         if(!game.intimetrial || game.translator_exploring)
         {
@@ -1263,7 +1266,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(128-16, 80-32, 14); //Teleporter!
-        roomname = "Building Apport";
+        roomname = RN("Building Apport");
 
         if(game.intimetrial)
         {
@@ -1319,7 +1322,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         195,154,3,98,193,156,3,0,195,154,3,98,208,
         };
 
-        roomname = "Whee Sports";
+        roomname = RN("Whee Sports");
         warpx = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1368,7 +1371,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         132,4,130,4,131,4,193,0,199,195,
         };
 
-        roomname = "Whizz Down The Shaft";
+        roomname = RN("Whizz Down The Shaft");
         warpx = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1387,7 +1390,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createblock(1, -10, 84 - 16, 340, 32, 10); //create the second line!
 
-        roomname = "The Gravitron";
+        roomname = RN("The Gravitron");
         warpx = true; //warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1438,7 +1441,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
             }
         }
 
-        roomname = "Tunnel of Terror";
+        roomname = RN("Tunnel of Terror");
         warpx = true;
 
         game.swnmode = false;
@@ -1480,7 +1483,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity((22 * 8)+4, (9 * 8) + 4, 14); //Teleporter!
 
-        roomname = "House of Mirrors";
+        roomname = RN("House of Mirrors");
         warpx = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1536,7 +1539,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         //obj.createentity(164, 96, 10, 1, 56410);  // (savepoint)
 
         warpy = true;
-        roomname = "Now Take My Lead";
+        roomname = RN("Now Take My Lead");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1573,7 +1576,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 280, 0, 32, 240, 12); //scene 2
         }
 
-        roomname = "What Are You Waiting For?";
+        roomname = RN("What Are You Waiting For?");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1626,7 +1629,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(232, 120, 1, 0, 3);  // Enemy
 
         warpy = true;
-        roomname = "Don't Get Ahead of Yourself!";
+        roomname = RN("Don't Get Ahead of Yourself!");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1662,7 +1665,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         }
 
 
-        roomname = "Very Good";
+        roomname = RN("Very Good");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1702,7 +1705,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(104, 152, 1, 0, 3);  // Enemy
         obj.createentity(200, 152, 1, 0, 3);  // Enemy
 
-        roomname = "Must I Do Everything For You?";
+        roomname = RN("Must I Do Everything For You?");
         warpy = true;
 
         result = contents;
@@ -1738,7 +1741,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 200, 0, 32, 240, 43); //scene 3
         }
 
-        roomname = "Now Stay Close To Me...";
+        roomname = RN("Now Stay Close To Me...");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1779,7 +1782,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(144, 64, 2, 0, 2, 144, 64, 176, 216);  // Platform, bounded
 
-        roomname = "...But Not Too Close";
+        roomname = RN("...But Not Too Close");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1818,7 +1821,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         };
 
         warpy = true;
-        roomname = "Don't Be Afraid";
+        roomname = RN("Don't Be Afraid");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1838,7 +1841,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 200, 0, 32, 240, 44); //scene 3
         }
         warpy = true;
-        roomname = "Do as I Say...";
+        roomname = RN("Do as I Say...");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1875,7 +1878,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(136, 136, 2, 0, 4, 88, 128, 216, 208);  // Platform, bounded
         obj.createentity(184, 200, 2, 1, 4, 88, 128, 216, 208);  // Platform, bounded
 
-        roomname = "...Not as I Do";
+        roomname = RN("...Not as I Do");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1911,7 +1914,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 80, 0, 32, 240, 45); //scene 3
         }
         warpy = true;
-        roomname = "Mind Your Head";
+        roomname = RN("Mind Your Head");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1955,7 +1958,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(208, 200, 2, 1, 6, 48, 48, 272, 208);  // Platform, bounded
         obj.createentity(240, 200, 2, 1, 6, 48, 48, 272, 208);  // Platform, bounded
 
-        roomname = "Do Try To Keep Up";
+        roomname = RN("Do Try To Keep Up");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -1992,7 +1995,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(72, 72, 10, 1, 56530);  // (savepoint)
 
-        roomname = "You're Falling Behind";
+        roomname = RN("You're Falling Behind");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -2035,7 +2038,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 104, 0, 32, 240, 46); //scene 3
         }
 
-        roomname = "Class Dismissed!";
+        roomname = RN("Class Dismissed!");
         warpy = true;
         result = contents;
         *dataLen = sizeof(contents);
@@ -2048,7 +2051,7 @@ const unsigned char* finalclass::loadlevel(int rx, int ry, int* dataLen)
     default:
     {
         static const unsigned char contents[] = {240, 210};
-        roomname = "Outer Space";
+        roomname = RN("Outer Space");
         roomname_special = true;
 
         //game.test = true;

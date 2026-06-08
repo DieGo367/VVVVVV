@@ -3,6 +3,9 @@
 #include "Game.h"
 #include "Entity.h"
 #include "MakeAndPlay.h"
+#ifdef __NDS__
+#include "LocalizationIDs.h"
+#endif
 
 const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
 {
@@ -54,7 +57,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
             obj.createentity(136, 92, 11, 48);  // (horizontal gravity line)
         }
 
-        roomname = "Outer Hull"; //If not yet in level, use "The Space Station";
+        roomname = RN("Outer Hull"); //If not yet in level, use "The Space Station";
 
         result = contents;
         *dataLen = sizeof(contents);
@@ -74,7 +77,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         136,7,231,0,215,201,
         };
 
-        roomname = "The Filter"; //If not yet in level, use "The Space Station"
+        roomname = RN("The Filter"); //If not yet in level, use "The Space Station"
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -126,7 +129,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(216-4, 168, 1, 0, 4, 160, 88, 256, 192);  // Enemy, bounded
         obj.createentity(184-24, 96, 1, 1, 4, 160, 88, 256, 192);  // Enemy, bounded
         obj.createentity(256, 8, 2, 10, 4);  //Big Threadmill, >>>>>>
-        roomname = "Boldly To Go";
+        roomname = RN("Boldly To Go");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -186,7 +189,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(192, 96, 9, 2);  // (shiny trinket)
-        roomname = "One Way Room";
+        roomname = RN("One Way Room");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -241,7 +244,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(152, 72, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(224, 120, 10, 0, 447491);  // (savepoint)
 
-        roomname = "Conveying a New Idea";
+        roomname = RN("Conveying a New Idea");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -296,7 +299,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(64, 72, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(192, 72, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(192, 112, 2, 8, 4);  //Threadmill, >>>
-        roomname = "Upstream Downstream";
+        roomname = RN("Upstream Downstream");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -331,7 +334,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(192, 104, 2, 0, 4, 64, 72, 256, 160);  // Platform, bounded
         obj.createentity(224, 112, 2, 0, 4, 64, 72, 256, 160);  // Platform, bounded
         obj.createentity(264, 96, 10, 1, 448500);  // (savepoint)
-        roomname = "The High Road is Low";
+        roomname = RN("The High Road is Low");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -370,7 +373,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(64, 8, 2, 8, 4);  //Threadmill, >>>
         obj.createentity(224, 8, 2, 11, 4);  //Big Threadmill, <<<<<<
         obj.createentity(288, 8, 2, 9, 4);  //Threadmill, <<<
-        roomname = "Give Me A V";
+        roomname = RN("Give Me A V");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -414,7 +417,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(32, 208, 2, 8, 4);  //Threadmill, >>>
         obj.createentity(64, 208, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(128, 208, 2, 10, 4);  //Big Threadmill, >>>>>>
-        roomname = "Select Track";
+        roomname = RN("Select Track");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -443,7 +446,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(96, 32, 3,10);  //Disappearing Platform
         obj.createentity(192, 32, 3,10);  //Disappearing Platform
         obj.createentity(224, 32, 3,10);  //Disappearing Platform
-        roomname = "You Chose... Poorly";
+        roomname = RN("You Chose... Poorly");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -483,7 +486,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(128, 112, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(192, 112, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(256, 112, 2, 10, 4);  //Big Threadmill, >>>>>>
-        roomname = "Hyperspace Bypass 5";
+        roomname = RN("Hyperspace Bypass 5");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -520,7 +523,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(168, 104, 2, 0, 5, 136, 88, 200, 152);  // Platform, bounded
         obj.createentity(80, 112, 2, 8, 4);  //Threadmill, >>>
         obj.createentity(80, 104, 2, 9, 4);  //Threadmill, <<<
-        roomname = "Plain Sailing from Here On";
+        roomname = RN("Plain Sailing from Here On");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -573,7 +576,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(0, 16, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(64, 16, 2, 8, 4);  //Threadmill, >>>
         obj.createentity(104, 24, 10, 0, 448541);  // (savepoint)
-        roomname = "Ha Ha Ha Not Really";
+        roomname = RN("Ha Ha Ha Not Really");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -679,7 +682,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(232, 64, 10, 1, 448521);  // (savepoint)
         obj.createentity(232, 144, 10, 0, 448522);  // (savepoint)
         obj.createentity(72, 144, 10, 0, 448523);  // (savepoint)
-        roomname = "Gordian Knot";
+        roomname = RN("Gordian Knot");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -724,7 +727,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(160+8, 168, 1, 1, 5, 104, 120, 288, 200);  // Enemy, bounded
         obj.createentity(216+16, 128, 1, 0, 5, 104, 120, 288, 200);  // Enemy, bounded
 
-        roomname = "Backsliders";
+        roomname = RN("Backsliders");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -766,7 +769,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24 - 8 + (117 * 3), 144 - 8, 1, 10, 1);  // Enemy
 
         //LIES emitter starts here
-        roomname = "The Cuckoo";
+        roomname = RN("The Cuckoo");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -831,7 +834,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24 - 60 - 8 + (117 * 2), 144 - 8, 1, 10, 1);  // Enemy
         obj.createentity(24 - 60 - 8 + (117 * 3), 144 - 8, 1, 10, 1);  // Enemy
         //LIES Emitter, manually positioned
-        roomname = "Clarion Call";
+        roomname = RN("Clarion Call");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -866,7 +869,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(7*8, 2*8, 1, 12, 1);  // Enemy
         //FACTORY emitter starts here
-        roomname = "The Solution is Dilution";
+        roomname = RN("The Solution is Dilution");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -907,7 +910,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(7 * 8, (36 * 8)-216, 1, 12, 1);  // Enemy
         //FACTORY emitter starts here (manually placed)
 
-        roomname = "Lighter Than Air";
+        roomname = RN("Lighter Than Air");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -959,7 +962,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         {
             obj.createentity(18 * 8, (5 * 8) + 4, 14); //Teleporter!
         }
-        roomname = "Level Complete!";
+        roomname = RN("Level Complete!");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -998,7 +1001,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         5,175,5,195,136,5,158,4,199,152,6,0,193,158,4,228,135,5,175,5,
         193,158,4,247,193,
         };
-        roomname = "Green Grotto";
+        roomname = RN("Green Grotto");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1044,7 +1047,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(156, 40, 20, 1);  // (terminal)
         obj.createblock(5, 156-4, 40, 20, 16, 15);
 
-        roomname = "The Hanged Man, Reversed";
+        roomname = RN("The Hanged Man, Reversed");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1062,7 +1065,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(152, 120, 10, 0, 445530);  // (savepoint)
-        roomname = "doomS";
+        roomname = RN("doomS");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1097,7 +1100,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24 - 60 - 8 + (117 * 2), 144 - 8, 1, 10, 1);  // Enemy
         obj.createentity(24 - 60 - 8 + (117 * 3), 144 - 8, 1, 10, 1);  // Enemy
 
-        roomname = "Chinese Rooms";
+        roomname = RN("Chinese Rooms");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1115,7 +1118,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(152, 96, 10, 1, 446530);  // (savepoint)
-        roomname = "Swoop";
+        roomname = RN("Swoop");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1155,7 +1158,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(152, 160, 3, 827);  //Disappearing Platform
         obj.createentity(96, 88, 3, 827);  //Disappearing Platform
         obj.createentity(40, 160, 3, 827);  //Disappearing Platform
-        roomname = "Manic Mine";
+        roomname = RN("Manic Mine");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1189,7 +1192,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         207,175,12,183,10,213,177,12,0,207,175,12,183,10,213,177,12,0,207,175,
         12,183,10,213,177,12,0,207,151,13,152,13,213,153,13,0,231,194,
         };
-        roomname = "Sorrow";
+        roomname = RN("Sorrow");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1269,7 +1272,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(104, 136, 2, 9, 4);  //Threadmill, <<<
         obj.createentity(104, 160, 2, 9, 4);  //Threadmill, <<<
 
-        roomname = "$eeing Dollar $ign$";
+        roomname = RN("$eeing Dollar $ign$");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1340,7 +1343,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(96, 192, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(152, 192, 2, 8, 4);  //Threadmill, >>>
         obj.createentity(240, 88, 2, 9, 4);  //Threadmill, <<<
-        roomname = "Parabolica";
+        roomname = RN("Parabolica");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1386,7 +1389,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24 - 60 - 8 + (117 * 3), 144 - 8, 1, 10, 1);  // Enemy
 
         //LIES Emitter, manually positioned
-        roomname = "Spikes Do!";
+        roomname = RN("Spikes Do!");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1411,7 +1414,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(120, 72, 3, 707);  //Disappearing Platform
         obj.createentity(248, 72, 3, 707);  //Disappearing Platform
         obj.createentity(184, 200, 3, 707);  //Disappearing Platform
-        roomname = "What Lies Beneath?";
+        roomname = RN("What Lies Beneath?");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1459,7 +1462,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24 - 60 - 8 + 117, 144 - 8, 1, 10, 1);  // Enemy
         obj.createentity(24 - 60 - 8 + (117 * 2), 144 - 8, 1, 10, 1);  // Enemy
         //LIES Emitter, manually positioned, collector!
-        roomname = "Chipper Cipher";
+        roomname = RN("Chipper Cipher");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1501,7 +1504,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(40, 72, 3, 787);  //Disappearing Platform
-        roomname = "If You Fall Up";
+        roomname = RN("If You Fall Up");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1548,7 +1551,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(24, 80, 2, 3, 6);  // Platform
         obj.createentity(64, 176, 10, 0, 445550);  // (savepoint)
         obj.createentity(216 - 4, 192, 10, 1, 445551);  // (savepoint)
-        roomname = "Just Pick Yourself Down";
+        roomname = RN("Just Pick Yourself Down");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1601,7 +1604,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(128, 128, 2, 11, 4);  //Big Threadmill, <<<<<<
         obj.createentity(192, 128, 2, 11, 4);  //Big Threadmill, <<<<<<
         obj.createentity(240, 128, 2, 9, 4);  //Threadmill, <<<
-        roomname = "The Warning";
+        roomname = RN("The Warning");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1658,7 +1661,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(0, 16, 2, 10, 4);  //Big Threadmill, >>>>>>
 
 
-        roomname = "Getting Here is Half the Fun";
+        roomname = RN("Getting Here is Half the Fun");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1704,7 +1707,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         50,164,9,172,7,197,
         };
 
-        roomname = "Your Bitter Tears... Delicious";
+        roomname = RN("Your Bitter Tears... Delicious");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1754,7 +1757,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         50,142,3,86,193,144,3,0,195,142,3,86,199,
         };
 
-        roomname = "Easy Mode Unlocked";
+        roomname = RN("Easy Mode Unlocked");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1805,7 +1808,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         0,195,50,151,3,95,200,153,3,49,0,195,151,3,95,207,
         };
 
-        roomname = "Vici!";
+        roomname = RN("Vici!");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1853,7 +1856,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         49,0,195,50,174,6,182,4,214,176,6,0,195,50,174,6,182,4,193,
         };
 
-        roomname = "Vidi";
+        roomname = RN("Vidi");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1936,7 +1939,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(24, 152, 20, 1);  // (terminal)
         obj.createblock(5, 24-4, 152, 20, 16, 16);
-        roomname = "Doing Things The Hard Way";
+        roomname = RN("Doing Things The Hard Way");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1977,7 +1980,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         {
             obj.fatal_top();
         }
-        roomname = "Exhaust Chute";
+        roomname = RN("Exhaust Chute");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2035,7 +2038,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
                 }
             }
         }
-        roomname = "A Wrinkle in Time";
+        roomname = RN("A Wrinkle in Time");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2076,7 +2079,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(288, 168, 2, 9, 4);  //Threadmill, <<<
         obj.createentity(160 - 48, 184 - 8, 1, 3, 5);// , 160, 0, 320, 240);  // Enemy, bounded
         obj.createentity(160 - 28 + 48, 184 - 8, 1, 2, 5);// , 0, 0, 160, 240);  // Enemy, bounded
-        roomname = "Brass Sent Us Under The Top";
+        roomname = RN("Brass Sent Us Under The Top");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2120,7 +2123,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(208-4, 48, 1, 0, 3, 104, 40, 324, 136);  // Enemy, bounded
         obj.createentity(136 + 4, 96, 10, 1, 443541);  // (savepoint)
 
-        roomname = "The Tomb of Mad Carew";
+        roomname = RN("The Tomb of Mad Carew");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2161,7 +2164,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(56, 144, 10, 0, 443520);  // (savepoint)
         obj.createentity(152, 80, 10, 1, 443521);  // (savepoint)
-        roomname = "The Sensible Room";
+        roomname = RN("The Sensible Room");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2177,7 +2180,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(0, -200, 1, 16, 6, -64, -500, 320 + 64, 340);
-        roomname = "B-B-B-Busted";
+        roomname = RN("B-B-B-Busted");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2216,7 +2219,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         {
             obj.createblock(1, 0, 0, 112, 112, 8);
         }
-        roomname = "V Stitch";
+        roomname = RN("V Stitch");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2266,15 +2269,15 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(88, 72, 2, 15, 4);  // Platform
         obj.createentity(192, 128, 9, 6);  // (shiny trinket)
         obj.createentity(240, 136, 10, 0, 443490);  // (savepoint)
-        roomname = "Prize for the Reckless";
+        roomname = RN("Prize for the Reckless");
         if(game.nodeathmode)
         {
-            roomname = "I Can't Believe You Got This Far";
+            roomname = RN("I Can't Believe You Got This Far");
             roomname_special = true;
         }
         else if (game.intimetrial && !game.translator_exploring)
         {
-            roomname = "Imagine Spikes There, if You Like";
+            roomname = RN("Imagine Spikes There, if You Like");
             roomname_special = true;
         }
         result = contents;
@@ -2320,7 +2323,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(56, 144, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(120, 144, 2, 10, 4);  //Big Threadmill, >>>>>>
         obj.createentity(184, 144, 2, 8, 4);  //Threadmill, >>>
-        roomname = "A Deception";
+        roomname = RN("A Deception");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2376,7 +2379,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(56, 64, 10, 0, 442480);  // (savepoint)
         obj.createentity(280, 152, 10, 1, 442481);  // (savepoint)
 
-        roomname = "Down Under";
+        roomname = RN("Down Under");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2428,7 +2431,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(104, 184, 2, 11, 4);  //Big Threadmill, <<<<<<
         obj.createentity(144, 168, 10, 1, 442490);  // (savepoint)
         obj.createentity(24, 112, 10, 0, 442491);  // (savepoint)
-        roomname = "Shenanigan";
+        roomname = RN("Shenanigan");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2463,7 +2466,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
                 obj.createblock(1, 0, 0, 140, 240, 34);
             }
         }
-        roomname = "Frown Upside Down";
+        roomname = RN("Frown Upside Down");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2496,7 +2499,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         {
             obj.createblock(1, 280, 0, 32, 240, 82);
         }
-        roomname = "Energize";
+        roomname = RN("Energize");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2527,7 +2530,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(40, 24, 10, 0, 442530);  // (savepoint)
         obj.createentity(264, 24, 10, 0, 442531);  // (savepoint)
 
-        roomname = "Driller";
+        roomname = RN("Driller");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2582,7 +2585,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
                 obj.flags[68] = true;
             }
         }
-        roomname = "Quicksand";
+        roomname = RN("Quicksand");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2608,7 +2611,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(144, 40, 3);  //Disappearing Platform
         obj.createentity(200, 128, 3);  //Disappearing Platform
-        roomname = "Boo! Think Fast!";
+        roomname = RN("Boo! Think Fast!");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2651,7 +2654,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(135, 75, 2, 0, 3, 100, 70, 320, 160);
         obj.createentity(185, 110, 2, 0, 3, 100, 70, 320, 160);
         obj.createentity(235, 145, 2, 0, 3, 100, 70, 320, 160);
-        roomname = "Stop and Reflect";
+        roomname = RN("Stop and Reflect");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2698,7 +2701,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 16, 0, 320, 240, 47);
         }
 
-        roomname = "Trench Warfare";
+        roomname = RN("Trench Warfare");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2743,7 +2746,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(64, 80, 10, 1, 441501);  // (savepoint)
         obj.createentity(64, 136, 10, 0, 441502);  // (savepoint)
 
-        roomname = "The Yes Men";
+        roomname = RN("The Yes Men");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2782,7 +2785,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(56, 152, 2, 3, 3);  // Platform
         obj.createentity(280, 192, 10, 1, 440501);  // (savepoint)
 
-        roomname = "Gantry and Dolly";
+        roomname = RN("Gantry and Dolly");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2832,7 +2835,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 120, 0, 320, 240, 31);
         }
 
-        roomname = "Comms Relay";
+        roomname = RN("Comms Relay");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2870,7 +2873,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(200, 32, 1, 0, 8);  // Enemy
         obj.createentity(168, 104, 10, 1, 439500);  // (savepoint)
 
-        roomname = "Security Sweep";
+        roomname = RN("Security Sweep");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2920,7 +2923,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(256-4, 200, 20, 1);  // (terminal)
         obj.createblock(5, 256-8, 200, 20, 16, 6);
-        roomname = "Linear Collider";
+        roomname = RN("Linear Collider");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2957,7 +2960,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(192, 48, 10, 0, 439520);  // (savepoint)
         obj.createentity(112, 160, 10, 1, 439521);  // (savepoint)
-        roomname = "Atmospheric Filtering Unit";
+        roomname = RN("Atmospheric Filtering Unit");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -2993,7 +2996,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         155,9,163,7,195,157,9,0,225,155,9,163,7,193,
         };
 
-        roomname = "Traffic Jam";
+        roomname = RN("Traffic Jam");
 
         obj.createentity(45, 118, 1, 1, 4);
         obj.createentity(205, 118, 1, 1, 4);
@@ -3034,7 +3037,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         6,182,4,195,176,6,180,10,197,174,12,0,208,172,12,180,10,200,174,6,
         182,4,193,
         };
-        roomname = "Leap of Faith";
+        roomname = RN("Leap of Faith");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -3072,7 +3075,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
             obj.createblock(1, 72, 0, 320, 240, 30);
         }
 
-        roomname = "Solitude";
+        roomname = RN("Solitude");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -3087,7 +3090,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         194,
         };
 
-        roomname = "Conundrum";
+        roomname = RN("Conundrum");
 
         if(!game.nocutscenes)
         {
@@ -3148,7 +3151,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         186,10,196,127,167,2,230,86,239,195,
         };
 
-        roomname = "Welcome Aboard";
+        roomname = RN("Welcome Aboard");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -3176,7 +3179,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(216, 144, 10, 1, 440520);  // (savepoint)
         obj.createentity(16, 136, 9, 0);  // (shiny trinket)
 
-        roomname = "It's a Secret to Nobody";
+        roomname = RN("It's a Secret to Nobody");
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -3188,7 +3191,7 @@ const unsigned char* spacestation2class::loadlevel(int rx, int ry, int* dataLen)
     default:
     {
         static const unsigned char contents[] = {240, 210};
-        roomname = "Outer Space";
+        roomname = RN("Outer Space");
         roomname_special = true;
         obj.fatal_bottom();
         result = contents;
