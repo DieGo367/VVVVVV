@@ -70,7 +70,11 @@ mapclass::mapclass(void)
     resetmap();
 
     setroomname("");
+    #ifdef __NDS__
+    hiddenname = STRSR_ID_COUNT;
+    #else
     hiddenname = "";
+    #endif
 
     roomname_special = false;
     specialroomnames.clear();
@@ -1292,6 +1296,44 @@ const char* mapclass::currentarea(const int roomx, const int roomy)
     }
     return "???";
 }
+#ifdef __NDS__
+Special_Roomname_String_ID mapclass::currentarea_stringid(int roomx, int roomy)
+{
+    if (roomx >= 102 && roomx <= 104 && roomy >= 110 && roomy <= 111)
+    {
+        return STRSR_THE_SHIP;
+    }
+
+    switch (area(roomx, roomy))
+    {
+        case 0:
+        case 1:
+            return STRSR_DIMENSION_VVVVVV;
+            break;
+        case 2:
+            return STRSR_LABORATORY;
+            break;
+        case 3:
+        case 11:
+            return STRSR_THE_TOWER;
+            break;
+        case 4:
+            return STRSR_WARP_ZONE;
+            break;
+        case 5:
+            return STRSR_SPACE_STATION;
+            break;
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            return STRSR_OUTSIDE_DIMENSION_VVVVVV;
+            break;
+    }
+    return STRSR_QQQ;
+}
+#endif
 
 static void copy_short_to_int(int* dest, const short* src, const size_t size)
 {
@@ -1330,7 +1372,11 @@ void mapclass::loadlevel(int rx, int ry)
     obj.vertplatforms = false;
     obj.horplatforms = false;
     setroomname("");
+    #ifdef __NDS__
+    hiddenname = STRSR_ID_COUNT;
+    #else
     hiddenname = "";
+    #endif
     background = 1;
     warpx = false;
     warpy = false;

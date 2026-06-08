@@ -139,6 +139,22 @@ static void loadmeta(LangMeta& meta, const std::string& langcode = lang)
     }
 }
 
+#ifdef __NDS__
+static void arr_store_translation(Textbook *textbook, const char **arr, int index, const char *tra)
+{
+    if (tra == NULL)
+    {
+        tra = "";
+    }
+    const char* tb_tra = textbook_store(textbook, tra);
+    if (tb_tra == NULL)
+    {
+        return;
+    }
+
+    arr[index] = tb_tra;
+}
+#else
 static void map_store_translation(Textbook* textbook, hashmap* map, const char* eng, const char* tra)
 {
     /* Add the texts to the given textbook and set the translation in the given hashmap. */
@@ -159,22 +175,6 @@ static void map_store_translation(Textbook* textbook, hashmap* map, const char* 
     }
 
     hashmap_set(map, tb_eng, SDL_strlen(tb_eng), (uintptr_t) tb_tra);
-}
-
-#ifdef __NDS__
-static void arr_store_translation(Textbook *textbook, const char **arr, int index, const char *tra)
-{
-    if (tra == NULL)
-    {
-        tra = "";
-    }
-    const char* tb_tra = textbook_store(textbook, tra);
-    if (tb_tra == NULL)
-    {
-        return;
-    }
-
-    arr[index] = tb_tra;
 }
 #endif
 
@@ -260,9 +260,9 @@ void resettext(bool final_shutdown)
         hashmap_free(map_translation);
         hashmap_iterate(map_translation_cutscene, callback_free_map_value, NULL);
         hashmap_free(map_translation_cutscene);
-        #endif
         hashmap_free(map_translation_plural);
         hashmap_free(map_translation_roomnames_special);
+        #endif
 
         textbook_clear(&textbook_main);
     }
@@ -277,12 +277,14 @@ void resettext(bool final_shutdown)
     {
         #ifdef __NDS__
         SDL_zeroa(arr_translation);
+        SDL_zeroa(arr_translation_plural);
         SDL_zeroa(arr_translation_cutscene);
+        SDL_zeroa(arr_translation_roomnames_special);
         #else
         map_translation = hashmap_create();
         map_translation_cutscene = hashmap_create();
-        #endif
         map_translation_plural = hashmap_create();
+        #endif
 
         for (size_t i = 0; i <= 100; i++)
         {
@@ -301,7 +303,9 @@ void resettext(bool final_shutdown)
 
         SDL_zeroa(n_untranslated);
 
+        #ifndef __NDS__
         map_translation_roomnames_special = hashmap_create();
+        #endif
     }
 
     resettext_custom(final_shutdown);
@@ -567,6 +571,7 @@ static void loadtext_strings_plural(bool check_max)
     }
 
     #ifdef __NDS__
+    int string_id = 0;
     WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
     #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
@@ -590,6 +595,16 @@ static void loadtext_strings_plural(bool check_max)
             EXPECT_ELEM(subElem, "translation");
 
             unsigned char form = subElem->IntAttribute("form", 0);
+            #ifdef __NDS__
+            arr_store_translation(
+                &textbook_main,
+                arr_translation_plural[string_id],
+                form % 6,
+                lang == "en" ?
+                    pElem->Attribute(form == 1 ? "english_singular" : "english_plural")
+                : subElem->Attribute("translation")
+            );
+            #else
             char* key = add_disambiguator(form+1, eng_plural, NULL);
             if (key == NULL)
             {
@@ -604,6 +619,7 @@ static void loadtext_strings_plural(bool check_max)
             );
 
             VVV_free(key);
+            #endif
 
             tally_untranslated(subElem->Attribute("translation"), &n_untranslated[UNTRANSLATED_STRINGS_PLURAL]);
             if (check_max)
@@ -615,6 +631,9 @@ static void loadtext_strings_plural(bool check_max)
                 );
             }
         }
+        #ifdef __NDS__
+        string_id++;
+        #endif
     }
     #ifdef __NDS__
     lazyxml_close(handle);
@@ -1158,7 +1177,11 @@ static void loadtext_roomnames(bool custom_level, bool check_max)
             custom_level,
             x,
             y,
+            #ifdef __NDS__
+            pElem->Attribute(lang == "en" ? "english" : "translation"),
+            #else
             pElem->Attribute("translation"),
+            #endif
             show_translator_menu ? pElem->Attribute("explanation") : NULL
         );
     }
@@ -1184,6 +1207,7 @@ static void loadtext_roomnames_special(bool check_max)
     }
 
     #ifdef __NDS__
+    int string_id = 0;
     WHILE_STREAM_XML_ELEMENT(handle, doc, hDoc, pElem)
     #else
     FOR_EACH_XML_ELEMENT(hDoc, pElem)
@@ -1191,12 +1215,21 @@ static void loadtext_roomnames_special(bool check_max)
     {
         EXPECT_ELEM(pElem, "roomname");
 
+        #ifdef __NDS__
+        arr_store_translation(
+            &textbook_main,
+            arr_translation_roomnames_special,
+            string_id++,
+            pElem->Attribute(lang == "en" ? "english" : "translation")
+        );
+        #else
         map_store_translation(
             &textbook_main,
             map_translation_roomnames_special,
             pElem->Attribute("english"),
             pElem->Attribute("translation")
         );
+        #endif
 
         if (check_max)
         {
@@ -1226,13 +1259,9 @@ void loadtext(bool check_max)
     resettext(false);
     loadmeta(langmeta);
 
+    #ifndef __NDS__
     if (lang == "en")
     {
-        #ifdef __NDS__
-        // need to load strings now
-        loadtext_strings(check_max);
-        loadtext_cutscenes(false);
-        #endif
         if (show_translator_menu)
         {
             // We may still need the room name explanations
@@ -1242,6 +1271,7 @@ void loadtext(bool check_max)
         }
     }
     else
+    #endif
     {
         loadtext_numbers();
         loadtext_strings(check_max);

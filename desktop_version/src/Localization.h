@@ -91,18 +91,25 @@ const LangMeta* get_langmeta(void);
 #ifdef __NDS__
 const char* gettext(String_ID string_id);
 #define gettext_case(string_id, textcase) gettext(string_id)
+const char* gettext_plural(Plural_String_ID string_id, int count);
+void gettext_plural_fill(char* buf, size_t buf_len, Plural_String_ID string_id, const char* args_index, ...);
 #else
 const char* gettext(const char* eng);
 const char* gettext_case(const char* eng, char textcase);
-#endif
 const char* gettext_plural(const char* eng_plural, const char* eng_singular, int count);
 void gettext_plural_fill(char* buf, size_t buf_len, const char* eng_plural, const char* eng_singular, const char* args_index, ...);
+#endif
 std::string getnumber(int n, const char* number_class);
 const TextboxFormat* gettext_cutscene(const std::string& script_id, const std::string& eng, char textcase);
 const char* get_roomname_explanation(bool custom_level, int roomx, int roomy);
 const char* get_roomname_translation(bool custom_level, int roomx, int roomy);
+#ifdef __NDS__
+const char* gettext_roomname(bool custom_level, int roomx, int roomy, Special_Roomname_String_ID special_string_id, bool special);
+const char* gettext_roomname_special(Special_Roomname_String_ID string_id);
+#else
 const char* gettext_roomname(bool custom_level, int roomx, int roomy, const char* eng, bool special);
 const char* gettext_roomname_special(const char* eng);
+#endif
 
 bool is_cutscene_translated(const std::string& script_id);
 

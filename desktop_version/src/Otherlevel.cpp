@@ -16,7 +16,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
     const unsigned char* result;
     roomname = "";
     roomname_special = false;
-    hiddenname = "Dimension VVVVVV";
+    hiddenname = ID("Dimension VVVVVV", STRSR_DIMENSION_VVVVVV);
 
     switch(t)
     {
@@ -1096,7 +1096,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
             result = contents;
             *dataLen = sizeof(contents);
         }
-        hiddenname = "The Ship";
+        hiddenname = ID("The Ship", STRSR_THE_SHIP);
 
         break;
 
@@ -1135,7 +1135,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         };
 
         obj.createentity(64, 64, 14); //Teleporter!
-        hiddenname = "The Ship";
+        hiddenname = ID("The Ship", STRSR_THE_SHIP);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1177,7 +1177,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         201,134,10,135,10,197,136,10,0,196,182,8,183,8,184,8,0,198,134,10,
         135,10,196,136,10,0,214,134,10,135,10,136,10,0,227,194,
         };
-        hiddenname = "The Ship";
+        hiddenname = ID("The Ship", STRSR_THE_SHIP);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1503,7 +1503,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(152, 40, 21, 0); //Terminal (jukebox instructions)
         obj.createblock(5, 152 - 4, 40, 20, 16, 24);
-        hiddenname = "The Ship";
+        hiddenname = ID("The Ship", STRSR_THE_SHIP);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1536,7 +1536,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         163,13,171,11,211,165,13,0,209,163,13,171,11,211,148,12,188,12,209,149,
         12,171,11,241,188,2,231,107,223,194,
         };
-        hiddenname = "The Ship";
+        hiddenname = ID("The Ship", STRSR_THE_SHIP);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1805,7 +1805,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(232, 184, 20, 1); //Terminal
         obj.createentity(208, 184, 20, 1); //Terminal
         obj.createblock(5, 208 + 4, 184, 56, 16, 23);
-        hiddenname = "The Ship";
+        hiddenname = ID("The Ship", STRSR_THE_SHIP);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -1848,7 +1848,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         193,172,3,116,219,174,3,0,201,172,3,116,219,174,3,0,201,172,3,116,
         219,174,3,0,201,172,3,116,202,
         };
-        hiddenname = "The Ship";
+        hiddenname = ID("The Ship", STRSR_THE_SHIP);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -6085,7 +6085,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
             result = contents;
             *dataLen = sizeof(contents);
         }
-        hiddenname = "Secret Lab";
+        hiddenname = ID("Secret Lab", STRSR_SECRET_LAB);
         break;
 
     case rn(18,6):
@@ -6101,7 +6101,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         152,4,202,0,219,144,6,152,4,202,0,219,184,6,185,6,202,0,215,196,
         169,5,231,152,4,199,195,
         };
-        hiddenname = "Secret Lab";
+        hiddenname = ID("Secret Lab", STRSR_SECRET_LAB);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -6157,7 +6157,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
             }
             obj.createblock(5, 83 - 32, 0, 32 + 32 + 32, 240, 1);
         }
-        hiddenname = "Secret Lab";
+        hiddenname = ID("Secret Lab", STRSR_SECRET_LAB);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -6203,7 +6203,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(192, 128, 25, 0, 11); // Trophy
         obj.createentity(224, 128, 25, 0, 10); // Trophy
         obj.createentity(256, 128, 25, 0, 9); // Trophy
-        hiddenname = "Secret Lab";
+        hiddenname = ID("Secret Lab", STRSR_SECRET_LAB);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -6230,7 +6230,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
 
         obj.createentity(152, 168, 25, 0, 20); // Trophy placeholder
         obj.createentity(152, 168, 25, 0, 19); // Trophy
-        hiddenname = "Secret Lab";
+        hiddenname = ID("Secret Lab", STRSR_SECRET_LAB);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -6270,7 +6270,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         //victoria:
         obj.createentity(193, 89, 18, 16, 0, 18);
         obj.createblock(5, 193-16, 0, 32+32, 240, 5);
-        hiddenname = "Secret Lab";
+        hiddenname = ID("Secret Lab", STRSR_SECRET_LAB);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -6314,7 +6314,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         //naughty corner!
         obj.createblock(1, 30, 0, 20, 50, 15);
         obj.createblock(1, 90, 0, 20, 50, 16);
-        hiddenname = "Secret Lab";
+        hiddenname = ID("Secret Lab", STRSR_SECRET_LAB);
         result = contents;
         *dataLen = sizeof(contents);
         break;
@@ -6332,7 +6332,7 @@ const unsigned char* otherlevelclass::loadlevel(int rx, int ry, int* dataLen)
         obj.createentity(-8, 84-32, 11, 328+8);  // (horizontal gravity line)
         obj.createentity(-8, 148 + 32, 11, 328+8);  // (horizontal gravity line)
         obj.createblock(1, -10, 84 - 16, 340, 32, 9); //start the game
-        hiddenname = "The Super Gravitron";
+        hiddenname = ID("The Super Gravitron", STRSR_THE_SUPER_GRAVITRON);
         result = contents;
         *dataLen = sizeof(contents);
         break;

@@ -1009,8 +1009,8 @@ static void menurender(void)
                 char buffer[4*SCREEN_WIDTH_CHARS + 1];
                 loc::gettext_plural_fill(
                     buffer, sizeof(buffer),
-                    "{n} normal room names untranslated",
-                    "{n} normal room name untranslated",
+                    IDP("{n} normal room names untranslated",
+                    "{n} normal room name untranslated", STRP_N_ROOMNAMES_UNTRANSLATED),
                     "n:int",
                     names_left
                 );
@@ -1371,7 +1371,11 @@ static void menurender(void)
             font::print(PR_2X | PR_CEN, -1, 20, title, tr, tg, tb);
             font::print(
                 PR_CEN, -1, 80-20,
+                #ifdef __NDS__
+                loc::gettext_roomname_special(map.currentarea_stringid(summary->saverx, summary->savery)),
+                #else
                 loc::gettext_roomname_special(map.currentarea(summary->saverx, summary->savery)),
+                #endif
                 25, 255 - (help.glow / 2), 255 - (help.glow / 2)
             );
             for (int i = 0; i < 6; i++)
@@ -1412,8 +1416,8 @@ static void menurender(void)
         char buffer[2*SCREEN_WIDTH_CHARS + 1];
         loc::gettext_plural_fill(
             buffer, sizeof(buffer),
-            "You rescued {n_crew|wordy} crewmates",
-            "You rescued {n_crew|wordy} crewmate",
+            IDP("You rescued {n_crew|wordy} crewmates",
+            "You rescued {n_crew|wordy} crewmate", STRP_YOU_RESCUED_N_CREWMATES),
             "n_crew:int",
             game.ndmresultcrewrescued
         );
@@ -1421,8 +1425,8 @@ static void menurender(void)
 
         loc::gettext_plural_fill(
             buffer, sizeof(buffer),
-            "and found {n_trinkets|wordy} trinkets.",
-            "and found {n_trinkets|wordy} trinket.",
+            IDP("and found {n_trinkets|wordy} trinkets.",
+            "and found {n_trinkets|wordy} trinket.", STRP_AND_FOUND_N_TRINKETS),
             "n_trinkets:int",
             game.ndmresulttrinkets
         );
@@ -1434,7 +1438,11 @@ static void menurender(void)
             loc::gettext_roomname(
                 false,
                 game.ndmresulthardestroom_x, game.ndmresulthardestroom_y,
+                #ifdef __NDS__
+                (Special_Roomname_String_ID)ss_toi(game.ndmresulthardestroom), game.ndmresulthardestroom_specialname
+                #else
                 game.ndmresulthardestroom.c_str(), game.ndmresulthardestroom_specialname
+                #endif
             ),
             tr, tg, tb
         );
@@ -1479,8 +1487,8 @@ static void menurender(void)
         char buffer[3*SCREEN_WIDTH_CHARS + 1];
         loc::gettext_plural_fill(
             buffer, sizeof(buffer),
-            "And you found {n_trinkets|wordy} trinkets.",
-            "And you found {n_trinkets|wordy} trinket.",
+            IDP("And you found {n_trinkets|wordy} trinkets.",
+            "And you found {n_trinkets|wordy} trinket.", STRP_AND_YOU_FOUND_N_TRINKETS),
             "n_trinkets:int",
             game.ndmresulttrinkets
         );
@@ -2552,7 +2560,11 @@ void gamerender(void)
 
     if ((map.extrarow==0 || (map.custommode && map.roomname[0] != '\0')) && !force_roomname_hidden)
     {
+        #ifdef __NDS__
+        const char* roomname = loc::gettext_roomname(map.custommode, game.roomx, game.roomy, map.hiddenname, map.roomname_special);
+        #else
         const char* roomname = loc::gettext_roomname(map.custommode, game.roomx, game.roomy, map.roomname, map.roomname_special);
+        #endif
 
         graphics.render_roomname(
             roomname_untranslated ? PR_FONT_8X8 : PR_FONT_LEVEL,
@@ -2923,13 +2935,21 @@ static void draw_roomname_menu(void)
 {
     const char* name;
 
+    #ifdef __NDS__
+    if (map.hiddenname < STRSR_ID_COUNT)
+    #else
     if (map.hiddenname[0] != '\0')
+    #endif
     {
         name = loc::gettext_roomname_special(map.hiddenname);
     }
     else
     {
+        #ifdef __NDS__
+        name = loc::gettext_roomname(map.custommode, game.roomx, game.roomy, map.hiddenname, map.roomname_special);
+        #else
         name = loc::gettext_roomname(map.custommode, game.roomx, game.roomy, map.roomname, map.roomname_special);
+        #endif
     }
 
     font::print(PR_FONT_LEVEL | PR_CEN, -1, 2, name, 196, 196, 255 - help.glow);
@@ -3346,8 +3366,8 @@ void maprender(void)
             char buffer[SCREEN_WIDTH_CHARS + 1];
             loc::gettext_plural_fill(
                 buffer, sizeof(buffer),
-                "{n_crew|wordy} crewmates remain",
-                "{n_crew|wordy} crewmate remains",
+                IDP("{n_crew|wordy} crewmates remain",
+                "{n_crew|wordy} crewmate remains", STRP_N_CREWMATES_REMAIN),
                 "n_crew:int",
                 remaining
             );
@@ -3502,7 +3522,11 @@ void maprender(void)
                 buffer, sizeof(buffer),
                 loc::gettext(ID("{area}, {time}", STR_AREA_TIME)),
                 "area:str, time:str",
+                #ifdef __NDS__
+                loc::gettext_roomname_special(map.currentarea_stringid(last->saverx, last->savery)),
+                #else
                 loc::gettext_roomname_special(map.currentarea(last->saverx, last->savery)),
+                #endif
                 game.giventimestring(last->hours, last->minutes, last->seconds).c_str()
             );
 
@@ -3525,7 +3549,11 @@ void maprender(void)
             size_t i;
             font::print(
                 PR_CEN, -1, FLIP(80, 8),
+                #ifdef __NDS__
+                loc::gettext_roomname_special(map.currentarea_stringid(game.last_quicksave.saverx, game.last_quicksave.savery)),
+                #else
                 loc::gettext_roomname_special(map.currentarea(game.last_quicksave.saverx, game.last_quicksave.savery)),
+                #endif
                 25, 255 - help.glow/2, 255 - help.glow/2
             );
             for (i = 0; i < SDL_arraysize(game.crewstats); ++i)

@@ -11,6 +11,9 @@
 #include "Tower.h"
 #include "TowerBG.h"
 #include "WarpClass.h"
+#ifdef __NDS__
+#include "LocalizationIDs.h"
+#endif
 
 struct Roomtext
 {
@@ -110,6 +113,9 @@ public:
     void spawncompanion(void);
 
     const char* currentarea(int roomx, int roomy);
+    #ifdef __NDS__
+    Special_Roomname_String_ID currentarea_stringid(int roomx, int roomy);
+    #endif
 
     void loadlevel(int rx, int ry);
 
@@ -135,7 +141,11 @@ public:
     const char* roomname;
     bool roomname_special;
     bool roomnameset;
+    #ifdef __NDS__
+    Special_Roomname_String_ID hiddenname;
+    #else
     const char* hiddenname;
+    #endif
 
     std::vector<Roomname> specialroomnames;
 

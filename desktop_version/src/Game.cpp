@@ -809,7 +809,7 @@ static void compute_remaining_textbox(textboxclass* THIS)
     char buffer[SCREEN_WIDTH_CHARS + 1];
     if (remaining > 0)
     {
-        loc::gettext_plural_fill(buffer, sizeof(buffer), "{n_crew|wordy} remain", "{n_crew|wordy} remains", "n_crew:int", remaining);
+        loc::gettext_plural_fill(buffer, sizeof(buffer), IDP("{n_crew|wordy} remain", "{n_crew|wordy} remains", STRP_N_REMAIN), "n_crew:int", remaining);
     }
     else
     {
@@ -1129,7 +1129,7 @@ static void foundcrewmate_textbox2(textboxclass* THIS)
         char buffer[SCREEN_WIDTH_CHARS + 1];
         loc::gettext_plural_fill(
             buffer, sizeof(buffer),
-            "{n_crew|wordy} remain", "{n_crew|wordy} remains",
+            IDP("{n_crew|wordy} remain", "{n_crew|wordy} remains", STRP_N_REMAIN),
             "n_crew:int",
             num_remaining
         );
@@ -1220,8 +1220,8 @@ static void gamecomplete_textbox11(textboxclass* THIS)
     char buffer[SCREEN_WIDTH_CHARS + 1];
     loc::gettext_plural_fill(
         buffer, sizeof(buffer),
-        "Hardest Room (with {n_deaths} deaths)",
-        "Hardest Room (with {n_deaths} death)",
+        IDP("Hardest Room (with {n_deaths} deaths)",
+        "Hardest Room (with {n_deaths} death)", STRP_HARDEST_ROOM_WITH_N_DEATHS),
         "n_deaths:int",
         game.hardestroomdeaths
     );
@@ -1237,7 +1237,11 @@ static void gamecomplete_textbox12(textboxclass* THIS)
         loc::gettext_roomname(
             map.custommode,
             game.hardestroom_x, game.hardestroom_y,
+            #ifdef __NDS__
+            (Special_Roomname_String_ID)ss_toi(game.hardestroom), game.hardestroom_specialname
+            #else
             game.hardestroom.c_str(), game.hardestroom_specialname
+            #endif
         )
     );
 }
@@ -4613,7 +4617,11 @@ void Game::gethardestroom(void)
 
         if (map.roomname[0] == '\0')
         {
+            #ifdef __NDS__
+            hardestroom = std::to_string(map.hiddenname);
+            #else
             hardestroom = map.hiddenname;
+            #endif
             hardestroom_specialname = true;
         }
         else

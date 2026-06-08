@@ -4,6 +4,7 @@
 
 #ifdef __NDS__
 #define ID(string, id) id
+#define IDP(string_plural, string_singular, id) id
 /* This cast is an EGREGIOUS hack for the sake of saving memory.
  * Instead of storing string IDs as strings that would eat up static
  * memory, the ID value is stored in the pointer value. At the load
@@ -15,6 +16,7 @@
 #define NUL(string) (char *)(0)
 #else
 #define ID(string, id) string
+#define IDP(string_plural, string_singular, id) string_plural, string_singular
 #define IDC(string, id) string
 #define NUL(string) string
 #endif
@@ -808,6 +810,18 @@ enum String_ID {
     STR_ID_COUNT
 };
 
+enum Plural_String_ID {
+    STRP_YOU_RESCUED_N_CREWMATES, // "You rescued {n_crew|wordy} crewmates"
+    STRP_AND_FOUND_N_TRINKETS, // "and found {n_trinkets|wordy} trinkets."
+    STRP_AND_YOU_FOUND_N_TRINKETS, // "And you found {n_trinkets|wordy} trinkets."
+    STRP_N_CREWMATES_REMAIN, // "{n_crew|wordy} crewmates remain"
+    STRP_N_REMAIN, // "{n_crew|wordy} remain"
+    STRP_HARDEST_ROOM_WITH_N_DEATHS, // "Hardest Room (with {n_deaths} deaths)"
+    STRP_N_ROOMNAMES_UNTRANSLATED, // "{n} normal room names untranslated"
+
+    STRP_ID_COUNT
+};
+
 enum Cutscene_String_ID {
     // "intro"
     STRC_INTRO_UH_OH, // "cyan" "Uh oh..."
@@ -1554,6 +1568,76 @@ enum Cutscene_String_ID {
     STRC_ID_COUNT
 };
 
+enum Special_Roomname_String_ID {
+    STRSR_OUTER_SPACE, // "Outer Space"
+    STRSR_DIMENSION_VVVVVV, // "Dimension VVVVVV"
+    STRSR_THE_SHIP, // "The Ship"
+    STRSR_SECRET_LAB, // "Secret Lab"
+    STRSR_LABORATORY, // "Laboratory"
+    STRSR_THE_TOWER, // "The Tower"
+    STRSR_WARP_ZONE, // "Warp Zone"
+    STRSR_SPACE_STATION, // "Space Station"
+    STRSR_OUTSIDE_DIMENSION_VVVVVV, // "Outside Dimension VVVVVV"
+    STRSR_QQQ, // "???"
+    STRSR_THE_SUPER_GRAVITRON, // "The Super Gravitron"
+    STRSR_I_CANT_BELIEVE_YOU_GOT_THIS_FAR, // "I Can't Believe You Got This Far"
+    STRSR_IMAGINE_SPIKES_THERE_IF_YOU_LIKE, // "Imagine Spikes There, if You Like" dying)"
 
+    STRSR_REAR_WINDOW, // "Rear Window"
+    STRSR_REAR_VINDOW, // "Rear Vindow"
+
+    STRSR_ON_THE_WATERFRONT, // "On the Waterfront"
+    STRSR_ON_THE_VATERFRONT, // "On the Vaterfront"
+
+    STRSR_THE_UNTOUCHABLES, // "The Untouchables"
+    STRSR_THE_UNTOUCHAVLES, // "The Untouchavles"
+
+    STRSR_TELEVISION_NEWSVEEL, // "Television Newsveel"
+    STRSR_TELEVISION_NEWSVEL, // "Television Newsvel"
+    STRSR_TELEVISVONVNEWSVEL, // "TelevisvonvNewsvel"
+    STRSR_TVLVVVSVONVNEVSVEL, // "TvlvvvsvonvNevsvel"
+    STRSR_VVVVVVSVOVVNE_SVEL, // "vvvvvvsvovvNe svel"
+    STRSR_VHV_VVV_VVOVV_VEVL, // "vhv vvv'vvovv vevl"
+    STRSR_VHV_V_V_CVOVV_VEWV, // "vhv V v'Cvovv vewv"
+    STRSR_VHE_9_V_CVOVV_VEWV, // "vhe 9 v'Cvovv vewv"
+    STRSR_VHE_9_V_CVOVV_NEWV, // "vhe 9 v'Cvovv Newv"
+    STRSR_THE_9_O_CVOVK_NEWV, // "The 9 O'Cvovk Newv"
+    STRSR_THE_9_O_CLOCK_NEWS, // "The 9 O'Clock News"
+
+    STRSR_VWITCHED, // "Vwitched"
+    STRSR_VWITVHED, // "Vwitvhed"
+    STRSR_VVWIVCVEDV, // "vVwivcvedv"
+    STRSR_VVVWMVCVMDVV, // "vvvwMvcvMdvv"
+    STRSR_DVVVWMVFVVMDVVV, // "DvvvwMvfvvMdvvv"
+    STRSR_DVAV_MVFVR_MDVVVV, // "Dvav Mvfvr Mdvvvv"
+    STRSR_DIAV_M_FOR_MDRVER, // "Diav M for Mdrver"
+    STRSR_DIAL_M_FOR_MURDER, // "Dial M for Murder"
+
+    STRSR_GVNSMOKE, // "Gvnsmoke"
+    STRSR_GVNSMOVE, // "Gvnsmove"
+    STRSR_GVNVMOVEVV, // "Gvnvmovevv"
+    STRSR_GUNVMOVE1VV6, // "Gunvmove1vv6"
+    STRSR_VUNSMOKE_19V6, // "Vunsmoke 19v6"
+    STRSR_GUNSMOKE_1966, // "Gunsmoke 1966"
+
+    STRSR_PLEASE_ENJOY_THESE_REPEATS, // "Please enjoy these repeats"
+    STRSR_PLEASE_ENVOY_THEVE_REPEATS, // "Please envoy theve repeats"
+    STRSR_PLSE_ENVOY_TSE_RVPVAS, // "Plse envoy tse rvpvas"
+    STRSR_VL_ENVOY_TE_RVEVS, // "Vl envoy te rvevs"
+    STRSR_VV_EVO_TV_VEVS, // "Vv evo tv vevs"
+    STRSR_IV_VHV_MVRVIVS, // "Iv vhv Mvrvivs"
+    STRSR_IN_THE_MARGINS, // "In the Margins"
+
+    STRSR_TRY_JIGGLING_THE_ANTENNA, // "Try Jiggling the Antenna"
+    STRSR_TRY_VIGGLING_THE_ANTENNA, // "Try Viggling the Antenna"
+    STRSR_TRYJIVGLVNG_THEAVTEVNA, // "TryJivglvng theAvtevna"
+    STRSR_TVVIVGLVNG_THAVTVVV, // "Tvvivglvng thAvtvvv"
+    STRSR_VVVGGLVNV_TVNVVA, // "Vvvgglvnv tvnvva"
+    STRSR_VVAVVNVS_VVTV, // "Vvavvnvs vvtv"
+    STRSR_VEAVVN_S_GVTE, // "Veavvn's Gvte"
+    STRSR_HEAVEN_S_GATE, // "Heaven's Gate"
+
+    STRSR_ID_COUNT
+};
 
 #endif /* LOCALIZATION_IDS_H */

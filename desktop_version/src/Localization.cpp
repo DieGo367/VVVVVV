@@ -1,3 +1,4 @@
+#include "LocalizationIDs.h"
 #define LOCALIZATION_CPP
 #include "Localization.h"
 #include "LocalizationStorage.h"
@@ -89,6 +90,18 @@ const char* gettext_case(const char* eng, char textcase)
 }
 #endif
 
+#ifdef __NDS__
+const char* gettext_plural(Plural_String_ID string_id, int n)
+{
+    unsigned char form = form_for_count(n);
+    const char *str = arr_translation_plural[string_id][form % 6];
+    if (str == NULL)
+    {
+        return "";
+    }
+    return str;
+}
+#else
 static const char* gettext_plural_english(const char* eng_plural, const char* eng_singular, int n)
 {
     /* Do be consistent with negative number handling for other languages... */
@@ -119,8 +132,13 @@ const char* gettext_plural(const char* eng_plural, const char* eng_singular, int
     }
     return gettext_plural_english(eng_plural, eng_singular, n);
 }
+#endif
 
+#ifdef __NDS__
+void gettext_plural_fill(char* buf, size_t buf_len, Plural_String_ID string_id, const char* args_index, ...)
+#else
 void gettext_plural_fill(char* buf, size_t buf_len, const char* eng_plural, const char* eng_singular, const char* args_index, ...)
+#endif
 {
     /* Choose the right plural string based on a number, and then vformat that string.
      * The first vararg determines the specific plural form. */
@@ -130,7 +148,11 @@ void gettext_plural_fill(char* buf, size_t buf_len, const char* eng_plural, cons
     int count = va_arg(args, int);
     va_end(args);
 
+    #ifdef __NDS__
+    const char* tra = gettext_plural(string_id, count);
+    #else
     const char* tra = gettext_plural(eng_plural, eng_singular, count);
+    #endif
 
     va_start(args, args_index);
     vformat_buf_valist(buf, buf_len, tra, args_index, args);
@@ -280,6 +302,22 @@ const char* get_roomname_translation(bool custom_level, int roomx, int roomy)
     return tra;
 }
 
+#ifdef __NDS__
+const char* gettext_roomname(bool custom_level, int roomx, int roomy, Special_Roomname_String_ID special_string_id, bool special)
+{
+    if (special)
+    {
+        return gettext_roomname_special(special_string_id);
+    }
+
+    const char* tra = get_roomname_translation(custom_level, roomx, roomy);
+    if (tra[0] == '\0')
+    {
+        return "";
+    }
+    return tra;
+}
+#else
 const char* gettext_roomname(bool custom_level, int roomx, int roomy, const char* eng, bool special)
 {
     if (!custom_level && lang == "en")
@@ -299,7 +337,19 @@ const char* gettext_roomname(bool custom_level, int roomx, int roomy, const char
     }
     return tra;
 }
+#endif
 
+#ifdef __NDS__
+const char* gettext_roomname_special(Special_Roomname_String_ID string_id)
+{
+    const char *str = arr_translation_roomnames_special[string_id];
+    if (str == NULL || string_id >= STRSR_ID_COUNT)
+    {
+        return "";
+    }
+    return str;
+}
+#else
 const char* gettext_roomname_special(const char* eng)
 {
     if (lang == "en")
@@ -309,6 +359,7 @@ const char* gettext_roomname_special(const char* eng)
 
     return map_lookup_text(map_translation_roomnames_special, eng, eng);
 }
+#endif
 
 bool is_cutscene_translated(const std::string& script_id)
 {
